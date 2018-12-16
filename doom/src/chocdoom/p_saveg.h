@@ -55,10 +55,10 @@ void P_UnArchiveThinkers (void);
 void P_ArchiveSpecials (void);
 void P_UnArchiveSpecials (void);
 
-void P_SaveBegin ();
+void P_SaveBegin (void);
 uint32_t P_SaveWriteFile (char *name);
 int P_LoadBegin (char *name);
-void P_LoadEnd ();
+void P_LoadEnd (void);
 
 
 

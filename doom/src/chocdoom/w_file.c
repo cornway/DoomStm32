@@ -90,8 +90,6 @@ void W_ForEach (char *path, void (*handle) (void *))
 
 wad_file_t *W_MapFile(char *path)
 {
-    wad_file_t *result;
-    int i;
     return stdc_wad_file.MMapFile(path);
 }
 

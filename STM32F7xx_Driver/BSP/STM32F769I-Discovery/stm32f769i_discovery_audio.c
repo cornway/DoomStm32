@@ -463,7 +463,7 @@ uint8_t BSP_AUDIO_OUT_Stop(uint32_t Option)
 
 uint8_t BSP_AUDIO_DMA_Stop(uint32_t Option)
 {
-HAL_SAI_DMAStop(&haudio_out_sai);
+    return HAL_SAI_DMAStop(&haudio_out_sai);
 }
 
 

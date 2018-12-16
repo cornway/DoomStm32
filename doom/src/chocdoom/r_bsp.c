@@ -239,7 +239,6 @@ static void R_AddLine (seg_t *line)
   angle_t  angle2;
   angle_t  span;
   angle_t  tspan;
-  static sector_t tempsec;     // killough 3/8/98: ceiling/water hack
 
   curline = line;
 

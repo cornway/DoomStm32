@@ -103,7 +103,6 @@ P_InterceptVector2
 ( divline_t*	v2,
   divline_t*	v1)
 {
-    fixed_t	frac;
     fixed_t	num;
     fixed_t	den;
 	

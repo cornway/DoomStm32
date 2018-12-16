@@ -36,7 +36,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "lcd_main.h"
-#include "gfx.h"
 #include "images.h"
 #include "touch.h"
 #include "button.h"
@@ -44,46 +43,17 @@
 #include "g_game.h"
 #include "D_player.h"
 
-#define IVID_IRAM 1
-#define DOOM_SCREEN_SCALE_FAST 1
-
-#if DOOM_CLUT
-#define GFX_RGB GFX_ARGB8888
-#define GFX_ARGB_R GFX_ARGB8888_R
-#define GFX_ARGB_G GFX_ARGB8888_G
-#define GFX_ARGB_B GFX_ARGB8888_B
-#define GFX_ARGB_A GFX_ARGB8888_A
-#elif (DOOM_PAL == RGB565_PAL)
-#define GFX_RGB GFX_RGB565
-#define GFX_ARGB_R GFX_RGB565_R
-#define GFX_ARGB_G GFX_RGB565_G
-#define GFX_ARGB_B GFX_RGB565_B
-#define GFX_ARGB_A (0xFF)
-#else
-#define GFX_RGB GFX_ARGB8888
-#define GFX_ARGB_R GFX_ARGB8888_R
-#define GFX_ARGB_G GFX_ARGB8888_G
-#define GFX_ARGB_B GFX_ARGB8888_B
-#define GFX_ARGB_A GFX_ARGB8888_A
+#ifndef MAX
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
 #endif
 
-extern player_t *our_hero;
+#ifndef MIN
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#endif
 
-extern void lcd_copy_image_clut (void *dest, void *src, int x, int y);
-extern void lcd_config_layer (
-        uint32_t buffer,
-        int x,
-        int y,
-        int w,
-        int h,
-        int layer,
-        int format);
 
-extern int lcd_get_ready_layer_idx (void);
-extern uint32_t lcd_get_layer_addr (int layer);
-extern void lcd_enable_layer (lcd_layers_t layer);
-extern void lcd_set_addr (uint32_t addr, int layer);
-
+#define IVID_IRAM 1
+#define GFX_PRECISE_SCALE 1
 
 // The screen buffer; this is modified to draw things to the screen
 
@@ -129,10 +99,10 @@ int vanilla_keyboard_mapping = true;
 
 typedef struct
 {
-	byte r;
-	byte g;
-	byte b;
-} col_t;
+    byte r;
+    byte g;
+    byte b;
+} PACKEDATTR rgb_raw_t;
 
 // Palette converted to RGB565
 
@@ -278,6 +248,8 @@ is_joy_freezed ()
     return 1;
 }
 
+/*TODO : remove ?*/
+#if 0
 static inline int8_t
 filter_pad (uint8_t i, int8_t action)
 {
@@ -299,6 +271,7 @@ filter_pad (uint8_t i, int8_t action)
     }
     return action;
 }
+#endif
 
 static inline void
 post_key_up (uint8_t key)
@@ -312,7 +285,7 @@ post_event (event_t *event, uint8_t i, int8_t action)
 {
     uint8_t key = pads_map[i].key;
     uint8_t control = pads_map[i].flags;
-    uint8_t type = ev_keyup;
+    evtype_t type = ev_keyup;
 
     //action = filter_pad(i, action);
     if (action) {
@@ -396,7 +369,7 @@ void I_GetEvent (void)
     } else {
         joy_ret = gamepad_read(joy_pads);
 
-        if (is_joy_freezed() || joy_ret < 0) {
+        if (joy_ret < 0 || is_joy_freezed()) {
             return;
         }
         for (int i = 0; i < joy_ret; i++) {
@@ -447,7 +420,56 @@ void I_UpdateNoBlit (void)
     }
 }
 
-#if !DOOM_SCREEN_SCALE_FAST
+#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
+
+typedef union {
+    uint32_t w;
+    uint16_t hw[2];
+    uint8_t a[4];
+} wrd_t;
+
+void I_FinishUpdate (void)
+{
+    lcd_refresh ();
+    int src_fsize = SCREENHEIGHT * SCREENWIDTH;
+
+    uint64_t *d_y0 = (uint64_t *)lcd_get_ready_layer_addr();
+    uint64_t *d_y1 = (uint64_t *)((uint32_t)d_y0 + SCREENWIDTH * 2);
+    wrd_t *line;
+    wrd_t d_yt0, d_yt1;
+    int s_y, i;
+    uint64_t d0;
+
+    SCB_CleanDCache();
+    for (s_y = 0; s_y < src_fsize; s_y += SCREENWIDTH) {
+
+        line = (wrd_t *)&I_VideoBuffer[s_y];
+
+        for (i = 0; i < SCREENWIDTH; i += sizeof(wrd_t)) {
+
+            d_yt1 = *line;
+            d_yt0 = d_yt1;
+
+            d_yt0.a[3] = d_yt0.a[1];
+            d_yt0.a[2] = d_yt0.a[1];
+            d_yt0.a[1] = d_yt0.a[0];
+
+            d_yt1.a[0] = d_yt1.a[2];
+            d_yt1.a[1] = d_yt1.a[2];
+            d_yt1.a[2] = d_yt1.a[3];
+
+            d0 = (uint64_t)(((uint64_t)d_yt1.w << 32) | d_yt0.w);
+            *d_y0++     = d0;
+            *d_y1++     = d0;
+
+            line++;
+        }
+        d_y0 = d_y1;
+        d_y1 = d_y0 + SCREENWIDTH / ((sizeof(*d_y0) / 2));
+    }
+}
+
+#elif GFX_PRECISE_SCALE
 
 static void fill_scale_pattern (uint8_t *p_x, uint8_t *p_y)
 {
@@ -477,9 +499,13 @@ static void fill_scale_pattern (uint8_t *p_x, uint8_t *p_y)
     }
 }
 
-static uint8_t cache_index_line[1024];
-
-static inline void update_line_direct (pal_t *dest, int src_y, uint8_t *p_x, uint8_t to_cache)
+static inline void update_line_direct (
+        pal_t *dest,
+        int src_y,
+        uint8_t *p_x,
+        uint8_t *cache,
+        boolean update_cache
+)
 {
     int i, s_i, d_i;
     pal_t cache_pix = 0;
@@ -491,98 +517,45 @@ static inline void update_line_direct (pal_t *dest, int src_y, uint8_t *p_x, uin
             cache_pix = rgb_palette[index];
         }
         dest[d_i] = cache_pix;
-        if (to_cache)
-            cache_index_line[d_i] = index;
+        if (update_cache) {
+            cache[d_i] = index;
+        }
     }
 }
 
-static inline void update_line_cache (pal_t *dest)
+static inline void update_line_cache (pal_t *dest, uint8_t *cache)
 {
     int d_i;
     for (d_i = 0; d_i < GFX_MAX_WIDTH; d_i++) {
-        dest[d_i] = rgb_palette[ cache_index_line[d_i] ];
+        dest[d_i] = rgb_palette[ cache[d_i] ];
     }
 }
 
 void I_FinishUpdate (void)
 {
     byte index;
-
-    lcd_vsync = false;
-    pal_t *d_y = (pal_t*)lcd_frame_buffer;
+    pal_t *d_y = (pal_t*)lcd_get_ready_layer_addr();
     int src_y = 0, dest_y;
     pal_t cache_pix = 0;
     uint8_t pattern_x[GFX_MAX_WIDTH + 1], pattern_y[GFX_MAX_HEIGHT + 1];
-    lcd_wait_ready();
+    uint8_t cache_line[MAX(GFX_MAX_WIDTH, GFX_MAX_HEIGHT)];
+    boolean cache_upd;
+
     lcd_refresh ();
-    pattern_x[GFX_MAX_WIDTH] = 0;
-    pattern_y[GFX_MAX_HEIGHT] = 0;
     fill_scale_pattern(pattern_x, pattern_y);
+
     for (dest_y = 0; dest_y < GFX_MAX_HEIGHT; dest_y++ , d_y += GFX_MAX_WIDTH) {
         if (pattern_y[dest_y]) {
+            cache_upd = !pattern_y[dest_y + 1];
             src_y++;
-            update_line_direct(d_y, src_y, pattern_x, !pattern_y[dest_y + 1]);
+            update_line_direct(d_y, src_y, pattern_x, cache_line, cache_upd);
         } else {
             update_line_cache(d_y);
         }
     }
-    lcd_vsync = true;
 }
 
-
-#elif DOOM_CLUT /*(DOOM_SCREEN_SCALE_FAST == 0)*/
-
-typedef union {
-    uint32_t w;
-    uint16_t hw[2];
-    uint8_t a[4];
-} wrd_t;
-
-void I_FinishUpdate (void)
-{
-    lcd_vsync = false;
-    lcd_wait_ready();
-    lcd_refresh ();
-    int src_fsize = SCREENHEIGHT * SCREENWIDTH;
-
-    uint64_t *d_y0 = (uint64_t *)lcd_get_ready_layer();
-    uint64_t *d_y1 = (uint64_t *)((uint32_t)d_y0 + SCREENWIDTH * 2);
-    wrd_t *line;
-    wrd_t d_yt0, d_yt1;
-    int s_y, i;
-    uint64_t d0;
-    
-    SCB_CleanDCache();
-    for (s_y = 0; s_y < src_fsize; s_y += SCREENWIDTH) {
-
-        line = (wrd_t *)&I_VideoBuffer[s_y];
-
-        for (i = 0; i < SCREENWIDTH; i += sizeof(wrd_t)) {
-
-            d_yt1 = *line;
-            d_yt0 = d_yt1;
-
-            d_yt0.a[3] = d_yt0.a[1];
-            d_yt0.a[2] = d_yt0.a[1];
-            d_yt0.a[1] = d_yt0.a[0];
-
-            d_yt1.a[0] = d_yt1.a[2];
-            d_yt1.a[1] = d_yt1.a[2];
-            d_yt1.a[2] = d_yt1.a[3];
-
-            d0 = (uint64_t)(((uint64_t)d_yt1.w << 32) | d_yt0.w);
-            *d_y0++     = d0;
-            *d_y1++     = d0;
-
-            line++;
-        }
-        d_y0 = d_y1;
-        d_y1 = d_y0 + SCREENWIDTH / ((sizeof(*d_y0) / 2));
-    }
-    lcd_vsync = true;
-}
-
-#else /*DOOM_CLUT*/
+#else /*GFX_PRECISE_SCALE*/
 
 static inline void update_line_direct (pal_t *dest, int src_y)
 {
@@ -598,13 +571,10 @@ static inline void update_line_direct (pal_t *dest, int src_y)
     }
 }
 
-extern uint32_t lcd_get_ready_layer (void);
-
 void I_FinishUpdate (void)
 {
     byte index;
 
-    lcd_vsync = false;
     int32_t x_offset = (GFX_MAX_WIDTH - (SCREENWIDTH * 2)) / 2;
     int32_t y_offset = (GFX_MAX_HEIGHT - (SCREENHEIGHT * 2)) / 2;
 
@@ -614,11 +584,10 @@ void I_FinishUpdate (void)
     int src_max_y = SCREENHEIGHT * SCREENWIDTH;
     uint32_t cache_pix = 0;
 
-    lcd_wait_ready();
     lcd_refresh ();
-    d_y = (pal_t*)lcd_get_ready_layer() + (x_offset + y_offset * GFX_MAX_WIDTH);
+    d_y = (pal_t*)lcd_get_ready_layer_addr() + (x_offset + y_offset * GFX_MAX_WIDTH);
     SCB_CleanDCache();
-#if (DOOM_PAL == RGB565_PAL)
+#if (GFX_COLOR_MODE == GFX_COLOR_MODE_RGB565)
     uint32_t *d_y0 = (uint32_t *)d_y;
     uint32_t *d_y1 = (uint32_t *)(d_y + GFX_MAX_WIDTH);
     for (src_y = 0; src_y < src_max_y; src_y += SCREENWIDTH) {
@@ -633,7 +602,7 @@ void I_FinishUpdate (void)
         d_y0 += GFX_MAX_WIDTH;
         d_y1 += GFX_MAX_WIDTH;
     }
-#else
+#elif (GFX_COLOR_MODE == GFX_COLOR_MODE_RGBA8888)
     for (src_y = 0; src_y < src_max_y; src_y += SCREENWIDTH) {
 
         for (s_i = src_y, d_i = 0; d_i < SCREENWIDTH * 2; s_i++) {
@@ -647,14 +616,10 @@ void I_FinishUpdate (void)
         }
         d_y += GFX_MAX_WIDTH * 2;
     }
-#endif    
-    lcd_vsync = true;
+#endif /*GFX_COLOR_MODE == GFX_COLOR_MODE_RGBA8888*/
 }
 
-
-#endif /*(DOOM_SCREEN_SCALE_FAST == 0)*/
-
-
+#endif
 
 //
 // I_ReadScreen
@@ -668,58 +633,28 @@ void I_ReadScreen (byte* scr)
 // I_SetPalette
 //
 
-#if DOOM_CLUT
-
-extern void lcd_load_clut (void *_buf, int size, int layer);
-
 void I_SetPalette (byte* palette)
 {
-	int i;
-	col_t* c;
+    unsigned int i;
+    rgb_raw_t* color;
+    unsigned int pal_size = sizeof(rgb_palette) / sizeof(rgb_palette[0]);
 
-    int pal_size = sizeof(rgb_palette) / sizeof(rgb_palette[0]);
-    int x = (GFX_MAX_WIDTH - SCREENWIDTH * 2) / 2;
-    int y = (GFX_MAX_HEIGHT - SCREENHEIGHT * 2) / 2;
-
-	for (i = 0; i < pal_size; i++)
-	{
-		c = (col_t*)palette;
-		rgb_palette[i] = GFX_RGB(gammatable[usegamma][c->r],
-									   gammatable[usegamma][c->g],
-									   gammatable[usegamma][c->b],
-									   0xff);
+    for (i = 0; i < pal_size; i++)
+    {
+        color = (rgb_raw_t*)palette;
+        rgb_palette[i] = GFX_RGB(gammatable[usegamma][color->r],
+                        gammatable[usegamma][color->g],
+                        gammatable[usegamma][color->b],
+                        GFX_OPAQUE);
         palette += 3;
     }
-
-    lcd_config_layer(lcd_get_layer_addr(0), x, y,
-        SCREENWIDTH * 2, SCREENHEIGHT * 2, 0, LTDC_PIXEL_FORMAT_L8);
-    lcd_load_clut (rgb_palette, pal_size, 0);
-
-    lcd_config_layer(lcd_get_layer_addr(1), x, y,
-       SCREENWIDTH * 2, SCREENHEIGHT * 2, 1, LTDC_PIXEL_FORMAT_L8);
-    lcd_load_clut (rgb_palette, pal_size, 1);
-
+#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
+    lcd_load_palette(rgb_palette, pal_size, SCREENWIDTH, SCREENHEIGHT);
     cross_color = I_GetPaletteIndex(CROSS_R, CROSS_G, CROSS_B);
-}
-
 #else
-
-void I_SetPalette (byte* palette)
-{
-	int i;
-	col_t* c;
-	for (i = 0; i < 256; i++)
-	{
-		c = (col_t*)palette;
-        rgb_palette[i] = GFX_RGB(gammatable[usegamma][c->r],
-									   gammatable[usegamma][c->g],
-									   gammatable[usegamma][c->b],
-									   0xFF);
-        palette += 3;
-    }
-}
+    cross_color = GFX_RGB(CROSS_R, CROSS_G, CROSS_B, GFX_OPAQUE);
 #endif
-
+}
 
 // Given an RGB value, find the closest matching palette index.
 
@@ -727,7 +662,7 @@ int I_GetPaletteIndex (int r, int g, int b)
 {
     int best, best_diff, diff;
     int i;
-    col_t color;
+    rgb_raw_t color;
 
     best = 0;
     best_diff = INT_MAX;

@@ -98,12 +98,10 @@ typedef bool boolean;
 
 #else
 
-typedef enum 
-{
-    false	= 0,
-    true	= 1,
-	undef	= 0xFFFFFFFF
-} boolean;
+typedef uint8_t boolean;
+#define true 1
+#define false 0
+#define undef (0xff)
 
 #endif
 

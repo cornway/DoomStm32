@@ -176,7 +176,6 @@ static int music_scan_dir_for_num (int _num, char *name)
 {
     FRESULT res;
     DIR dir;
-    UINT i;
     FILINFO fno;
     static int songs_max = 0;
     int cnt = 0;

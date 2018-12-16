@@ -176,14 +176,14 @@ boolean M_WriteFile(char *name, void *source, int length)
 boolean M_WriteFile(char *name, void *source, int length)
 {
 	FIL file;
-	unsigned long c;
+	UINT c;
 
 	if (f_open (&file, name, FA_CREATE_ALWAYS | FA_WRITE) != FR_OK)
 	{
 		return false;
 	}
 
-	if (f_writen (&file, source, length, &c) != FR_OK)
+	if (f_write (&file, source, length, &c) != FR_OK)
 	{
 		return false;
 	}
@@ -234,7 +234,7 @@ int M_ReadFile(char *name, byte **buffer)
 	FIL file;
 	int length;
 	byte		*buf;
-	unsigned long read;
+	UINT read;
 
 	if (f_open (&file, name, FA_OPEN_EXISTING | FA_READ) != FR_OK)
 	{
@@ -243,7 +243,7 @@ int M_ReadFile(char *name, byte **buffer)
 
 	length = f_size (&file);
 	buf = Z_Malloc (length, PU_STATIC, NULL);
-	f_readn (&file, buf, length, &read);
+	f_read (&file, buf, length, &read);
 	f_close (&file);
 
 	*buffer = buf;
@@ -289,7 +289,6 @@ boolean M_StrToInt(const char *str, int *result)
 void M_ExtractFileBase(char *path, char *dest)
 {
     char *src;
-    char *filename;
     int length;
 
     src = path + strlen(path) - 1;
@@ -299,8 +298,6 @@ void M_ExtractFileBase(char *path, char *dest)
     {
 	src--;
     }
-
-    filename = src;
 
     // Copy up to eight characters
     // Note: Vanilla Doom exits with an error if a filename is specified

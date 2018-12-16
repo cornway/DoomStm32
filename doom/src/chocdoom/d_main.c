@@ -176,9 +176,7 @@ void D_Display (void)
     static  boolean		fullscreen = false;
     static  gamestate_t		oldgamestate = (gamestate_t)-1;
     static  int			borderdrawcount;
-    int				nowtime;
     int				tics;
-    int				wipestart;
     int				y;
     boolean			done;
     boolean			wipe;
@@ -308,19 +306,8 @@ void D_Display (void)
     // wipe update
     wipe_EndScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
 
-    wipestart = I_GetTime () - 1;
-
     do
     {
-#if 0
-	do
-	{
-	    nowtime = I_GetTime ();
-	    tics = nowtime - wipestart;
-            I_Sleep(1);
-	} while (tics <= 0);
-#endif  
-	wipestart = nowtime;
 	done = wipe_ScreenWipe(wipe_Melt
 			       , 0, 0, SCREENWIDTH, SCREENHEIGHT, tics);
 	I_UpdateNoBlit ();
@@ -412,7 +399,6 @@ extern void fps_update (void);
 extern void frame_start (void);
 extern void frame_end (void);
 extern void gamepad_process (void);
-extern int8_t gamepad_connected;
 
 void D_DoomLoop (void)
 {
@@ -897,12 +883,6 @@ static void D_AddPwads()
 }
 
 
-static void D_AddLumpFile(char *filename)
-{
-    W_AddLumpFile(filename);
-}
-
-
 // Copyright message banners
 // Some dehacked mods replace these.  These are only displayed if they are 
 // replaced by dehacked.
@@ -1341,7 +1321,8 @@ void D_DoomMain (void)
     // Turbo mode.  The player's speed is multiplied by x%.  If unspecified,
     // x defaults to 200.  Values are rounded up to 10 and down to 400.
     //
-    if ( (p=M_CheckParm ("-turbo")) )
+    p=M_CheckParm ("-turbo");
+    if ( p )
     {
 	int     scale = 200;
 	extern int forwardmove[2];
@@ -1645,7 +1626,7 @@ void D_DoomMain (void)
 
     if (p)
     {
-	startskill = (skill_t)myargv[p+1][0]-'1';
+	startskill = (skill_t)(myargv[p+1][0]-'1');
 	autostart = true;
     }
 

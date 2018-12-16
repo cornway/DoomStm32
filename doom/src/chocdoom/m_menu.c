@@ -57,6 +57,7 @@
 #include "sounds.h"
 
 #include "m_menu.h"
+#include "d_iwad.h"
 
 
 extern patch_t*		hu_font[HU_FONTSIZE];
@@ -229,7 +230,7 @@ void M_DrawSelCell(menu_t *menu,int item);
 void M_WriteText(int x, int y, char *string);
 int  M_StringWidth(char *string);
 int  M_StringHeight(char *string);
-void M_StartMessage(char *string,void *routine,boolean input);
+void M_StartMessage(char *string,void (*routine) (int),boolean input);
 void M_StopMessage(void);
 void M_ClearMenus (void);
 void M_SetLevel(int choice);
@@ -549,7 +550,7 @@ void M_ReadSaveStrings(void)
     FILE   *handle;
 #else
     FIL		handle;
-    unsigned long count;
+    UINT count;
 #endif
     int     i;
     char    name[256];
@@ -1037,7 +1038,7 @@ void M_VerifyNightmare(int key)
     if (key != key_menu_confirm)
 	return;
 		
-    G_DeferedInitNew(nightmare,epi+1,1);
+    G_DeferedInitNew((skill_t)nightmare,epi+1,1);
     M_ClearMenus ();
 }
 
@@ -1049,7 +1050,7 @@ void M_ChooseSkill(int choice)
 	return;
     }
 	
-    G_DeferedInitNew(choice,epi+1,level_selected);
+    G_DeferedInitNew((skill_t)choice,epi+1,level_selected);
     M_ClearMenus ();
 }
 
@@ -1105,8 +1106,6 @@ void M_Options(int choice)
 //
 void M_ChangeMessages(int choice)
 {
-    // warning: unused parameter `int choice'
-    choice = 0;
     showMessages = 1 - showMessages;
 	
     if (!showMessages)
@@ -1133,7 +1132,6 @@ void M_EndGameResponse(int key)
 
 void M_EndGame(int choice)
 {
-    choice = 0;
     if (!usergame)
     {
 	S_StartSound(NULL,sfx_oof);
@@ -1157,7 +1155,6 @@ void M_EndGame(int choice)
 //
 void M_ReadThis(int choice)
 {
-    choice = 0;
     M_SetupNextMenu(&ReadDef1);
 }
 
@@ -1168,7 +1165,6 @@ void M_ReadThis2(int choice)
 
     if (gameversion == exe_doom_1_9 && gamemode != commercial)
     {
-        choice = 0;
         M_SetupNextMenu(&ReadDef2);
     }
     else
@@ -1181,7 +1177,6 @@ void M_ReadThis2(int choice)
 
 void M_FinishReadThis(int choice)
 {
-    choice = 0;
     M_SetupNextMenu(&MainDef);
 }
 
@@ -1286,7 +1281,6 @@ void M_ChangeSensitivity(int choice)
 
 void M_ChangeDetail(int choice)
 {
-    choice = 0;
     detailLevel = 1 - detailLevel;
 
     R_SetViewSize (screenblocks, detailLevel);
@@ -1384,7 +1378,7 @@ M_DrawSelCell
 void
 M_StartMessage
 ( char*		string,
-  void*		routine,
+  void (*routine) (int),
   boolean	input )
 {
     messageLastMenuActive = menuactive;
@@ -1514,15 +1508,13 @@ boolean M_Responder (event_t* ev)
     int             ch;
     int             key;
     int             i;
-    
-    static  int     lasty = 0;
+
 #if ORIGCODE
     static  int     joywait = 0;
     static  int     mousewait = 0;
     static  int     mousey = 0; 
     static  int     mousex = 0;
 #endif
-    static  int     lastx = 0;
 
     // In testcontrols mode, none of the function keys should do anything
     // - the only key is escape to quit.

@@ -26,14 +26,7 @@ int		columnofs[MAXWIDTH];
 //  (color ramps used for  suit colors).
 //
 
-byte		translations[3][256];	
-
-
-
-// Backing buffer containing the bezel drawn around the screen and 
-// surrounding background.
-
-static byte *background_buffer = NULL;
+byte		translations[3][256];
 
 
 //
@@ -461,7 +454,6 @@ int             deathmatch;           	// only if started as net death
 boolean         netgame;                // only true if packets are broadcast 
 boolean         playeringame[MAXPLAYERS]; 
 player_t        players[MAXPLAYERS];
-player_t        *our_hero;
 
 boolean         turbodetected[MAXPLAYERS];
  

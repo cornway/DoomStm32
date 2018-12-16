@@ -154,7 +154,7 @@ void PendSV_Handler(void)
   * @param  None
   * @retval None
   */
-extern int32_t systime;
+extern volatile uint32_t systime;
 void SysTick_Handler(void)
 {
   HAL_IncTick();
@@ -213,16 +213,9 @@ void OTG_HS_IRQHandler(void)
   HAL_HCD_IRQHandler(&hhcd);
 }
 
-
-/**
-  * @brief  DCMI interrupt handler.
-  * @param  None
-  * @retval None
-  */
-extern DMA2D_HandleTypeDef dma2d_hdl;
 void DMA2D_IRQHandler(void)
 {
-  HAL_DMA2D_IRQHandler(&dma2d_hdl);
+  //HAL_DMA2D_IRQHandler(&dma2d_hdl);
 }
 
 extern SD_HandleTypeDef uSdHandle;

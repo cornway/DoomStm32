@@ -260,6 +260,7 @@ R_PointToAngle
 ( fixed_t	x,
   fixed_t	y )
 {	
+    angle_t ret;
     x -= viewx;
     y -= viewy;
     
@@ -276,12 +277,12 @@ R_PointToAngle
 	    if (x>y)
 	    {
 		// octant 0
-		return tantoangle[ SlopeDiv(y,x)];
+		ret = tantoangle[ SlopeDiv(y,x)];
 	    }
 	    else
 	    {
 		// octant 1
-		return ANG90-1-tantoangle[ SlopeDiv(x,y)];
+		ret = ANG90-1-tantoangle[ SlopeDiv(x,y)];
 	    }
 	}
 	else
@@ -292,12 +293,12 @@ R_PointToAngle
 	    if (x>y)
 	    {
 		// octant 8
-		return -tantoangle[SlopeDiv(y,x)];
+		ret = -tantoangle[SlopeDiv(y,x)];
 	    }
 	    else
 	    {
 		// octant 7
-		return ANG270+tantoangle[ SlopeDiv(x,y)];
+		ret = ANG270+tantoangle[ SlopeDiv(x,y)];
 	    }
 	}
     }
@@ -312,12 +313,12 @@ R_PointToAngle
 	    if (x>y)
 	    {
 		// octant 3
-		return ANG180-1-tantoangle[ SlopeDiv(y,x)];
+		ret = ANG180-1-tantoangle[ SlopeDiv(y,x)];
 	    }
 	    else
 	    {
 		// octant 2
-		return ANG90+ tantoangle[ SlopeDiv(x,y)];
+		ret = ANG90+ tantoangle[ SlopeDiv(x,y)];
 	    }
 	}
 	else
@@ -328,16 +329,16 @@ R_PointToAngle
 	    if (x>y)
 	    {
 		// octant 4
-		return ANG180+tantoangle[ SlopeDiv(y,x)];
+		ret = ANG180+tantoangle[ SlopeDiv(y,x)];
 	    }
 	    else
 	    {
 		 // octant 5
-		return ANG270-1-tantoangle[ SlopeDiv(x,y)];
+		ret = ANG270-1-tantoangle[ SlopeDiv(x,y)];
 	    }
 	}
     }
-    return 0;
+    return ret;
 }
 
 
@@ -411,8 +412,6 @@ fixed_t R_ScaleFromGlobalAngle (angle_t visangle)
     angle_t		angleb;
     int			sinea;
     int			sineb;
-    fixed_t		num;
-    int			den;
 
     anglea = ANG90 + (visangle-viewangle);
     angleb = ANG90 + (visangle-rw_normalangle);
@@ -577,7 +576,6 @@ R_SetViewSize
 void R_ExecuteSetViewSize (void)
 {
     fixed_t	cosadj;
-    fixed_t	dy;
     int		i;
     int		j;
     int		level;

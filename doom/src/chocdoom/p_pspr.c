@@ -137,7 +137,7 @@ void P_BringUpWeapon (player_t* player)
     if (player->pendingweapon == wp_chainsaw)
 	S_StartSound (player->mo, sfx_sawup);
 		
-    newstate = weaponinfo[player->pendingweapon].upstate;
+    newstate = (statenum_t)weaponinfo[player->pendingweapon].upstate;
 
     player->pendingweapon = wp_nochange;
     player->psprites[ps_weapon].sy = WEAPONBOTTOM - player->lookdir;
@@ -226,7 +226,7 @@ boolean P_CheckAmmo (player_t* player)
     // Now set appropriate weapon overlay.
     P_SetPsprite (player,
 		  ps_weapon,
-		  weaponinfo[player->readyweapon].downstate);
+		  (statenum_t)weaponinfo[player->readyweapon].downstate);
 
     return false;	
 }
@@ -243,7 +243,7 @@ void P_FireWeapon (player_t* player)
 	return;
 	
     P_SetMobjState (player->mo, S_PLAY_ATK1);
-    newstate = weaponinfo[player->readyweapon].atkstate;
+    newstate = (statenum_t)weaponinfo[player->readyweapon].atkstate;
     P_SetPsprite (player, ps_weapon, newstate);
     P_NoiseAlert (player->mo, player->mo);
 }
@@ -258,7 +258,7 @@ void P_DropWeapon (player_t* player)
 {
     P_SetPsprite (player,
 		  ps_weapon,
-		  weaponinfo[player->readyweapon].downstate);
+		  (statenum_t)weaponinfo[player->readyweapon].downstate);
 }
 
 
@@ -297,7 +297,7 @@ A_WeaponReady
     {
 	// change weapon
 	//  (pending weapon should allready be validated)
-	newstate = weaponinfo[player->readyweapon].downstate;
+	newstate = (statenum_t)weaponinfo[player->readyweapon].downstate;
 	P_SetPsprite (player, ps_weapon, newstate);
 	return;	
     }
@@ -428,7 +428,7 @@ A_Raise
     
     // The weapon has been raised all the way,
     //  so change to the ready state.
-    newstate = weaponinfo[player->readyweapon].readystate;
+    newstate = (statenum_t)weaponinfo[player->readyweapon].readystate;
 
     P_SetPsprite (player, ps_weapon, newstate);
 }
@@ -444,7 +444,7 @@ A_GunFlash
   pspdef_t*	psp ) 
 {
     P_SetMobjState (player->mo, S_PLAY_ATK2);
-    P_SetPsprite (player,ps_flash,weaponinfo[player->readyweapon].flashstate);
+    P_SetPsprite (player,ps_flash,(statenum_t)weaponinfo[player->readyweapon].flashstate);
 }
 
 
@@ -594,7 +594,7 @@ A_FirePlasma
 
     P_SetPsprite (player,
 		  ps_flash,
-		  weaponinfo[player->readyweapon].flashstate+(P_Random ()&1) );
+		  (statenum_t)(weaponinfo[player->readyweapon].flashstate+(P_Random ()&1)) );
 
     P_SpawnPlayerMissile (player->mo, MT_PLASMA);
 }
@@ -671,7 +671,7 @@ A_FirePistol
 
     P_SetPsprite (player,
 		  ps_flash,
-		  weaponinfo[player->readyweapon].flashstate);
+		  (statenum_t)weaponinfo[player->readyweapon].flashstate);
 
     P_BulletSlope (player->mo);
     P_GunShot (player->mo, !player->refire);
@@ -695,7 +695,7 @@ A_FireShotgun
 
     P_SetPsprite (player,
 		  ps_flash,
-		  weaponinfo[player->readyweapon].flashstate);
+		  (statenum_t)weaponinfo[player->readyweapon].flashstate);
 
     P_BulletSlope (player->mo);
 	
@@ -725,7 +725,7 @@ A_FireShotgun2
 
     P_SetPsprite (player,
 		  ps_flash,
-		  weaponinfo[player->readyweapon].flashstate);
+		  (statenum_t)weaponinfo[player->readyweapon].flashstate);
 
     P_BulletSlope (player->mo);
 	
@@ -751,6 +751,7 @@ A_FireCGun
   pspdef_t*	psp ) 
 {
     S_StartSound (player->mo, sfx_pistol);
+    int new_state;
 
     if (!player->ammo[weaponinfo[player->readyweapon].ammo])
 	return;
@@ -758,11 +759,9 @@ A_FireCGun
     P_SetMobjState (player->mo, S_PLAY_ATK2);
     DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
 
+    new_state = weaponinfo[player->readyweapon].flashstate + (int)psp->state - (int)&states[S_CHAIN1];
     P_SetPsprite (player,
-		  ps_flash,
-		  weaponinfo[player->readyweapon].flashstate
-		  + psp->state
-		  - &states[S_CHAIN1] );
+		  ps_flash, (statenum_t)new_state);
 
     P_BulletSlope (player->mo);
 	
@@ -868,13 +867,12 @@ void P_MovePsprites (player_t* player)
 {
     int		i;
     pspdef_t*	psp;
-    state_t*	state;
 	
     psp = &player->psprites[0];
     for (i=0 ; i<NUMPSPRITES ; i++, psp++)
     {
 	// a null state means not active
-	if ( (state = psp->state) )	
+	if ( psp->state )
 	{
 	    // drop tic count and possibly change state
 

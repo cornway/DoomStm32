@@ -119,7 +119,6 @@ extern int             deathmatch;           	// only if started as net death
 extern boolean         netgame;                // only true if packets are broadcast 
 extern boolean         playeringame[MAXPLAYERS]; 
 extern player_t        players[MAXPLAYERS];
-extern player_t        *our_hero;
 
 extern boolean         turbodetected[MAXPLAYERS];
  
@@ -305,7 +304,6 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 { 
     int		i; 
     boolean	strafe;
-    boolean	bstrafe; 
     int		speed;
     int		forward;
     int		side;
@@ -506,7 +504,7 @@ void G_DoLoadLevel (void)
     levelstarttic = gametic;        // for time calculation
     
     if (wipegamestate == GS_LEVEL) 
-	wipegamestate = -1;             // force a wipe 
+	wipegamestate = GS_FORCE_WIPE;             // force a wipe
 
     gamestate = GS_LEVEL; 
 
@@ -1448,7 +1446,6 @@ G_SaveGame
 void G_DoSaveGame (void) 
 { 
     char *savegame_file;
-    FRESULT res;
     uint32_t save_size;
 
     savegame_file = strupr (P_SaveGameFile(savegameslot));
@@ -2027,7 +2024,7 @@ void G_DoPlayDemo (void)
                          DemoVersionDescription(demoversion));
     }
     
-    skill = *demo_p++; 
+    skill = (skill_t)*demo_p++;
     episode = *demo_p++; 
     map = *demo_p++; 
     deathmatch = *demo_p++;

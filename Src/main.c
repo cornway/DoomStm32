@@ -41,7 +41,7 @@
 int screen_res_x;
 int screen_res_y;
 
-uint32_t systime = 0;
+volatile uint32_t systime = 0;
 
 extern void fatal_error (const char* message);
 extern void qspi_flash_init (void);
@@ -59,7 +59,7 @@ static void CPU_CACHE_Enable(void);
 #define SDRAM_VOL_END   0xC1000000
 #define SDRAM_VOL_SIZE (SDRAM_VOL_END - SDRAM_VOL_START)
 volatile pal_t *__lcd_frame_buf_raw = (void *)SDRAM_VOL_START;
-#if DOOM_CLUT
+#if GFX_COLOR_MODE_CLUT
 #define RAW_LCD_FBUF_SIZE_MAX 0x200000
 #else
 #define RAW_LCD_FBUF_SIZE_MAX 0x200000
@@ -76,12 +76,11 @@ int main(void)
   CPU_CACHE_Enable();
   HAL_Init();
   SystemClock_Config();
-  lcd_attach_buf();
   BSP_LED_Init(LED1);
   BSP_LED_Init(LED2);
 
   qspi_flash_init();  
-  Display_Init();
+  lcd_init();
   gamepad_init();  
   audio_init();
   

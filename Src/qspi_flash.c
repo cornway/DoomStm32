@@ -41,6 +41,7 @@ static inline int qspi_map_read (uint8_t *buf, int addr, int size)
     for (int i = 0; i < size; i++) {
         buf[i] = src[i];
     }
+    return 0;
 }
 
 int qspi_flash_read (uint8_t *buf, int addr, int size)

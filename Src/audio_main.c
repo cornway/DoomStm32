@@ -10,6 +10,9 @@ extern snd_sample_t *music_get_next_chunk (int32_t *size);
 extern uint8_t music_get_volume (void);
 extern int music_init (void);
 
+/*TODO use define instead of 0*/
+#define AUDIO_PLAY_SCHEME 0
+
 #define AUDIO_TIMEOUT_MAX 1000 /*2 s*/
 #define MAX_2BAND_VOL ((MAX_VOL) | (MAX_VOL << 8))
 #define MAX_4BAND_VOL ((MAX_2BAND_VOL) | (MAX_2BAND_VOL << 16))
@@ -357,6 +360,7 @@ chan_try_reject (chan_desc_t *desc)
     return 0;
 }
 
+#if (AUDIO_PLAY_SCHEME == 1)
 
 static inline uint8_t
 chan_move_win_all ( int size,
@@ -370,6 +374,8 @@ chan_move_win_all ( int size,
     }
     return chan_llist_ready.size;
 }
+
+#endif /*(AUDIO_PLAY_SCHEME == 1)*/
 
 static inline uint8_t
 chan_try_reject_all ()
@@ -500,28 +506,6 @@ exit:
     music_tickle();
 }
 
-static inline uint8_t get_vol_interp (uint8_t vol)
-{
-    
-if (vol > 224) {
-        return 0;
-     } else if (vol > 196) {
-        return 1;
-     } else if (vol > 160) {
-        return 2;
-     } else if (vol > 128) {
-        return 3;
-     } else if (vol > 96) {
-        return 4;
-     } else if (vol > 64) {
-        return 5;
-     } else if (vol > 32) {
-        return 6;
-     } else {
-        return 7;
-     }
-}
-
 #define AMP(x, vol) (((int16_t)x * vol) / MAX_VOL)
 #define COMP(x, vol, comp) (((int16_t)x * vol) / comp)
 
@@ -585,6 +569,8 @@ mix_to_master_raw1 (uint16_t *dest,
     }
 #endif
 }
+
+#if (AUDIO_PLAY_SCHEME == 1)
 
 static inline void
 mix_to_master_raw2 (uint16_t *dest,
@@ -740,6 +726,7 @@ chan_to_buf_arr (uint16_t **ps)
     return chan_llist_ready.size;
 } 
 
+#endif /*(AUDIO_PLAY_SCHEME == 1)*/
 
 static void chan_proc_raw_all_ex (uint16_t *dest)
 {
@@ -801,24 +788,21 @@ static void mus_play (uint8_t idx)
 
 static void chan_proc_all_to_buf (uint8_t idx)
 {
-    uint16_t *ps[AUDIO_MAX_CHANS];
-    uint8_t  vol[AUDIO_MAX_CHANS];
-    int32_t psize[AUDIO_MAX_CHANS];
-    int32_t size = 0;
     uint16_t *dest = audio_raw_buf[idx];
 #if COMPRESSION
     comp_weight = chan_llist_ready.size + 2;
 #endif
-#if 1
+    /*TODO : fix this*/
+#if (AUDIO_PLAY_SCHEME == 1)
     while (chan_llist_ready.size) {
+        int32_t psize[AUDIO_MAX_CHANS];
+        uint16_t *ps[AUDIO_MAX_CHANS];
+        uint8_t  vol[AUDIO_MAX_CHANS];
 
         bufclr[idx] = 0;
         if (chan_try_reject_all() == 0) {
             break;
         }
-
-        chan_proc_raw_all_ex(dest);
-        break;
 
         if (chan_len(chan_llist_ready.first) < AUDIO_OUT_BUFFER_SIZE) {
             chan_proc_raw_all_ex(dest);
@@ -876,7 +860,6 @@ typedef struct {
 } snd_cache_t;
 
 static snd_cache_t snd_num_cache[SND_NUM_CACHE_MAX];
-static uint16_t last_free_snd_cache_slot = 0;
 
 static const char *snd_dir_path =
 "doom/sound/";
@@ -960,6 +943,7 @@ get_ext_snd_size (int num)
         return snd_num_cache[num].size;
     }
     error_handle();
+    return 0;
 }
 
 int
@@ -967,7 +951,6 @@ cache_ext_sound (int num, uint8_t *dest, int size)
 {
     char path[64];
     FRESULT fr;
-    int fsize = 0;
     uint32_t btr;
     static FIL file;
 
@@ -980,6 +963,7 @@ cache_ext_sound (int num, uint8_t *dest, int size)
     fr = f_read(&file, dest, size, &btr);
     if ((fr != FR_OK) || (btr != size)) {
         error_handle();
+        return -1;
     }
     
     f_close(&file);

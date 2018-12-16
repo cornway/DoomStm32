@@ -33,9 +33,6 @@
 
 #include "doomstat.h"
 
-
-extern player_t *our_hero;
-
 void G_PlayerReborn (int player);
 void P_SpawnMapThing (mapthing_t*	mthing);
 
@@ -87,7 +84,7 @@ void P_ExplodeMissile (mobj_t* mo)
 {
     mo->momx = mo->momy = mo->momz = 0;
 
-    P_SetMobjState (mo, mobjinfo[mo->type].deathstate);
+    P_SetMobjState (mo, (statenum_t)mobjinfo[mo->type].deathstate);
 
     mo->tics -= P_Random()&3;
 
@@ -123,7 +120,7 @@ void P_XYMovement (mobj_t* mo)
 	    mo->flags &= ~MF_SKULLFLY;
 	    mo->momx = mo->momy = mo->momz = 0;
 
-	    P_SetMobjState (mo, mo->info->spawnstate);
+	    P_SetMobjState (mo, (statenum_t)mo->info->spawnstate);
 	}
 	return;
     }
@@ -650,7 +647,7 @@ void P_RespawnSpecials (void)
     else
 	z = ONFLOORZ;
 
-    mo = P_SpawnMobj (x,y,z, i);
+    mo = P_SpawnMobj (x,y,z, (mobjtype_t)i);
     mo->spawnpoint = *mthing;	
     mo->angle = ANG45 * (mthing->angle/45);
 
@@ -688,7 +685,6 @@ void P_SpawnPlayer (mapthing_t* mthing)
 	return;					
 		
     p = &players[mthing->type-1];
-    our_hero = &players[mthing->type-1];
 
     if (p->playerstate == PST_REBORN)
 	G_PlayerReborn (mthing->type-1);
@@ -823,7 +819,7 @@ void P_SpawnMapThing (mapthing_t* mthing)
     else
 	z = ONFLOORZ;
     
-    mobj = P_SpawnMobj (x,y,z, i);
+    mobj = P_SpawnMobj (x,y,z, (mobjtype_t)i);
     mobj->spawnpoint = *mthing;
 
     if (mobj->tics > 0)

@@ -129,7 +129,7 @@ size_t W_StdC_Read(wad_file_t *wad, unsigned int offset,
 
     // Read into the buffer.
 
-    f_readn (&stdc_wad->fstream, buffer, buffer_len, &count);
+    f_read(&stdc_wad->fstream, buffer, buffer_len, &count);
     return count;
 #endif
 }
@@ -166,7 +166,6 @@ static void W_StdC_Foreach(char *path, void (*handle)(void *))
 {
     FRESULT res;
     DIR dir;
-    UINT i;
     FILINFO fno;
     char path_to_file[128];
 

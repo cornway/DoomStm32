@@ -62,7 +62,7 @@ size_t mem_fread(void *buf, size_t size, size_t nmemb, MEMFILE *stream)
 
 	if (stream->mode != MODE_READ)
 	{
-		return -1;
+		return 0;
 	}
 
 	// Trying to read more bytes than we have left?
@@ -110,7 +110,7 @@ size_t mem_fwrite(const void *ptr, size_t size, size_t nmemb, MEMFILE *stream)
 
 	if (stream->mode != MODE_WRITE)
 	{
-		return -1;
+		return 0;
 	}
 	
 	// More bytes than can fit in the buffer?

@@ -27,8 +27,7 @@ void touch_state_tbl_init (void)
 
 void touch_init (void)
 {
-    uint32_t ts_status = TS_OK;
-    ts_status = BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
+    BSP_TS_Init(BSP_LCD_GetXSize(), BSP_LCD_GetYSize());
     touch_state_tbl_init();
 }
 
@@ -38,15 +37,15 @@ void touch_main (void)
     touch_read ();
 }
 
-static void clear ()
+static inline void touch_clear ()
 {
-    touch_state.status = 0;
+    touch_state.status = TOUCH_IDLE;
     memset(&TS_State, 0, sizeof(TS_State));
 }
 
 void touch_read (void)
 {
-    clear();
+    touch_clear();
     uint32_t ts_status = BSP_TS_GetState(&TS_State);
     uint8_t state = 0;
     state = touch_state_tbl[ts_state][TS_State.touchDetected ? TS_PRESS_ON : TS_PRESS_OFF];

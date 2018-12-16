@@ -527,7 +527,7 @@ static default_t	doom_defaults_list[] =
     // while a value of zero disables music.
     //
 
-    CONFIG_VARIABLE_INT(snd_musicdevice),
+    CONFIG_VARIABLE_INT((int)snd_musicdevice),
 
     //!
     // Sound effects device.  A value of zero disables in-game sound
@@ -536,7 +536,7 @@ static default_t	doom_defaults_list[] =
     // effects.
     //
 
-    CONFIG_VARIABLE_INT(snd_sfxdevice),
+    CONFIG_VARIABLE_INT((int)snd_sfxdevice),
 
     //!
     // SoundBlaster I/O port. Unused.

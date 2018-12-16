@@ -58,8 +58,8 @@ char *snd_musiccmd = "";
 static sound_module_t *sound_module;
 static music_module_t *music_module;
 
-int snd_musicdevice = SNDDEVICE_SB;
-int snd_sfxdevice = SNDDEVICE_SB;
+snddevice_t snd_musicdevice = SNDDEVICE_SB;
+snddevice_t snd_sfxdevice = SNDDEVICE_SB;
 
 // Sound modules
 
@@ -115,8 +115,11 @@ static music_module_t *music_modules[] =
 static boolean SndDeviceInList(snddevice_t device, snddevice_t *list,
                                int len)
 {
-    int i;
+#if 1
     return true;
+    /*TODO : remove ?*/
+#else
+    int i;
     for (i=0; i<len; ++i)
     {
         if (device == list[i])
@@ -126,6 +129,7 @@ static boolean SndDeviceInList(snddevice_t device, snddevice_t *list,
     }
 
     return false;
+#endif
 }
 
 // Find and initialize a sound_module_t appropriate for the setting
@@ -317,7 +321,7 @@ int I_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep)
     if (sound_module != NULL)
     {
         CheckVolumeSeparation(&vol, &sep);
-        return sound_module->StartSound(sfxinfo, channel, vol, sep);
+        return sound_module->StartSound(sfxinfo, channel, vol, sep, NORM_PITCH);
     }
     else
     {

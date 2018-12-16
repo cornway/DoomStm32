@@ -204,7 +204,6 @@ void R_RenderSegLoop (void)
     fixed_t		texturecolumn;
     int			top;
     int			bottom;
-    short       temp_ceil;
 
     for ( ; rw_x < rw_stopx ; rw_x++) {
         short temp_ceil = ceilingclip[rw_x]+1;

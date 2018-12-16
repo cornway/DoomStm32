@@ -408,7 +408,6 @@ static int InitTag (void)
 			break;
 		case M_EOI:
 			return FUNC_FORMAT_ERROR;
-			break;
 		default:
 			if ((id & 0xf0) != 0xd0)
 			{

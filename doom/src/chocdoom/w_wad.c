@@ -259,15 +259,11 @@ wad_file_t *W_AddLumpFile (char *filename)
 {
     wadinfo_t *header;
     lumpinfo_t *lump_p;
-    unsigned int i, j;
+    unsigned int i;
     wad_file_t *wad_file;
-    int startlump;
-    int length;
     int newnumlumps;
-    int lumpnums;
     filelump_t *filerover;
     filelump_t *fileinfo;
-    filelump_t *fileinfo_temp;
 
     // open the file and add to directory
 
@@ -282,7 +278,7 @@ wad_file_t *W_AddLumpFile (char *filename)
     newnumlumps = LONG(header->numlumps);
     header->numlumps = newnumlumps;
     header->infotableofs = LONG(header->infotableofs);
-    length = header->numlumps*sizeof(filelump_t);
+
     filerover = (filelump_t *)(wad_file->mapped + header->infotableofs);
     fileinfo = filerover;
 

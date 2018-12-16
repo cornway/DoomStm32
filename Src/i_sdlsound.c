@@ -38,9 +38,9 @@
 #include "doomtype.h"
 #include "audio_main.h"
 
+#ifndef INT16_MAX
 #define INT16_MAX 0x7FFF
-
-#define NORM_PITCH 128
+#endif
 
 typedef uint8_t Uint8;
 typedef uint16_t Uint16;
@@ -70,14 +70,8 @@ static boolean sound_initialized = false;
 
 static allocated_sound_t *channels_playing[NUM_CHANNELS];
 
-static int mixer_freq = 22050;
-static Uint16 mixer_format;
-static int mixer_channels;
+static int mixer_freq = AUDIO_SAMPLE_RATE;
 static boolean use_sfx_prefix;
-static boolean (*ExpandSoundData)(sfxinfo_t *sfxinfo,
-                                  byte *data,
-                                  int samplerate,
-                                  int length) = NULL;
 
 // Doubly-linked list of allocated sounds.
 // When a sound is played, it is moved to the head, so that the oldest
@@ -297,49 +291,6 @@ static allocated_sound_t * GetAllocatedSoundBySfxInfoAndPitch(sfxinfo_t *sfxinfo
     }
 
     return NULL;
-}
-
-// Allocate a new sound chunk and pitch-shift an existing sound up-or-down
-// into it.
-
-static allocated_sound_t * PitchShift(allocated_sound_t *insnd, int pitch)
-{
-    allocated_sound_t * outsnd;
-    Sint16 *inp, *outp;
-    Sint16 *srcbuf, *dstbuf;
-    Uint32 srclen, dstlen;
-
-    srcbuf = (Sint16 *)insnd->chunk.abuf;
-    srclen = insnd->chunk.alen;
-
-    // determine ratio pitch:NORM_PITCH and apply to srclen, then invert.
-    // This is an approximation of vanilla behaviour based on measurements
-    dstlen = (int)((1 + (1 - (float)pitch / NORM_PITCH)) * srclen);
-
-    // ensure that the new buffer is an even length
-    if ((dstlen % 2) == 0)
-    {
-        dstlen++;
-    }
-
-    outsnd = AllocateSound(insnd->sfxinfo, dstlen);
-
-    if (!outsnd)
-    {
-        return NULL;
-    }
-
-    outsnd->pitch = pitch;
-    dstbuf = (Sint16 *)outsnd->chunk.abuf;
-
-    // loop over output buffer. find corresponding input cell, copy over
-    for (outp = dstbuf; outp < dstbuf + dstlen/2; ++outp)
-    {
-        inp = srcbuf + (int)((float)(outp - dstbuf) / dstlen * srclen);
-        *outp = *inp;
-    }
-
-    return outsnd;
 }
 
 // When a sound stops, check if it is still playing.  If it is not,
@@ -1032,7 +983,6 @@ static int I_SDL_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep, i
 
     if (snd == NULL)
     {
-        allocated_sound_t *newsnd;
         // fetch the base sound effect, un-pitch-shifted
         snd = GetAllocatedSoundBySfxInfoAndPitch(sfxinfo, NORM_PITCH);
 
@@ -1130,33 +1080,6 @@ static void I_SDL_ShutdownSound(void)
     sound_initialized = false;
 }
 
-// Calculate slice size, based on snd_maxslicetime_ms.
-// The result must be a power of two.
-
-static int GetSliceSize(void)
-{
-    int limit;
-    int n;
-
-    limit = (snd_samplerate * snd_maxslicetime_ms) / 1000;
-
-    // Try all powers of two, not exceeding the limit.
-
-    for (n=0;; ++n)
-    {
-        // 2^n <= limit < 2^n+1 ?
-
-        if ((1 << (n + 1)) > limit)
-        {
-            return (1 << n);
-        }
-    }
-
-    // Should never happen?
-
-    return 1024;
-}
-
 static boolean I_SDL_InitSound(boolean _use_sfx_prefix)
 {
     int i;
@@ -1167,9 +1090,6 @@ static boolean I_SDL_InitSound(boolean _use_sfx_prefix)
     {
         channels_playing[i] = NULL;
     }
-
-    ExpandSoundData = ExpandSoundData_SDL;
-
 #ifdef HAVE_LIBSAMPLERATE
     if (use_libsamplerate != 0)
     {

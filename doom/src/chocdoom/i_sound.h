@@ -23,6 +23,7 @@
 #include "doomtype.h"
 
 
+#define NORM_PITCH 128
 //
 // SoundFX struct.
 //
@@ -133,7 +134,7 @@ typedef struct
     // Start a sound on a given channel.  Returns the channel id
     // or -1 on failure.
 
-    int (*StartSound)(sfxinfo_t *sfxinfo, int channel, int vol, int sep);
+    int (*StartSound)(sfxinfo_t *sfxinfo, int channel, int vol, int sep, int pitch);
 
     // Stop the sound playing on the given channel.
 
@@ -225,8 +226,8 @@ void I_PlaySong(void *handle, boolean looping);
 void I_StopSong(void);
 boolean I_MusicIsPlaying(void);
 
-extern int snd_sfxdevice;
-extern int snd_musicdevice;
+extern snddevice_t snd_sfxdevice;
+extern snddevice_t snd_musicdevice;
 extern int snd_samplerate;
 extern int snd_cachesize;
 extern int snd_maxslicetime_ms;

@@ -16,30 +16,59 @@
 #define CTL_MASK        0x00f00000
 #define CTL_GPOS        20
 
-#define _UP     0
-#define _DOWN   0xff
-#define _LEFT   0
-#define _RIGHT  0xff
+#define M_UP     0
+#define M_DOWN   0xff
+#define M_LEFT   0
+#define M_RIGHT  0xff
 
-#define _K1     0x1
-#define _K2     0x2
-#define _K3     0x4
-#define _K4     0x8
-#define _BL     1
-#define _BR     2
-#define _TL     4
-#define _TR     8
-#define _START  1
-#define _SELECT 2
+#define M_K1     0x1
+#define M_K2     0x2
+#define M_K3     0x4
+#define M_K4     0x8
+#define M_BL     1
+#define M_BR     2
+#define M_TL     4
+#define M_TR     8
+#define M_START  1
+#define M_SELECT 2
 
+enum {
+    K_UP = 0,
+    K_DOWN,
+    K_LEFT,
+    K_RIGHT,
 
+    K_K1,
+    K_K2,
+    K_K3,
+    K_K4,
+    K_BL,
+    K_BR,
+    K_TL,
+    K_TR,
+    K_START,
+    K_SELECT,
+    K_MAX,
+};
+
+#define set_pad_state(actions_cnt, keypads, joypad_data, mask)   \
+do {                                                \
+    if (joypad_data & M##mask) {                    \
+         keypads[K##mask] = 1;                      \
+    } else if (keypads[K##mask] >= 0) {             \
+        keypads[K##mask] = keypads[K##mask] - 1;    \
+    }                                               \
+    if (keypads[K##mask] >= 0) {                    \
+        actions_cnt++;                              \
+    }                                               \
+} while (0)
 
 static USBH_HandleTypeDef hUSBHost;
-int8_t gamepad_connected = 0;
 static uint32_t gamepad_data[2];
-static int8_t pad_states[14];
 uint64_t gamepad_data_ev;
 int8_t gamepad_data_ready = 0;
+static int8_t keypads[K_MAX];
+static uint8_t needs_handle_cnt;
 
 static void USBH_UserProcess(USBH_HandleTypeDef * phost, uint8_t id);
 USBH_StatusTypeDef USBH_HID_GamepadInit(USBH_HandleTypeDef *phost);
@@ -50,9 +79,10 @@ void gamepad_init (void)
     USBH_Init(&hUSBHost, USBH_UserProcess, 0);
     USBH_RegisterClass(&hUSBHost, USBH_HID_CLASS);
     USBH_Start(&hUSBHost);
-    for (int i = 0; i < sizeof(pad_states); i++) {
-        pad_states[i] = -1;
+    for (int i = 0; i < K_MAX; i++) {
+        keypads[i] = -1;
     }
+    needs_handle_cnt = 0;
 }
 
 void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
@@ -60,62 +90,59 @@ void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 
 }
 
-static inline void
-set_state(num, state) \
-{
-    if (state) {
-         pad_states[num] = 1;
-    } else if (pad_states[num] >= 0) {
-        pad_states[num]--;
-    }
-}
-
 int gamepad_read (int8_t *pads)
 {
     uint32_t nav_keys;
     uint32_t act_keys;
 
-    uint8_t up_down_pads;
-    uint8_t left_right_pads;
-    uint8_t key_pads;
-    uint8_t shift_pads;
-    uint8_t ctls_pads;
+    uint8_t up_down_pads =0;
+    uint8_t left_right_pads = 0;
+    uint8_t key_pads = 0;
+    uint8_t shift_pads = 0;
+    uint8_t ctls_pads = 0;
 
     /*Skip each first 'frame'*/
     if (gamepad_data_ready < 2) {
         return -1;
     }
+    if ((gamepad_data_ev == 0) && (needs_handle_cnt == 0)) {
+        return -1;
+    }
     nav_keys = gamepad_data_ev & 0xffffffff;
     act_keys = (gamepad_data_ev >> 32) & 0xffffffff;
 
-    up_down_pads        = (nav_keys & UP_DOWN_MASK) >> UP_DOWN_GPOS;
-    left_right_pads     = (nav_keys & LR_MASK)      >> LR_GPOS;
-    key_pads            = (act_keys & KEYS_MASK)    >> KEYS_GPOS;
-    shift_pads          = (act_keys & SHIFT_MASK)   >> SHIFT_GPOS;
-    ctls_pads           = (act_keys & CTL_MASK)     >> CTL_GPOS;
+    if (nav_keys) {
+        up_down_pads        = (nav_keys & UP_DOWN_MASK) >> UP_DOWN_GPOS;
+        left_right_pads     = (nav_keys & LR_MASK)      >> LR_GPOS;
+    }
+    if (act_keys) {
+        key_pads            = (act_keys & KEYS_MASK)    >> KEYS_GPOS;
+        shift_pads          = (act_keys & SHIFT_MASK)   >> SHIFT_GPOS;
+        ctls_pads           = (act_keys & CTL_MASK)     >> CTL_GPOS;
+    }
+    set_pad_state(needs_handle_cnt, keypads, up_down_pads, _UP);
+    set_pad_state(needs_handle_cnt, keypads, up_down_pads, _DOWN);
 
-    set_state(0, up_down_pads == _UP);
-    set_state(1, up_down_pads == _DOWN);
+    set_pad_state(needs_handle_cnt, keypads, left_right_pads, _LEFT);
+    set_pad_state(needs_handle_cnt, keypads, left_right_pads, _RIGHT);
 
-    set_state(2, left_right_pads == _LEFT);
-    set_state(3, left_right_pads == _RIGHT);
+    set_pad_state(needs_handle_cnt, keypads, key_pads, _K1);
+    set_pad_state(needs_handle_cnt, keypads, key_pads, _K2);
+    set_pad_state(needs_handle_cnt, keypads, key_pads, _K3);
+    set_pad_state(needs_handle_cnt, keypads, key_pads, _K4);
 
-    set_state(4, key_pads & _K1);
-    set_state(5, key_pads & _K2);
-    set_state(6, key_pads & _K3);
-    set_state(7, key_pads & _K4);
+    set_pad_state(needs_handle_cnt, keypads, shift_pads, _BL);
+    set_pad_state(needs_handle_cnt, keypads, shift_pads, _TL);
+    set_pad_state(needs_handle_cnt, keypads, shift_pads, _BR);
+    set_pad_state(needs_handle_cnt, keypads, shift_pads, _TR);
 
-    set_state(8, shift_pads & _BL);
-    set_state(9, shift_pads & _TL);
-    set_state(10, shift_pads & _BR);
-    set_state(11, shift_pads & _TR);
+    set_pad_state(needs_handle_cnt, keypads, ctls_pads, _START);
+    set_pad_state(needs_handle_cnt, keypads, ctls_pads, _SELECT);
 
-    set_state(12, ctls_pads & _START);
-    set_state(13, ctls_pads & _SELECT);
-
-    memcpy(pads, pad_states, sizeof(pad_states));
+    memcpy(pads, keypads, sizeof(keypads));
     gamepad_data_ready = 0;
-    return sizeof(pad_states);
+
+    return needs_handle_cnt;
 }
 
 
@@ -126,25 +153,7 @@ void gamepad_process (void)
 
 static void USBH_UserProcess(USBH_HandleTypeDef * phost, uint8_t id)
 {
-  switch (id)
-  {
-    case HOST_USER_SELECT_CONFIGURATION:
-    break;
 
-    case HOST_USER_DISCONNECTION:
-        gamepad_connected = 1;
-    break;
-
-    case HOST_USER_CLASS_ACTIVE:
-        gamepad_connected = 2;
-    break;
-
-    case HOST_USER_CONNECTION:      
-    break;
-
-    default:
-    break;
-  }
 }
 
 USBH_StatusTypeDef USBH_HID_GamepadInit(USBH_HandleTypeDef *phost)

@@ -125,6 +125,21 @@ int I_GetTimeMS(void)
 
 // Sleep for a specified number of ms
 
+/*
+ * Sleep for the specified number of milliseconds
+ */
+extern volatile uint32_t systime;
+static inline void sleep_ms (uint32_t ms)
+{
+    uint32_t wait_start;
+
+    wait_start = systime;
+
+    while (systime - wait_start < ms)
+    {
+    }
+}
+
 void I_Sleep(int ms)
 {
 	sleep_ms (ms);

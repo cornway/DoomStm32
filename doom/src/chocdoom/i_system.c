@@ -163,17 +163,12 @@ byte *I_ZoneBase (int *size)
 
 void I_PrintBanner(char *msg)
 {
-    int i;
-    int spaces = 35 - (strlen(msg) / 2);
+    /*TODO*/
 }
 
 void I_PrintDivider(void)
 {
-    int i;
-
-    for (i=0; i<75; ++i)
-    {
-    }
+    /*TODO*/
 }
 
 void I_PrintStartupBanner(char *gamedescription)
@@ -252,59 +247,9 @@ void I_Quit (void)
 #if !defined(_WIN32) && !defined(__MACOSX__)
 #define ZENITY_BINARY "/usr/bin/zenity"
 
-// returns non-zero if zenity is available
-
-static int ZenityAvailable(void)
-{
-    return 1;//system(ZENITY_BINARY " --help >/dev/null 2>&1") == 0;
-}
-
-// Escape special characters in the given string so that they can be
-// safely enclosed in shell quotes.
-
-static char *EscapeShellString(char *string)
-{
-    char *result;
-    char *r, *s;
-
-    // In the worst case, every character might be escaped.
-    result = malloc(strlen(string) * 2 + 3);
-    r = result;
-
-    // Enclosing quotes.
-    *r = '"';
-    ++r;
-
-    for (s = string; *s != '\0'; ++s)
-    {
-        // From the bash manual:
-        //
-        //  "Enclosing characters in double quotes preserves the literal
-        //   value of all characters within the quotes, with the exception
-        //   of $, `, \, and, when history expansion is enabled, !."
-        //
-        // Therefore, escape these characters by prefixing with a backslash.
-
-        if (strchr("$`\\!", *s) != NULL)
-        {
-            *r = '\\';
-            ++r;
-        }
-
-        *r = *s;
-        ++r;
-    }
-
-    // Enclosing quotes.
-    *r = '"';
-    ++r;
-    *r = '\0';
-
-    return result;
-}
-
 // Open a native error box with a message using zenity
-
+/*TODO : remove ?*/
+#if 0
 static int ZenityErrorBox(char *message)
 {
     int result;
@@ -331,6 +276,7 @@ static int ZenityErrorBox(char *message)
 
     return result;
 }
+#endif
 
 #endif /* !defined(_WIN32) && !defined(__MACOSX__) */
 
@@ -338,8 +284,6 @@ static int ZenityErrorBox(char *message)
 //
 // I_Error
 //
-
-static boolean already_quitting = false;
 
 void I_Error (char *error, ...)
 {

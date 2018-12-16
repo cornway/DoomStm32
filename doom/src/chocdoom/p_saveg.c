@@ -100,11 +100,11 @@ int8_t p_saveg_use_ram = 0;
 static byte saveg_read8_file (void)
 {
     byte result;
-    unsigned long count;
+    UINT count;
 #if LOAD_SAVE_USE_RAM
     I_Error("!");
 #endif
-    if (f_readn (&save_stream, &result, 1, &count) != FR_OK)
+    if (f_read (&save_stream, &result, 1, &count) != FR_OK)
     {
         if (!savegame_error)
         {
@@ -130,11 +130,11 @@ static byte saveg_read8_buf (void)
 
 static void saveg_write8_file(byte value)
 {
-	unsigned long count;
+	UINT count;
 #if LOAD_SAVE_USE_RAM
     I_Error("!");
 #endif
-	if (f_writen (&save_stream, &value, 1, &count) != FR_OK)
+	if (f_write (&save_stream, &value, 1, &count) != FR_OK)
     {
         if (!savegame_error)
         {
@@ -386,7 +386,7 @@ static void saveg_write_mapthing_t(mapthing_t *str)
 static void saveg_read_actionf_t(actionf_t *str)
 {
     // actionf_p1 acp1;
-    str->acp1 = saveg_readp();
+    str->acp1 = (actionf_p1)saveg_readp();
 }
 
 static void saveg_write_actionf_t(actionf_t *str)
@@ -462,7 +462,7 @@ static void saveg_read_mobj_t(mobj_t *str)
     str->angle = saveg_read32();
 
     // spritenum_t sprite;
-    str->sprite = saveg_read_enum();
+    str->sprite = (spritenum_t)saveg_read_enum();
 
     // int frame;
     str->frame = saveg_read32();
@@ -501,7 +501,7 @@ static void saveg_read_mobj_t(mobj_t *str)
     str->validcount = saveg_read32();
 
     // mobjtype_t type;
-    str->type = saveg_read_enum();
+    str->type = (mobjtype_t)saveg_read_enum();
 
     // mobjinfo_t* info;
     str->info = saveg_readp();
@@ -784,7 +784,7 @@ static void saveg_read_player_t(player_t *str)
     str->mo = saveg_readp();
 
     // playerstate_t playerstate;
-    str->playerstate = saveg_read_enum();
+    str->playerstate = (playerstate_t)saveg_read_enum();
 
     // ticcmd_t cmd;
     saveg_read_ticcmd_t(&str->cmd);
@@ -832,10 +832,10 @@ static void saveg_read_player_t(player_t *str)
     }
 
     // weapontype_t readyweapon;
-    str->readyweapon = saveg_read_enum();
+    str->readyweapon = (weapontype_t)saveg_read_enum();
 
     // weapontype_t pendingweapon;
-    str->pendingweapon = saveg_read_enum();
+    str->pendingweapon = (weapontype_t)saveg_read_enum();
 
     // boolean weaponowned[NUMWEAPONS];
     for (i=0; i<NUMWEAPONS; ++i)
@@ -1051,7 +1051,7 @@ static void saveg_read_ceiling_t(ceiling_t *str)
     saveg_read_thinker_t(&str->thinker);
 
     // ceiling_e type;
-    str->type = saveg_read_enum();
+    str->type = (ceiling_e)saveg_read_enum();
 
     // sector_t* sector;
     sector = saveg_read32();
@@ -1124,7 +1124,7 @@ static void saveg_read_vldoor_t(vldoor_t *str)
     saveg_read_thinker_t(&str->thinker);
 
     // vldoor_e type;
-    str->type = saveg_read_enum();
+    str->type = (vldoor_e)saveg_read_enum();
 
     // sector_t* sector;
     sector = saveg_read32();
@@ -1185,7 +1185,7 @@ static void saveg_read_floormove_t(floormove_t *str)
     saveg_read_thinker_t(&str->thinker);
 
     // floor_e type;
-    str->type = saveg_read_enum();
+    str->type = (floor_e)saveg_read_enum();
 
     // boolean crush;
     str->crush = saveg_read32();
@@ -1271,10 +1271,10 @@ static void saveg_read_plat_t(plat_t *str)
     str->count = saveg_read32();
 
     // plat_e status;
-    str->status = saveg_read_enum();
+    str->status = (plat_e)saveg_read_enum();
 
     // plat_e oldstatus;
-    str->oldstatus = saveg_read_enum();
+    str->oldstatus = (plat_e)saveg_read_enum();
 
     // boolean crush;
     str->crush = saveg_read32();
@@ -1283,7 +1283,7 @@ static void saveg_read_plat_t(plat_t *str)
     str->tag = saveg_read32();
 
     // plattype_e type;
-    str->type = saveg_read_enum();
+    str->type = (plattype_e)saveg_read_enum();
 }
 
 static void saveg_write_plat_t(plat_t *str)
@@ -1534,7 +1534,7 @@ boolean P_ReadSaveGameHeader(void)
     if (strcmp(read_vcheck, vcheck) != 0)
 	return false;				// bad version 
 
-    gameskill = saveg_read8();
+    gameskill = (skill_t)saveg_read8();
     gameepisode = saveg_read8();
     gamemap = saveg_read8();
 

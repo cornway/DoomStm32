@@ -458,7 +458,6 @@ void R_InitTextures (void)
 
     int*		maptex;
     int*		maptex2;
-    int*		maptex1;
     
     char		name[9];
     char*		names;
@@ -475,10 +474,6 @@ void R_InitTextures (void)
     int			numtextures2;
 
     int*		directory;
-    
-    int			temp1;
-    int			temp2;
-    int			temp3;
 
     
     // Load the patch names from pnames.lmp.
@@ -498,7 +493,7 @@ void R_InitTextures (void)
     // Load the map texture definitions from textures.lmp.
     // The data is contained in one or two lumps,
     //  TEXTURE1 for shareware, plus TEXTURE2 for commercial.
-    maptex = maptex1 = W_CacheLumpName (DEH_String("TEXTURE1"), PU_STATIC);
+    maptex = W_CacheLumpName (DEH_String("TEXTURE1"), PU_STATIC);
     numtextures1 = LONG(*maptex);
     maxoff = W_LumpLength (W_GetNumForName (DEH_String("TEXTURE1")));
     directory = maptex+1;
@@ -526,11 +521,6 @@ void R_InitTextures (void)
     textureheight = Z_Malloc (numtextures * sizeof(*textureheight), PU_STATIC, 0);
 
     totalwidth = 0;
-    
-    //	Really complex printing shit...
-    temp1 = W_GetNumForName (DEH_String("S_START"));  // P_???????
-    temp2 = W_GetNumForName (DEH_String("S_END")) - 1;
-    temp3 = ((temp2-temp1+63)/64) + ((numtextures+63)/64);
 
     // If stdout is a real console, use the classic vanilla "filling
     // up the box" effect, which uses backspace to "step back" inside
