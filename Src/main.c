@@ -37,6 +37,7 @@
 #include "main.h"
 #include "lcd_main.h"
 #include "audio_main.h"
+#include "usbh_hid.h"
 
 int screen_res_x;
 int screen_res_y;

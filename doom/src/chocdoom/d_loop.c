@@ -115,6 +115,11 @@ static boolean local_playeringame[NET_MAXPLAYERS];
 static int player_class;
 
 
+void I_StartTic (void)
+{
+    I_GetEvent();
+}
+
 // 35 fps clock adjusted by offsetms milliseconds
 
 static int GetAdjustedTime(void)
