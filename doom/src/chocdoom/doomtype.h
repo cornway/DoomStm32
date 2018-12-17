@@ -98,10 +98,10 @@ typedef bool boolean;
 
 #else
 
-typedef uint8_t boolean;
+typedef int boolean;
 #define true 1
 #define false 0
-#define undef (0xff)
+#define undef -1
 
 #endif
 

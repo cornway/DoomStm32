@@ -163,7 +163,7 @@ void D_ProcessEvents (void)
 //
 
 // wipegamestate can be set to -1 to force a wipe on the next draw
-gamestate_t     wipegamestate = GS_DEMOSCREEN;
+gamestate_t     wipegamestate = GS_LEVEL;
 extern  boolean setsizeneeded;
 extern  int             showMessages;
 void R_ExecuteSetViewSize (void);
@@ -199,7 +199,6 @@ void D_Display (void)
     if (gamestate != wipegamestate)
 		{
 		wipe = true;
-		wipe_StartScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
     }
     else
     	wipe = false;
@@ -234,6 +233,8 @@ void D_Display (void)
       case GS_DEMOSCREEN:
 		D_PageDrawer ();
 		break;
+      default:
+        break;
     }
     
     // draw the view directly
@@ -288,7 +289,9 @@ void D_Display (void)
 		V_DrawPatchDirect(viewwindowx + (scaledviewwidth - 68) / 2, y,
 							  (patch_t *)W_CacheLumpName (DEH_String("M_PAUSE"), PU_CACHE));
     }
-
+    if (wipe) {
+        wipe_StartScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
+    }
 
     // menus go directly to the screen
     M_Drawer ();          // menu is drawn even on top of everything
