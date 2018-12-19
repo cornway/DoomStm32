@@ -22,6 +22,9 @@
 
 #include "ff.h"
 
+#define LOAD_SAVE_USE_RAM 1
+
+
 // maximum size of a savegame description
 
 #define SAVESTRINGSIZE 24

@@ -141,12 +141,17 @@ draw_cross ()
 }
 
 extern gamestate_t     gamestate;
+extern boolean         automapactive;
 
 void I_UpdateNoBlit (void)
 {
-    if (gamestate == GS_LEVEL) {
-        draw_cross();
+    if (gamestate != GS_LEVEL) {
+        return;
     }
+    if (automapactive) {
+        return;
+    }
+    draw_cross();
 }
 
 #if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)

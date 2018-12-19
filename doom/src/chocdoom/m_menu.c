@@ -58,6 +58,7 @@
 
 #include "m_menu.h"
 #include "d_iwad.h"
+#include "p_saveg.h"
 
 
 extern patch_t*		hu_font[HU_FONTSIZE];
@@ -544,6 +545,12 @@ void M_DrawNewLevel (void)
 // M_ReadSaveStrings
 //  read the strings from the savegame files
 //
+#if LOAD_SAVE_USE_RAM
+void M_ReadSaveStrings(void)
+{
+    LoadMenu[0].status = 1;
+}
+#else
 void M_ReadSaveStrings(void)
 {
 #if ORIGCODE
@@ -581,11 +588,13 @@ void M_ReadSaveStrings(void)
 		LoadMenu[i].status = 1;
     }
 }
-
+#endif /*LOAD_SAVE_USE_RAM*/
 
 //
 // M_LoadGame & Cie.
 //
+extern boolean game_saved_in_ram;
+extern char saveg_level_name[80 + 1];
 void M_DrawLoad(void)
 {
     int             i;
@@ -593,7 +602,13 @@ void M_DrawLoad(void)
                           (patch_t *)W_CacheLumpName(DEH_String("M_LOADG"), PU_CACHE));
 	if (p_saveg_use_ram) {
         M_DrawSaveLoadBorder(LoadDef.x,LoadDef.y);
-    	M_WriteText(LoadDef.x,LoadDef.y, "QUICK LOAD");
+        if (game_saved_in_ram) {
+            char buf[80 + 1];
+            snprintf(buf, sizeof(buf), "Map : %s", saveg_level_name);
+            M_WriteText(LoadDef.x,LoadDef.y, buf);
+        } else {
+    	    M_WriteText(LoadDef.x,LoadDef.y, "SLOT EMPTY");
+        }
     } else {
         for (i = 0;i < load_end; i++)
         {

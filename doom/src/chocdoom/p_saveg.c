@@ -32,6 +32,7 @@
 #include "g_game.h"
 #include "m_misc.h"
 #include "r_state.h"
+#include "hu_lib.h"
 
 #include "ff.h"
 
@@ -82,7 +83,6 @@ char *P_SaveGameFile(int slot)
 }
 
 // Endian-safe integer read/write functions
-#define LOAD_SAVE_USE_RAM 1
 #define SAVEGAME_BUF_LIMIT (1024 * 128) /**/
 static uint8_t load_begin = 0;
 static uint8_t *save_buf = NULL;
@@ -90,6 +90,9 @@ static uint8_t *load_buf = NULL;
 static uint32_t save_size = 0;
 static uint32_t load_pos = 0;
 static uint32_t load_size = 0;
+boolean game_saved_in_ram = false;
+char saveg_level_name[80 + 1];
+extern hu_textline_t	w_title;
 
 #if LOAD_SAVE_USE_RAM
 int8_t p_saveg_use_ram = 1;
@@ -175,6 +178,8 @@ static void P_SaveEnd ()
     save_buf = NULL;
 #endif
     write8_handle = saveg_write8_file;
+    snprintf(saveg_level_name, sizeof(saveg_level_name), "%s", w_title.l);
+    game_saved_in_ram = true;
     music_resume();
 }
 
