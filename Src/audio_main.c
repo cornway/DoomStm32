@@ -779,10 +779,9 @@ static void mus_play (uint8_t idx)
     int32_t size = 0;
     uint8_t vol = music_get_volume() << 1;
     uint16_t *buf = (uint16_t *)music_get_next_chunk(&size);
-    if (buf == NULL)
-        return;
-
-    mix_mus_to_master(dest, &buf, &vol, size);
+    if (buf) {
+        mix_mus_to_master(dest, &buf, &vol, size);
+    }
     bufclr[idx] = 0;
 }
 
