@@ -759,7 +759,7 @@ A_FireCGun
     P_SetMobjState (player->mo, S_PLAY_ATK2);
     DecreaseAmmo(player, weaponinfo[player->readyweapon].ammo, 1);
 
-    new_state = weaponinfo[player->readyweapon].flashstate + (int)psp->state - (int)&states[S_CHAIN1];
+    new_state = weaponinfo[player->readyweapon].flashstate + psp->state - &states[S_CHAIN1];
     P_SetPsprite (player,
 		  ps_flash, (statenum_t)new_state);
 
