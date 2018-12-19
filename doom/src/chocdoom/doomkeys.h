@@ -92,6 +92,8 @@
 #define KEYP_PERIOD     0
 #define KEYP_EQUALS     KEY_EQUALS
 #define KEYP_ENTER      KEY_ENTER
+#define KEY_WEAPON_ROR  '>'
+#define KEY_WEAPON_ROL  '<'
 
 #endif          // __DOOMKEYS__
 

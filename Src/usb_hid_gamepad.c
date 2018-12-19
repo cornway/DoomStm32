@@ -3,6 +3,7 @@
 #include "usbh_conf.h"
 #include "usbh_core.h"
 #include "usbh_hid.h"
+#include "input_main.h"
 
 #define UP_DOWN_MASK    0x0000ff00
 #define UP_DOWN_GPOS    8
@@ -51,6 +52,35 @@ enum {
     K_MAX = 14,
 };
 
+static const struct usb_gamepad_to_kbd_map gamepad_to_kbd_map[] =
+{
+    [K_UP]      = {KEY_UPARROW,       PAD_LOOK_CONTROL | PAD_LOOK_UP, 0, 0, 0},
+    [K_DOWN]    = {KEY_DOWNARROW,     PAD_LOOK_CONTROL, 0, 0, 0},
+    [K_LEFT]    = {KEY_LEFTARROW,     PAD_LOOK_CONTROL | PAD_LOOK_LEFT, 0, 0, 0},
+    [K_RIGHT]   = {KEY_RIGHTARROW,    PAD_LOOK_CONTROL | PAD_LOOK_LEFT, 0, 0, 0},
+    [K_K1]      = {KEY_TAB,           PAD_FREQ_LOW, 0, 0, 0},
+    [K_K2]      = {KEY_USE,           0, 0, 0, 0},
+    [K_K3]      = {KEY_FIRE,          0, 0, 0, 0},
+    [K_K4]      = {KEY_RSHIFT,        PAD_FREQ_LOW | PAD_SPEC_BM, 0, 0, 0},
+    [K_BL]      = {KEY_STRAFE_L,      0, 0, 0, 0},
+#if GAMEPAD_USE_FLYLOOK
+    [K_BR]      = {KEY_WEAPON_ROL,    PAD_SET_FLYLOOK, 0, 0, 0},
+#else
+    [K_BR]      = {KEY_WEAPON_ROL,    PAD_FREQ_LOW, 0, 0, 0},
+#endif
+    [K_TL]      = {KEY_STRAFE_R,      0, 0, 0, 0},
+    [K_TR]      = {KEY_WEAPON_ROR,    PAD_FREQ_LOW, 0, 0, 0},
+    [K_START]   = {KEY_ENTER,         0, 0, 0, 0},
+    [K_SELECT]  = {KEY_ESCAPE,        PAD_FREQ_LOW, 0, 0, 0},
+};
+
+const struct usb_gamepad_to_kbd_map *
+get_gamepad_to_kbd_map (uint8_t *keys_cnt)
+{
+    *keys_cnt = sizeof(gamepad_to_kbd_map) / sizeof(gamepad_to_kbd_map[0]);
+    return gamepad_to_kbd_map;
+}
+
 static USBH_HandleTypeDef hUSBHost;
 static uint32_t gamepad_data[2];
 uint64_t gamepad_data_ev;
@@ -76,6 +106,7 @@ static void USBH_UserProcess(USBH_HandleTypeDef * phost, uint8_t id);
 USBH_StatusTypeDef USBH_HID_GamepadInit(USBH_HandleTypeDef *phost);
 
 
+
 void gamepad_init (void)
 {
     USBH_Init(&hUSBHost, USBH_UserProcess, 0);
@@ -92,7 +123,7 @@ void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 
 }
 
-int gamepad_read (int8_t *pads, uint8_t *pads_cnt)
+int gamepad_read (int8_t *pads)
 {
     uint32_t nav_keys;
     uint32_t act_keys;
@@ -110,7 +141,6 @@ int gamepad_read (int8_t *pads, uint8_t *pads_cnt)
     if ((gamepad_data_ev == 0) && (needs_handle_cnt == 0)) {
         return -1;
     }
-    *pads_cnt = K_MAX;
     nav_keys = gamepad_data_ev & 0xffffffff;
     act_keys = (gamepad_data_ev >> 32) & 0xffffffff;
 

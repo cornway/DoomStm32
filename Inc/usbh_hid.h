@@ -34,7 +34,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usbh_core.h"
 #include "usbh_hid_mouse.h"
-#include "usbh_hid_keybd.h"
  
 /** @addtogroup USBH_LIB
   * @{
@@ -325,6 +324,7 @@ uint16_t  fifo_read(FIFO_TypeDef * f, void * buf, uint16_t  nbytes);
 
 uint16_t  fifo_write(FIFO_TypeDef * f, const void * buf, uint16_t  nbytes);
 
+void gamepad_init (void);
 /**
   * @}
   */ 
