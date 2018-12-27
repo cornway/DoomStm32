@@ -158,6 +158,7 @@ extern fixed_t         sidemove[2];
 extern fixed_t         angleturn[3];    // + slow turn 
 extern fixed_t         angleturn_prev[3];
 
+int play_startup_demo = 0;
 
 static int *weapon_keys[] = {
     &key_weapon1,
@@ -1952,7 +1953,10 @@ void G_BeginRecording (void)
 char*	defdemoname; 
  
 void G_DeferedPlayDemo (char* name) 
-{ 
+{
+    if (!play_startup_demo){
+        return;
+    }
     defdemoname = name; 
     gameaction = ga_playdemo; 
 } 

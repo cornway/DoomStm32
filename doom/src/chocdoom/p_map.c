@@ -1012,7 +1012,6 @@ boolean PTR_ShootTraverse (intercept_t* in)
 	// Spawn bullet puffs.
 	if (shootthing->player->readyweapon == wp_fist) {
         S_StartSound(NULL, sfx_punch);
-        P_SpawnBlood (x,y,z, 1);
     }
 	P_SpawnPuff (x,y,z);
 	

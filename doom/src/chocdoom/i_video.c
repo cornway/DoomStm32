@@ -113,11 +113,11 @@ void I_StartFrame (void)
 
 }
 
-#define CROSS_R 255
+#define CROSS_R 200
 #define CROSS_G 200
-#define CROSS_B 0
-#define CROSS_W 10
-#define CROSS_H 10
+#define CROSS_B 200
+#define CROSS_W 6
+#define CROSS_H 6
 
 extern int cross_x;
 extern int cross_y;
@@ -142,13 +142,15 @@ draw_cross ()
 
 extern gamestate_t     gamestate;
 extern boolean         automapactive;
+extern boolean         menuactive;
 
 void I_UpdateNoBlit (void)
 {
     if (gamestate != GS_LEVEL) {
         return;
     }
-    if (automapactive) {
+    if (automapactive ||
+        menuactive) {
         return;
     }
     draw_cross();
