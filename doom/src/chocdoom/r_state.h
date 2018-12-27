@@ -110,6 +110,7 @@ extern angle_t		xtoviewangle[SCREENWIDTH+1];
 //extern fixed_t		finetangent[FINEANGLES/2];
 
 extern fixed_t		rw_distance;
+extern fixed_t		rw_distance_prev;
 extern angle_t		rw_normalangle;
 extern fixed_t      project_rw_dist;
 

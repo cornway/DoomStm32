@@ -60,6 +60,7 @@ extern int		rw_stopx;
 extern angle_t		rw_centerangle;
 extern fixed_t		rw_offset;
 extern fixed_t		rw_distance;
+extern fixed_t		rw_distance_prev;
 extern fixed_t		rw_scale;
 extern fixed_t		rw_scalestep;
 extern fixed_t		rw_midtexturemid;
@@ -86,7 +87,7 @@ extern short*		maskedtexturecol;
 
 extern lighttable_t**	walllights;
 
-
+extern boolean render_on_distance;
 //
 // R_RenderMaskedSegRange
 //
@@ -194,6 +195,38 @@ R_RenderMaskedSegRange
 #define HEIGHTBITS		12
 #define HEIGHTUNIT		(1<<HEIGHTBITS)
 
+extern byte*		ylookup[MAXHEIGHT];
+extern int		columnofs[MAXWIDTH];
+
+int rw_scale_var = 0;
+
+void (*render_col) (void);
+
+static void R_CopySeg (
+    int dest,
+    int src,
+    boolean floor,
+    boolean ceiling)
+{
+    if (midtexture || bottomtexture || markfloor) {
+        floorclip[dest] = floorclip[src];
+    }
+    if (floor) {
+        floorplane->top[dest] = floorplane->top[src];
+        floorplane->bottom[dest] = floorplane->bottom[src];
+    }
+    if (ceiling) {
+        ceilingplane->top[dest] = ceilingplane->top[src];
+        ceilingplane->bottom[dest] = ceilingplane->bottom[src];
+    }
+    if (midtexture || toptexture || markceiling) {
+        ceilingclip[dest] = ceilingclip[src];
+    }
+    if (maskedtexture) {
+        maskedtexturecol[dest] = maskedtexturecol[src];
+    }
+}
+
 void R_RenderSegLoop (void)
 {
     angle_t		angle;
@@ -204,14 +237,30 @@ void R_RenderSegLoop (void)
     fixed_t		texturecolumn;
     int			top;
     int			bottom;
+    boolean col_done;
+    boolean _markfloor = false, _markceiling = false;
+
+    rw_render_range = R_RANGE_NEAREST;
+    R_SetRwRange(rw_distance);
 
     for ( ; rw_x < rw_stopx ; rw_x++) {
         short temp_ceil = ceilingclip[rw_x]+1;
         short temp_floor = floorclip[rw_x]-1;
-    
+
+        col_done = false;
+        _markfloor = false;
+        _markceiling = false;
+
+        if (render_on_distance) {
+            byte downscale = 1 << rw_render_downscale[rw_render_range].shift;
+            rw_render_range_t next = rw_render_downscale[rw_render_range].next;
+            if (rw_x + downscale >= rw_stopx) {
+                rw_render_range = next;
+            }
+        }
+
         // mark floor / ceiling areas
         yl = (topfrac+HEIGHTUNIT-1)>>HEIGHTBITS;
-
         // no space above wall?
         if (yl < temp_ceil)
             yl = temp_ceil;
@@ -226,6 +275,7 @@ void R_RenderSegLoop (void)
             if (top <= bottom) {
                 ceilingplane->top[rw_x] = top;
                 ceilingplane->bottom[rw_x] = bottom;
+                _markceiling = true;
             }
         }
         yh = bottomfrac>>HEIGHTBITS;
@@ -242,9 +292,9 @@ void R_RenderSegLoop (void)
             {
                 floorplane->top[rw_x] = top;
                 floorplane->bottom[rw_x] = bottom;
+                _markfloor = true;
             }
         }
-
         // texturecolumn and lighting are independent of wall tiers
         if (segtextured)
         {
@@ -277,6 +327,7 @@ void R_RenderSegLoop (void)
             dc_texturemid = rw_midtexturemid;
             dc_source = R_GetColumn(midtexture,texturecolumn);
             colfunc ();
+            col_done = true;
             ceilingclip[rw_x] = viewheight;
             floorclip[rw_x] = -1;
         } else {
@@ -296,6 +347,7 @@ void R_RenderSegLoop (void)
                     dc_texturemid = rw_toptexturemid;
                     dc_source = R_GetColumn(toptexture,texturecolumn);
                     colfunc ();
+                    col_done = true;
                     ceilingclip[rw_x] = mid;
                 }
                 else
@@ -322,6 +374,7 @@ void R_RenderSegLoop (void)
                     dc_source = R_GetColumn(bottomtexture,
                                 texturecolumn);
                     colfunc ();
+                    col_done = true;
                     floorclip[rw_x] = mid;
                 }
                 else
@@ -335,6 +388,18 @@ void R_RenderSegLoop (void)
                 // save texturecol
                 //  for backdrawing of masked mid texture
                 maskedtexturecol[rw_x] = texturecolumn;
+            }
+        }
+        if (render_on_distance && col_done) {
+            byte downscale = 1 << rw_render_downscale[rw_render_range].shift;
+            uint8_t i = downscale - 1;
+            while (i) {
+                rw_x++;
+                R_CopySeg(rw_x, rw_x - 1, _markfloor, _markceiling);
+                rw_scale += rw_scalestep ;
+                topfrac += topstep;
+                bottomfrac += bottomstep;
+                i--;
             }
         }
         rw_scale += rw_scalestep;
@@ -451,7 +516,11 @@ R_StoreWallRange
     distangle = ANG90 - offsetangle;
     hyp = R_PointToDist (curline->v1->x, curline->v1->y);
     sineval = finesine[distangle>>ANGLETOFINESHIFT];
-    rw_distance = FixedMul (hyp, sineval);
+    rw_distance = FixedMul (hyp, sineval);//
+    if (abs(rw_distance_prev - rw_distance) > 200) {
+        //R_ExecuteSetViewSize();
+    }
+    rw_distance_prev = 0;
     project_rw_dist = FixedDiv(projection, rw_distance);
 		
 	

@@ -276,9 +276,14 @@ typedef struct mobj_s
 
     // Thing being chased/attacked for tracers.
     struct mobj_s*	tracer;	
+
+    uint8_t flags2;
     
 } mobj_t;
 
+
+#define MOBJ_KILLED_BM (0x1)
+#define MOBJ_MISSILE_BM (0x2)
 
 
 #endif

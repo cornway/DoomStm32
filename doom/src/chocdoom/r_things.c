@@ -435,8 +435,19 @@ R_DrawVisSprite
     int			texturecolumn;
     fixed_t		frac;
     patch_t*		patch;
-	
-	
+
+    rw_render_range = R_RANGE_NEAREST;
+    R_SetRwRange(vis->distance);
+    if (rw_render_range) {
+        render_on_distance =  true;
+    }
+    if (detailshift) {
+        render_on_distance =  false;
+        rw_render_range = R_RANGE_NEAREST;
+    }
+    if (rw_render_range == R_RANGE_INVIS) {
+        return;
+    }
     patch = W_CacheLumpNum (vis->patch+firstspritelump, PU_CACHE);
 
     dc_colormap = vis->colormap;
@@ -458,19 +469,31 @@ R_DrawVisSprite
     frac = vis->startfrac;
     spryscale = vis->scale;
     sprtopscreen = centeryfrac - FixedMul(dc_texturemid,spryscale);
-	
+
     for (dc_x=vis->x1 ; dc_x<=vis->x2 ; dc_x++, frac += vis->xiscale)
     {
-	texturecolumn = frac>>FRACBITS;
+        texturecolumn = frac>>FRACBITS;
 #ifdef RANGECHECK
-	if (texturecolumn < 0 || texturecolumn >= SHORT(patch->width))
-	    I_Error ("R_DrawSpriteRange: bad texturecolumn");
+        if (texturecolumn < 0 || texturecolumn >= SHORT(patch->width))
+            I_Error ("R_DrawSpriteRange: bad texturecolumn");
 #endif
-	column = (column_t *) ((byte *)patch +
-			       LONG(patch->columnofs[texturecolumn]));
-	R_DrawMaskedColumn (column);
-    }
+        column = (column_t *) ((byte *)patch +
+                LONG(patch->columnofs[texturecolumn]));
+        R_DrawMaskedColumn (column);
+        if (render_on_distance) {
+            byte downscale = 1 << rw_render_downscale[rw_render_range].shift;
+            rw_render_range_t next_range = rw_render_downscale[rw_render_range].next;
+            if (dc_x + downscale > vis->x2) {
+                rw_render_range = next_range;
+            } else {
+                downscale--;
+                dc_x += downscale;
+                frac += vis->xiscale * downscale;
+            }
+        }
 
+    }
+    render_on_distance = false;
     colfunc = basecolfunc;
 }
 
@@ -579,6 +602,11 @@ void R_ProjectSprite (mobj_t* thing)
     vis = R_NewVisSprite ();
     vis->mobjflags = thing->flags;
     vis->scale = xscale<<detailshift;
+    if (thing->flags2 & (MOBJ_KILLED_BM | MOBJ_MISSILE_BM)) {
+        vis->distance = tz;
+    } else {
+        vis->distance = -tz;
+    }
     vis->gx = thing->x;
     vis->gy = thing->y;
     vis->gz = thing->z;
@@ -814,7 +842,7 @@ void R_DrawPSprite (pspdef_t* psp)
 	// local light
 	vis->colormap = spritelights[MAXLIGHTSCALE-1];
     }
-	
+	vis->distance = -1;
     R_DrawVisSprite (vis, vis->x1, vis->x2);
 }
 
@@ -1099,8 +1127,9 @@ void R_DrawMasked (void)
     
     // draw the psprites on top of everything
     //  but does not draw on side views
-    if (!viewangleoffset)		
-	R_DrawPlayerSprites ();
+    if (!viewangleoffset)		{
+	    R_DrawPlayerSprites ();
+    }
 }
 
 

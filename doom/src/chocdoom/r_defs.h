@@ -356,6 +356,8 @@ typedef struct vissprite_s
     fixed_t		startfrac;
     
     fixed_t		scale;
+
+    fixed_t     distance;
     
     // negative if flipped
     fixed_t		xiscale;	

@@ -524,6 +524,7 @@ P_SpawnMobj
     mobj->height = info->height;
     mobj->flags = info->flags;
     mobj->health = info->spawnhealth;
+    mobj->flags2 = 0;
 
     if (gameskill != sk_nightmare)
 	mobj->reactiontime = info->reactiontime;
@@ -992,7 +993,8 @@ P_SpawnMissile
     th = P_SpawnMobj (source->x,
 		      source->y,
 		      source->z + 4*8*FRACUNIT, type);
-    
+
+    th->flags2 = MOBJ_MISSILE_BM;
     if (th->info->seesound)
 	S_StartSound (th, th->info->seesound);
 

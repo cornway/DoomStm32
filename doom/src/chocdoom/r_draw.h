@@ -54,6 +54,9 @@ void 	R_DrawFuzzColumnLow (void);
 void	R_DrawTranslatedColumn (void);
 void	R_DrawTranslatedColumnLow (void);
 
+void R_CopyColumn (int dest, int src);
+
+
 void
 R_VideoErase
 ( unsigned	ofs,
@@ -103,6 +106,29 @@ void R_FillBackScreen (void);
 // If the view size is not full screen, draws a border around it.
 void R_DrawViewBorder (void);
 
+#define R_DISTANCE_NEAR (200 * FRACUNIT)
+#define R_DISTANCE_MID  (500 * FRACUNIT)
+#define R_DISTANCE_FAR  (1000 * FRACUNIT)
+#define R_DISTANCE_INVIS (1200 * FRACUNIT)
 
+
+typedef enum {
+    R_RANGE_NEAREST = 0,
+    R_RANGE_NEAR,
+    R_RANGE_MID,
+    R_RANGE_FAR,
+    R_RANGE_INVIS,
+    R_RANGE_MAX,
+} rw_render_range_t;
+
+typedef struct {
+    byte shift;
+    rw_render_range_t next;
+} rw_range_attr;
+
+void R_SetRwRange (fixed_t distance);
+
+extern rw_range_attr rw_render_downscale[R_RANGE_MAX];
+extern rw_render_range_t rw_render_range;
 
 #endif

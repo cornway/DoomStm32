@@ -42,4 +42,7 @@
 #include "r_things.h"
 #include "r_draw.h"
 
+
+extern boolean render_on_distance;
+
 #endif		// __R_LOCAL__

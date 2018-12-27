@@ -59,6 +59,8 @@ int			viewangleoffset;
 int			validcount = 1;		
 
 
+boolean render_on_distance = false;
+
 lighttable_t*		fixedcolormap;
 lighttable_t**	walllights;
 
@@ -148,11 +150,14 @@ int		rw_angle1;
 //
 // regular wall
 //
+rw_render_range_t rw_render_range = R_RANGE_NEAR;
+
 int		rw_x;
 int		rw_stopx;
 angle_t		rw_centerangle;
 fixed_t		rw_offset;
 fixed_t		rw_distance;
+fixed_t		rw_distance_prev;
 fixed_t		rw_scale;
 fixed_t		rw_scalestep;
 fixed_t		rw_midtexturemid;

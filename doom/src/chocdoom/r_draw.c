@@ -48,7 +48,7 @@
 //  and we need only the base address,
 //  and the total size == width*height*depth/8.,
 //
-
+extern int render_on_distance;
 
 extern byte*		viewimage; 
 extern int		viewwidth;
@@ -95,13 +95,44 @@ extern int			dccount;
 // Thus a special case loop for very fast rendering can
 //  be used. It has also been used with Wolfenstein 3D.
 // 
+
+rw_range_attr rw_render_downscale[R_RANGE_MAX] =
+{
+    [R_RANGE_NEAREST]   = {0, R_RANGE_NEAREST},
+    [R_RANGE_NEAR]      = {1, R_RANGE_NEAREST},
+    [R_RANGE_MID]       = {2, R_RANGE_NEAR},
+    [R_RANGE_FAR]       = {2, R_RANGE_MID},
+    [R_RANGE_INVIS]     = {2, R_RANGE_FAR},
+};
+
+void R_SetRwRange (fixed_t distance)
+{
+    if (distance > 0) {
+        if (distance > R_DISTANCE_INVIS) {
+            rw_render_range = R_RANGE_INVIS;
+        } else if (distance > R_DISTANCE_FAR) {
+            rw_render_range = R_RANGE_FAR;
+        } else if (distance > R_DISTANCE_MID) {
+           rw_render_range = R_RANGE_MID;
+        } else if (distance > R_DISTANCE_NEAR) {
+           rw_render_range = R_RANGE_NEAR;
+        }
+    } else if (distance < 0) {
+        distance = -distance;
+        if (distance > R_DISTANCE_INVIS) {
+            rw_render_range = R_RANGE_INVIS;
+        }
+    }
+}
+
 void R_DrawColumn (void) 
 { 
     int			count; 
     byte*		dest; 
     float		frac;
-    float		fracstep;	 
- 
+    float		fracstep;
+    boolean     low_detail = render_on_distance ? true : false;
+
     count = dc_yh - dc_yl; 
 
     // Zero length, column does not exceed a pixel.
@@ -130,16 +161,104 @@ void R_DrawColumn (void)
     // Inner loop that does the actual texture mapping,
     //  e.g. a DDA-lile scaling.
     // This is as fast as it gets.
-    do 
-    {
-	// Re-map color indices from wall texture column
-	//  using a lighting/special effects LUT.
-	*dest = dc_colormap[dc_source[(int)frac & 0x7f]];
-	
-	dest += SCREENWIDTH; 
-	frac += fracstep;
-	
-    } while (count--); 
+    if (render_on_distance) {
+        uint32_t c;
+        byte *dest2 = dest + SCREENWIDTH;
+        byte *dest3 = dest2 + SCREENWIDTH;
+        byte *dest4 = dest3 + SCREENWIDTH;
+        switch (rw_render_range) {
+            case R_RANGE_INVIS:
+            case R_RANGE_FAR:
+                c = dc_colormap[dc_source[(int)frac & 0x7f]];
+                c = (c << 8) | c;
+                c = (c << 16) | c;
+                if (count >= 4) {
+                    do  {
+                        *(uint32_t *)dest = c;
+                        *(uint32_t *)dest2 = c;
+                        *(uint32_t *)dest3 = c;
+                        *(uint32_t *)dest4 = c;
+                        dest += SCREENWIDTH * 4;
+                        dest2 += SCREENWIDTH * 4;
+                        dest3 += SCREENWIDTH * 4;
+                        dest4 += SCREENWIDTH * 4;
+                        count -= 4;
+                    } while (count > 0);
+                }
+            break;
+            case R_RANGE_MID:
+                fracstep += fracstep;
+                fracstep += fracstep;
+                if (count >= 4) {
+                    do  {
+                        // Re-map color indices from wall texture column
+                        //  using a lighting/special effects LUT.
+                        c = dc_colormap[dc_source[(int)frac & 0x7f]];
+                        c = (c << 8) | c;
+                        c = (c << 16) | c;
+                        *(uint32_t *)dest = c;
+                        *(uint32_t *)dest2 = c;
+                        *(uint32_t *)dest3 = c;
+                        *(uint32_t *)dest4 = c;
+                        dest += SCREENWIDTH * 4;
+                        dest2 += SCREENWIDTH * 4;
+                        dest3 += SCREENWIDTH * 4;
+                        dest4 += SCREENWIDTH * 4;
+                        frac += fracstep;
+                        count -= 4;
+                    } while (count > 0);
+                }
+            break;
+            case R_RANGE_NEAR:
+                fracstep += fracstep;
+                if (count >= 2) {
+                    do  {
+                        // Re-map color indices from wall texture column
+                        //  using a lighting/special effects LUT.
+                        c = dc_colormap[dc_source[(int)frac & 0x7f]];
+                        c = (c << 8) | c;
+                        *(uint16_t *)dest = c;
+                        *(uint16_t *)dest2 = c;
+                        dest += SCREENWIDTH * 2;
+                        dest2 += SCREENWIDTH * 2;
+                        frac += fracstep;
+                        count -= 2;
+                    } while (count > 0);
+                }
+            break;
+            default : low_detail = false;
+            break;
+        }
+    }
+    if (low_detail) {
+        uint32_t c = dc_colormap[dc_source[(int)frac & 0x7f]];
+        c = (c << 8) | c;
+        c = (c << 16) | c;
+        while (count-- >= 0) {
+            switch(rw_render_range) {
+                case R_RANGE_INVIS:
+                case R_RANGE_FAR:
+                    c = 0;
+                case R_RANGE_MID:
+                    *(uint32_t *)dest = c;
+                    break;
+                case R_RANGE_NEAR:
+                    *(uint16_t *)dest = c;
+                    break;
+                default: *dest = c;
+            }
+            dest += SCREENWIDTH;
+        }
+    } else {
+        while (count-- >= 0) {
+            // Re-map color indices from wall texture column
+            //  using a lighting/special effects LUT.
+            *dest = dc_colormap[dc_source[(int)frac & 0x7f]];
+
+            dest += SCREENWIDTH;
+            frac += fracstep;
+        }
+    }
 } 
 
 

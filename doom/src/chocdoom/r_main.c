@@ -581,6 +581,8 @@ void R_ExecuteSetViewSize (void)
     int		level;
     int		startmap; 	
     int tempCentery;
+    fixed_t _detailshift = setdetail;
+    detailshift = _detailshift;
 
     setsizeneeded = false;
 
@@ -594,10 +596,12 @@ void R_ExecuteSetViewSize (void)
 	scaledviewwidth = setblocks*32;
 	viewheight = (setblocks*168/10)&~7;
     }
-    
-    detailshift = setdetail;
-    viewwidth = scaledviewwidth>>detailshift;
-	
+    if (rw_distance > 200 * FRACUNIT) {
+        //_detailshift = 1;
+    } else if (rw_distance > 400 * FRACUNIT) {
+        //_detailshift = 2;
+    }
+    viewwidth = scaledviewwidth>>_detailshift;
     centerx = viewwidth/2;
     centerxfrac = centerx<<FRACBITS;
     projection = centerxfrac;
@@ -606,7 +610,7 @@ void R_ExecuteSetViewSize (void)
 
     if (!detailshift)
     {
-	colfunc = basecolfunc = R_DrawColumn;
+    colfunc = basecolfunc = R_DrawColumn;
     fuzzcolfunc = R_DrawFuzzColumn;
 	transcolfunc = R_DrawTranslatedColumn;
 	spanfunc = R_DrawSpan;
@@ -647,7 +651,7 @@ void R_ExecuteSetViewSize (void)
         centeryfrac = centery << FRACBITS;
         for (i = 0; i < viewheight; i++)
         {
-            yslope[i] = FixedDiv((viewwidth << detailshift) / 2 * FRACUNIT,
+            yslope[i] = FixedDiv((viewwidth << _detailshift) / 2 * FRACUNIT,
                                  abs(((i - centery) << FRACBITS) +
                                      FRACUNIT / 2));
         }
@@ -664,9 +668,10 @@ void R_ExecuteSetViewSize (void)
     for (i=0 ; i< LIGHTLEVELS ; i++)
     {
 	startmap = ((LIGHTLEVELS-1-i)*2)*NUMCOLORMAPS/LIGHTLEVELS;
+    int level_mul = SCREENWIDTH/(viewwidth<<_detailshift)/DISTMAP;
 	for (j=0 ; j<MAXLIGHTSCALE ; j++)
 	{
-	    level = startmap - j*SCREENWIDTH/(viewwidth<<detailshift)/DISTMAP;
+	    level = startmap - j*level_mul;
 	    
 	    if (level < 0)
 		level = 0;
