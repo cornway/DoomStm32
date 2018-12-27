@@ -328,7 +328,7 @@ int music_stop (void)
 
 int music_set_vol (uint8_t vol)
 {
-    mus.volume = vol & MAX_VOL;
+    mus.volume = vol;
     return 0;
 }
 

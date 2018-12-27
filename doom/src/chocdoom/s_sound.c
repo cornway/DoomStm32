@@ -101,6 +101,8 @@ static boolean mus_paused;
 
 uint8_t mus_playing = 0;
 
+int mus_playing_num = 0;
+
 // Number of channels to use
 
 int snd_channels = 8;
@@ -601,8 +603,12 @@ void S_StartMusic(int m_id)
 
 void S_ChangeMusic(int musicnum, int looping)
 {
+    if (mus_playing && (mus_playing_num == musicnum)) {
+        return;
+    }
     S_StopMusic();
     music_play_song_num(musicnum, looping);
+    mus_playing_num = musicnum;
     mus_playing = 1;
 #if 0
     musicinfo_t *music = NULL;
