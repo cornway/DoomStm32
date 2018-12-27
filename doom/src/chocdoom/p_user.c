@@ -174,15 +174,18 @@ void P_MovePlayer (player_t* player)
         if (look == TOCENTER)
         {
             player->centering = true;
+            player->lookdir = 0;
         }
         else
         {
             look = look  * 5;
             player->lookdir += look * FRACUNIT;
-            if (player->lookdir > 90 * FRACUNIT||
-                player->lookdir < -110 * FRACUNIT)
+            if (player->lookdir > 60 * FRACUNIT)
             {
-                player->lookdir -= look;
+                player->lookdir = 60 * FRACUNIT;
+            } else if (player->lookdir < -60 * FRACUNIT)
+            {
+                player->lookdir = -60 * FRACUNIT;
             }
         }
     }

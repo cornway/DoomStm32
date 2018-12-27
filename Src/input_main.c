@@ -146,6 +146,8 @@ static int touch_screen_get_key (int x, int y)
 }
 
 extern boolean menuactive;
+extern boolean automapactive;
+extern int followplayer;
 
 #define TSENS_SLEEP_TIME 250
 #define JOY_FREEZE_TIME 150/*ms*/
@@ -154,11 +156,12 @@ static uint32_t joy_freeze_tstamp = 0;
 static uint8_t touch_sensor_freeze_cnt = 0;
 
 
-uint8_t special_toggle = 0;
-uint8_t special_event = 0;
+int8_t function_key_act = -1;
+uint8_t function_key;
 uint8_t special_key = 0;
-uint8_t lookfly = 0;
+uint8_t lookfly_act = 0;
 uint8_t lookfly_key = 0;
+uint8_t lookfly_key_trig = 0;
 
 static inline int
 is_joy_freezed ()
@@ -184,22 +187,25 @@ post_key_up (uint8_t key)
 }
 
 static inline void
-set_lookfly_key (uint8_t flags, int8_t action, uint8_t key)
+post_key_down (uint8_t key)
+{
+    event_t event = {ev_keydown, key, -1, -1, -1};
+    D_PostEvent(&event);
+}
+
+static inline uint8_t
+get_lookfly_key (uint8_t flags)
 {
     if (flags & PAD_LOOK_CONTROL) {
-        if (!action) {
-            post_key_up(key);
-        }
         if (flags & PAD_LOOK_UP) {
-            key = KEY_PGDN;
-        } else if (flags & PAD_LOOK_LEFT) {
-            key = KEY_END;
-        } else {
-            key = KEY_DEL;
+            return KEY_PGDN;
         }
-        lookfly_key = key;
-        lookfly = 0;
+        if (flags & PAD_LOOK_DOWN) {
+            return KEY_DEL;
+        }
+        return KEY_END;
     }
+    return 0;
 }
 
 static inline void
@@ -210,49 +216,62 @@ post_event (
 {
     uint8_t key = kbd_key->key;
     uint8_t flags = kbd_key->flags;
-    evtype_t type = ev_keyup;
+    boolean post_key = false;
 
     if (action) {
-        if (flags & PAD_SPEC_BM) {
-            special_toggle = 1 - special_toggle;
-            special_event = 1 + special_toggle;
-            special_key = key;
-            goto skip_post;
+        if (flags & PAD_FUNCTION) {
+            function_key_act = 2;
         } else if (flags & PAD_SET_FLYLOOK) {
-            lookfly = 1;
-            lookfly_key = 0;
-            goto skip_post;
+            lookfly_act = 1;
+        } else {
+            if (lookfly_act > 0) {
+                lookfly_key = get_lookfly_key(flags);
+                if (lookfly_key) {
+                    lookfly_key_trig = key;
+                    key = lookfly_key;
+                } else {
+                    lookfly_act = 0;
+                }
+            } else if (function_key_act > 0) {
+                if (flags & PAD_LOOK_CONTROL) {
+                    if (function_key && (function_key != KEY_RSHIFT)) {
+                        post_key_up(KEY_RSHIFT);
+                    }
+                    function_key = KEY_RSHIFT;
+                    post_key_down(KEY_RSHIFT);
+                }
+                function_key_act--;
+            } else if (automapactive) {
+                if (key == KEY_STRAFE_L) {
+                    key = KEY_MAP_ZOOM_IN;
+                } else if (key == KEY_STRAFE_R) {
+                    key = KEY_MAP_ZOOM_OUT;
+                } else if (key == KEY_USE) {
+                    followplayer = 1 - followplayer;
+                }
+            }
+            post_key = true;
         }
-        type = ev_keydown;
-    } else {
+    } else if ((flags & PAD_SET_FLYLOOK) || (key == lookfly_key_trig)) {
         post_key_up(lookfly_key);
+        lookfly_act = 0;
         lookfly_key = 0;
+    } else {
+        if (automapactive) {
+            if (key == KEY_STRAFE_L) {
+                key = KEY_MAP_ZOOM_IN;
+            } else if (key == KEY_STRAFE_R) {
+                key = KEY_MAP_ZOOM_OUT;
+            }
+            post_key_up(key);
+        }
     }
-    if (lookfly) {
-        set_lookfly_key(flags, action, key);
+
+    if (post_key) {
+        post_key_down(key);
     }
-    event->data1 = key;
-    event->type = type;
-    D_PostEvent(event);
-skip_post:
     touch_sensor_freeze_cnt = TSENS_SLEEP_TIME;
     set_joy_freeze(flags);
-}
-
-static inline void
-post_special ()
-{
-    event_t event;
-    event.type = ev_keydown;
-    event.data1 = special_key;
-
-    if (special_toggle) {
-        D_PostEvent(&event);
-    } else if (special_event) {
-        event.type = ev_keyup;
-        special_key = 0;
-        D_PostEvent(&event);
-    }
 }
 
 void I_GetEvent (void)
@@ -273,7 +292,7 @@ void I_GetEvent (void)
     } else {
         uint8_t keys_cnt = 0;
         int8_t joy_pads[16];
-        int joy_ret = gamepad_read(joy_pads);;
+        int joy_ret = gamepad_read(joy_pads);
         const struct usb_gamepad_to_kbd_map *kbd_map = get_gamepad_to_kbd_map(&keys_cnt);
 
         /*TODO : (keys_cnt <= N(joy_pads))*/
@@ -281,15 +300,26 @@ void I_GetEvent (void)
             return;
         }
         for (int i = 0; i < keys_cnt; i++) {
+            uint8_t key = kbd_map[i].key;
+
+            if (function_key_act == 0) {
+                post_key_up(function_key);
+                function_key_act--;
+                function_key = 0;
+            }
+
             if (joy_pads[i] >= 0) {
                 post_event(&event, &kbd_map[i], joy_pads[i]);
                 continue;
             }
-            if (touch_sensor_freeze_cnt)
+
+            post_key_up(key);
+
+            if (touch_sensor_freeze_cnt) {
                 touch_sensor_freeze_cnt--;
+            }
         }
     }
-    post_special();
 }
 
 

@@ -94,6 +94,8 @@
 #define KEYP_ENTER      KEY_ENTER
 #define KEY_WEAPON_ROR  '>'
 #define KEY_WEAPON_ROL  '<'
+#define KEY_MAP_ZOOM_IN '='
+#define KEY_MAP_ZOOM_OUT '-'
 
 #endif          // __DOOMKEYS__
 

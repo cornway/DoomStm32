@@ -55,13 +55,13 @@ enum {
 static const struct usb_gamepad_to_kbd_map gamepad_to_kbd_map[] =
 {
     [K_UP]      = {KEY_UPARROW,       PAD_LOOK_CONTROL | PAD_LOOK_UP, 0, 0, 0},
-    [K_DOWN]    = {KEY_DOWNARROW,     PAD_LOOK_CONTROL, 0, 0, 0},
-    [K_LEFT]    = {KEY_LEFTARROW,     PAD_LOOK_CONTROL | PAD_LOOK_LEFT, 0, 0, 0},
-    [K_RIGHT]   = {KEY_RIGHTARROW,    PAD_LOOK_CONTROL | PAD_LOOK_LEFT, 0, 0, 0},
+    [K_DOWN]    = {KEY_DOWNARROW,     PAD_LOOK_CONTROL | PAD_LOOK_DOWN, 0, 0, 0},
+    [K_LEFT]    = {KEY_LEFTARROW,     PAD_LOOK_CONTROL | PAD_LOOK_CENTRE, 0, 0, 0},
+    [K_RIGHT]   = {KEY_RIGHTARROW,    PAD_LOOK_CONTROL | PAD_LOOK_CENTRE, 0, 0, 0},
     [K_K1]      = {KEY_TAB,           PAD_FREQ_LOW, 0, 0, 0},
-    [K_K2]      = {KEY_USE,           0, 0, 0, 0},
+    [K_K4]      = {KEY_USE,           0, 0, 0, 0},
     [K_K3]      = {KEY_FIRE,          0, 0, 0, 0},
-    [K_K4]      = {KEY_RSHIFT,        PAD_FREQ_LOW | PAD_SPEC_BM, 0, 0, 0},
+    [K_K2]      = {KEY_RSHIFT,        PAD_FREQ_LOW | PAD_FUNCTION, 0, 0, 0},
     [K_BL]      = {KEY_STRAFE_L,      0, 0, 0, 0},
 #if GAMEPAD_USE_FLYLOOK
     [K_BR]      = {KEY_WEAPON_ROL,    PAD_SET_FLYLOOK, 0, 0, 0},

@@ -401,7 +401,6 @@ void HU_Erase(void)
 
 extern uint32_t fps_prev;
 extern uint32_t msec_per_frame;
-extern uint8_t special_event;
 
 void HU_Ticker(void)
 {
@@ -429,18 +428,7 @@ void HU_Ticker(void)
 	    message_counter = HU_MSGTIMEOUT;
 	    message_nottobefuckedwith = message_dontfuckwithme;
 	    message_dontfuckwithme = 0;
-	} else if (special_event) {
-        special_event--;
-        if (special_event) {
-            HUlib_addMessageToSText(&w_message, 0, "ALWAYS RUN ON");
-        } else {
-            HUlib_addMessageToSText(&w_message, 0, "ALWAYS RUN OFF");
-        }
-        special_event = 0;
-	    plr->message = NULL;
-	    message_on = true;
-	    message_counter = HU_MSGTIMEOUT;
-    } else if (message_counter == 0) {
+	} else if (message_counter == 0) {
 	    char msg_buf[64];
 	    snprintf(msg_buf, sizeof(msg_buf), "FPS : %d(%d)",
             fps_prev, msec_per_frame);

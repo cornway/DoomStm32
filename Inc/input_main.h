@@ -20,11 +20,12 @@ enum {
 };
 
 #define PAD_FREQ_LOW   0x1
-#define PAD_SPEC_BM     0x2
+#define PAD_FUNCTION     0x2
 #define PAD_SET_FLYLOOK   0x4
 #define PAD_LOOK_CONTROL 0x8
 #define PAD_LOOK_UP     0x10
-#define PAD_LOOK_LEFT  0x20
+#define PAD_LOOK_DOWN  0x20
+#define PAD_LOOK_CENTRE 0x40
 
 struct usb_gamepad_to_kbd_map {
     uint8_t key;

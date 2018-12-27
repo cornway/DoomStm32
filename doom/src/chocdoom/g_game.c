@@ -345,8 +345,14 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
         turnheld += ticdup;
         if (gamekeydown[key_right]) {
             t_angleturn = -angleturn[0] - (turnheld << 4);
+            if (t_angleturn < -angleturn[1]) {
+                t_angleturn = angleturn[1];
+            }
         } else {
             t_angleturn = angleturn[0] + (turnheld << 4);
+            if (t_angleturn > angleturn[1]) {
+                t_angleturn = angleturn[1];
+            }
         }
     } else { 
         turnheld = 0;
