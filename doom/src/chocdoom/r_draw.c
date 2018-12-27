@@ -101,8 +101,8 @@ rw_range_attr rw_render_downscale[R_RANGE_MAX] =
     [R_RANGE_NEAREST]   = {0, R_RANGE_NEAREST},
     [R_RANGE_NEAR]      = {1, R_RANGE_NEAREST},
     [R_RANGE_MID]       = {2, R_RANGE_NEAR},
-    [R_RANGE_FAR]       = {2, R_RANGE_MID},
-    [R_RANGE_INVIS]     = {2, R_RANGE_FAR},
+    [R_RANGE_FAR]       = {2, R_RANGE_NEAR},
+    [R_RANGE_INVIS]     = {2, R_RANGE_NEAR},
 };
 
 void R_SetRwRange (fixed_t distance)

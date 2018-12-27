@@ -254,8 +254,10 @@ void R_RenderSegLoop (void)
         if (render_on_distance) {
             byte downscale = 1 << rw_render_downscale[rw_render_range].shift;
             rw_render_range_t next = rw_render_downscale[rw_render_range].next;
-            if (rw_x + downscale >= rw_stopx) {
+            while ((rw_x + downscale >= rw_stopx) && (downscale > 1)) {
                 rw_render_range = next;
+                downscale = 1 << rw_render_downscale[rw_render_range].shift;
+                next = rw_render_downscale[rw_render_range].next;
             }
         }
 

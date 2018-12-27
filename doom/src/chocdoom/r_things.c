@@ -483,9 +483,12 @@ R_DrawVisSprite
         if (render_on_distance) {
             byte downscale = 1 << rw_render_downscale[rw_render_range].shift;
             rw_render_range_t next_range = rw_render_downscale[rw_render_range].next;
-            if (dc_x + downscale > vis->x2) {
+            while ((dc_x + downscale > vis->x2) && (downscale > 1)) {
                 rw_render_range = next_range;
-            } else {
+                downscale = 1 << rw_render_downscale[rw_render_range].shift;
+                next_range = rw_render_downscale[rw_render_range].next;
+            }
+            if (rw_render_range) {
                 downscale--;
                 dc_x += downscale;
                 frac += vis->xiscale * downscale;
