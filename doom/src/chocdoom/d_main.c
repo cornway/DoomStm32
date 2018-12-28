@@ -869,13 +869,10 @@ static boolean D_AddFile(char *filename)
     return handle != NULL;
 }
 
-extern int extended;
 static void D_ForeachFileHdlr(void *_filename)
 {
     char *filename = (char *)_filename;
-    extended = 1;
     W_AddFile(filename);
-    extended = 0;
 }
 
 static void D_AddPwads()
