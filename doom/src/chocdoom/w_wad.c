@@ -138,7 +138,7 @@ static void ExtendLumpInfo(int newnumlumps)
 // Other files are single lumps with the base filename
 //  for the lump name.
 int maps_total = 0;
-int extended = 0;
+
 wad_file_t *W_AddFile (char *filename)
 {
     wadinfo_t header;
@@ -224,10 +224,6 @@ wad_file_t *W_AddFile (char *filename)
 		strncpy(lump_p->name, filerover->name, 8);
         if (0 == strncmp(lump_p->name, "MAP", 3)) {
             maps_total++;
-            if (extended) {
-                lump_p->name[3] = (maps_total / 10) % 10 + '0';
-                lump_p->name[4] = maps_total % 10 + '0';
-            }
         } else if (((lump_p->name[0] == 'E') && (lump_p->name[2] == 'M'))) {
             maps_total++;
         }

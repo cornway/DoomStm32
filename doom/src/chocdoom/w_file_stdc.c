@@ -178,7 +178,9 @@ static void W_StdC_Foreach(char *path, void (*handle)(void *))
                 break;
             }
             if ((fno.fattrib & AM_DIR) == 0) {
-                if (0 == strncmp(fno.fname + (strlen(fno.fname) - 4), ".WAD", 4)) {
+                char *ext = fno.fname + strlen(fno.fname) - sizeof(WAD_EXT) + 1;
+                strupr(ext);
+                if (0 == strncmp(ext, WAD_EXT, sizeof(WAD_EXT))) {
                     snprintf(path_to_file, sizeof(path_to_file),
                         "%s/%s", path, fno.fname);
 

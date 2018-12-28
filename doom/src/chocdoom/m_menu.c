@@ -1004,16 +1004,13 @@ void M_NewGame(int choice)
         M_SetupNextMenu(&EpiDef);
 }
 
-extern int extended;
 static void D_ForeachFileHdlr(void *_filename)
 {
     char *filename = (char *)_filename;
-    extended = 1;
     W_AddFile(filename);
     snprintf(level_select_message, sizeof(level_select_message),
         "New map[%d]: %s", level_selected, filename);
     level_selected--;
-    extended = 0;
     filename[0] = 0;
 }
 

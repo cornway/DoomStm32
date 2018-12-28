@@ -60,8 +60,8 @@ static void CPU_CACHE_Enable(void);
 #define SDRAM_VOL_END   0xC1000000
 #define SDRAM_VOL_SIZE (SDRAM_VOL_END - SDRAM_VOL_START)
 volatile pal_t *__lcd_frame_buf_raw = (void *)SDRAM_VOL_START;
-#if GFX_COLOR_MODE_CLUT
-#define RAW_LCD_FBUF_SIZE_MAX 0x200000
+#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
+#define RAW_LCD_FBUF_SIZE_MAX 0x080000
 #else
 #define RAW_LCD_FBUF_SIZE_MAX 0x200000
 #endif
