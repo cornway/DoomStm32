@@ -255,7 +255,7 @@ void R_GenerateComposite (int texnum)
     {
 	realpatch = W_CacheLumpNum (patch->patch, PU_CACHE);
 	x1 = patch->originx;
-	x2 = x1 + SHORT(realpatch->width);
+	x2 = x1 + READ_LE_I16(realpatch->width);
 
 	if (x1<0)
 	    x = 0;
@@ -327,7 +327,7 @@ void R_GenerateLookup (int texnum)
     {
 	realpatch = W_CacheLumpNum (patch->patch, PU_CACHE);
 	x1 = patch->originx;
-	x2 = x1 + SHORT(realpatch->width);
+	x2 = x1 + READ_LE_I16(realpatch->width);
 	
 	if (x1 < 0)
 	    x = 0;
@@ -551,12 +551,12 @@ void R_InitTextures (void)
 
 	texture = textures[i] =
 	    Z_Malloc (sizeof(texture_t)
-		      + sizeof(texpatch_t)*(SHORT(mtexture->patchcount)-1),
+		      + sizeof(texpatch_t)*(READ_LE_I16(mtexture->patchcount)-1),
 		      PU_STATIC, 0);
 	
-	texture->width = SHORT(mtexture->width);
-	texture->height = SHORT(mtexture->height);
-	texture->patchcount = SHORT(mtexture->patchcount);
+	texture->width = READ_LE_I16(mtexture->width);
+	texture->height = READ_LE_I16(mtexture->height);
+	texture->patchcount = READ_LE_I16(mtexture->patchcount);
     for (int _i = 0; _i < 8; _i++)
         texture->name[_i] = mtexture->name[_i];
 	mpatch = &mtexture->patches[0];
@@ -564,9 +564,9 @@ void R_InitTextures (void)
 
 	for (j=0 ; j<texture->patchcount ; j++, mpatch++, patch++)
 	{
-	    patch->originx = SHORT(mpatch->originx);
-	    patch->originy = SHORT(mpatch->originy);
-	    patch->patch = patchlookup[SHORT(mpatch->patch)];
+	    patch->originx = READ_LE_I16(mpatch->originx);
+	    patch->originy = READ_LE_I16(mpatch->originy);
+	    patch->patch = patchlookup[READ_LE_I16(mpatch->patch)];
 	    if (patch->patch == -1)
 	    {
 		I_Error ("R_InitTextures: Missing patch in texture %s",
@@ -650,9 +650,9 @@ void R_InitSpriteLumps (void)
     {
 
 	patch = W_CacheLumpNum (firstspritelump+i, PU_CACHE);
-	spritewidth[i] = SHORT(patch->width)<<FRACBITS;
-	spriteoffset[i] = SHORT(patch->leftoffset)<<FRACBITS;
-	spritetopoffset[i] = SHORT(patch->topoffset)<<FRACBITS;
+	spritewidth[i] = READ_LE_I16(patch->width)<<FRACBITS;
+	spriteoffset[i] = READ_LE_I16(patch->leftoffset)<<FRACBITS;
+	spritetopoffset[i] = READ_LE_I16(patch->topoffset)<<FRACBITS;
     }
 }
 

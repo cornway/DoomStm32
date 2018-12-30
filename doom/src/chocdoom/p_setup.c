@@ -139,8 +139,8 @@ void P_LoadVertexes (int lump)
     // internal representation as fixed.
     for (i=0 ; i<numvertexes ; i++, li++, ml++)
     {
-	li->x = SHORT(ml->x)<<FRACBITS;
-	li->y = SHORT(ml->y)<<FRACBITS;
+	li->x = READ_LE_I16(ml->x)<<FRACBITS;
+	li->y = READ_LE_I16(ml->y)<<FRACBITS;
     }
 
     // Free buffer memory.
@@ -189,15 +189,15 @@ void P_LoadSegs (int lump)
     li = segs;
     for (i=0 ; i<numsegs ; i++, li++, ml++)
     {
-	li->v1 = &vertexes[SHORT(ml->v1)];
-	li->v2 = &vertexes[SHORT(ml->v2)];
+	li->v1 = &vertexes[READ_LE_I16(ml->v1)];
+	li->v2 = &vertexes[READ_LE_I16(ml->v2)];
 
-	li->angle = (SHORT(ml->angle))<<16;
-	li->offset = (SHORT(ml->offset))<<16;
-	linedef = SHORT(ml->linedef);
+	li->angle = (READ_LE_I16(ml->angle))<<16;
+	li->offset = (READ_LE_I16(ml->offset))<<16;
+	linedef = READ_LE_I16(ml->linedef);
 	ldef = &lines[linedef];
 	li->linedef = ldef;
-	side = SHORT(ml->side);
+	side = READ_LE_I16(ml->side);
 	li->sidedef = &sides[ldef->sidenum[side]];
 	li->frontsector = sides[ldef->sidenum[side]].sector;
 
@@ -250,8 +250,8 @@ void P_LoadSubsectors (int lump)
     
     for (i=0 ; i<numsubsectors ; i++, ss++, ms++)
     {
-	ss->numlines = SHORT(ms->numsegs);
-	ss->firstline = SHORT(ms->firstseg);
+	ss->numlines = READ_LE_I16(ms->numsegs);
+	ss->firstline = READ_LE_I16(ms->firstseg);
     }
 	
     W_ReleaseLumpNum(lump);
@@ -273,21 +273,21 @@ void P_LoadSectors (int lump)
     sectors = Z_Malloc (numsectors*sizeof(sector_t),PU_LEVEL,0);	
     memset (sectors, 0, numsectors*sizeof(sector_t));
     data = W_CacheLumpNum (lump,PU_STATIC);
-	
+
     ms = (mapsector_t *)data;
     ss = sectors;
     for (i=0 ; i<numsectors ; i++, ss++, ms++)
     {
-	ss->floorheight = SHORT(ms->floorheight)<<FRACBITS;
-	ss->ceilingheight = SHORT(ms->ceilingheight)<<FRACBITS;
-	ss->floorpic = R_FlatNumForName(ms->floorpic);
-	ss->ceilingpic = R_FlatNumForName(ms->ceilingpic);
-	ss->lightlevel = SHORT(ms->lightlevel);
-	ss->special = SHORT(ms->special);
-	ss->tag = SHORT(ms->tag);
-	ss->thinglist = NULL;
+        ss->floorheight = READ_LE_I16(ms->floorheight)<<FRACBITS;
+        ss->ceilingheight = READ_LE_I16(ms->ceilingheight)<<FRACBITS;
+        ss->floorpic = R_FlatNumForName(ms->floorpic);
+        ss->ceilingpic = R_FlatNumForName(ms->ceilingpic);
+        ss->lightlevel = READ_LE_I16(ms->lightlevel);
+        ss->special = READ_LE_I16(ms->special);
+        ss->tag = READ_LE_I16(ms->tag);
+        ss->thinglist = NULL;
     }
-	
+
     W_ReleaseLumpNum(lump);
 }
 
@@ -313,15 +313,15 @@ void P_LoadNodes (int lump)
     
     for (i=0 ; i<numnodes ; i++, no++, mn++)
     {
-	no->x = SHORT(mn->x)<<FRACBITS;
-	no->y = SHORT(mn->y)<<FRACBITS;
-	no->dx = SHORT(mn->dx)<<FRACBITS;
-	no->dy = SHORT(mn->dy)<<FRACBITS;
+	no->x = READ_LE_I16(mn->x)<<FRACBITS;
+	no->y = READ_LE_I16(mn->y)<<FRACBITS;
+	no->dx = READ_LE_I16(mn->dx)<<FRACBITS;
+	no->dy = READ_LE_I16(mn->dy)<<FRACBITS;
 	for (j=0 ; j<2 ; j++)
 	{
-	    no->children[j] = SHORT(mn->children[j]);
+	    no->children[j] = READ_LE_I16(mn->children[j]);
 	    for (k=0 ; k<4 ; k++)
-		no->bbox[j][k] = SHORT(mn->bbox[j][k])<<FRACBITS;
+		no->bbox[j][k] = READ_LE_I16(mn->bbox[j][k])<<FRACBITS;
 	}
     }
 	
@@ -352,7 +352,7 @@ void P_LoadThings (int lump)
 	// Do not spawn cool, new monsters if !commercial
 	if (gamemode != commercial)
 	{
-	    switch (SHORT(mt->type))
+	    switch (READ_LE_I16(mt->type))
 	    {
 	      case 68:	// Arachnotron
 	      case 64:	// Archvile
@@ -372,11 +372,11 @@ void P_LoadThings (int lump)
 	    break;
 
 	// Do spawn all other stuff. 
-	spawnthing.x = SHORT(mt->x);
-	spawnthing.y = SHORT(mt->y);
-	spawnthing.angle = SHORT(mt->angle);
-	spawnthing.type = SHORT(mt->type);
-	spawnthing.options = SHORT(mt->options);
+	spawnthing.x = READ_LE_I16(mt->x);
+	spawnthing.y = READ_LE_I16(mt->y);
+	spawnthing.angle = READ_LE_I16(mt->angle);
+	spawnthing.type = READ_LE_I16(mt->type);
+	spawnthing.options = READ_LE_I16(mt->options);
 	
 	P_SpawnMapThing(&spawnthing);
     }
@@ -407,11 +407,11 @@ void P_LoadLineDefs (int lump)
     ld = lines;
     for (i=0 ; i<numlines ; i++, mld++, ld++)
     {
-	ld->flags = SHORT(mld->flags);
-	ld->special = SHORT(mld->special);
-	ld->tag = SHORT(mld->tag);
-	v1 = ld->v1 = &vertexes[SHORT(mld->v1)];
-	v2 = ld->v2 = &vertexes[SHORT(mld->v2)];
+	ld->flags = READ_LE_I16(mld->flags);
+	ld->special = READ_LE_I16(mld->special);
+	ld->tag = READ_LE_I16(mld->tag);
+	v1 = ld->v1 = &vertexes[READ_LE_I16(mld->v1)];
+	v2 = ld->v2 = &vertexes[READ_LE_I16(mld->v2)];
 	ld->dx = v2->x - v1->x;
 	ld->dy = v2->y - v1->y;
 	
@@ -449,8 +449,8 @@ void P_LoadLineDefs (int lump)
 	    ld->bbox[BOXTOP] = v1->y;
 	}
 
-	ld->sidenum[0] = SHORT(mld->sidenum[0]);
-	ld->sidenum[1] = SHORT(mld->sidenum[1]);
+	ld->sidenum[0] = READ_LE_I16(mld->sidenum[0]);
+	ld->sidenum[1] = READ_LE_I16(mld->sidenum[1]);
 
 	if (ld->sidenum[0] != -1)
 	    ld->frontsector = sides[ld->sidenum[0]].sector;
@@ -486,12 +486,12 @@ void P_LoadSideDefs (int lump)
     sd = sides;
     for (i=0 ; i<numsides ; i++, msd++, sd++)
     {
-	sd->textureoffset = SHORT(msd->textureoffset)<<FRACBITS;
-	sd->rowoffset = SHORT(msd->rowoffset)<<FRACBITS;
+	sd->textureoffset = READ_LE_I16(msd->textureoffset)<<FRACBITS;
+	sd->rowoffset = READ_LE_I16(msd->rowoffset)<<FRACBITS;
 	sd->toptexture = R_TextureNumForName(msd->toptexture);
 	sd->bottomtexture = R_TextureNumForName(msd->bottomtexture);
 	sd->midtexture = R_TextureNumForName(msd->midtexture);
-	sd->sector = &sectors[SHORT(msd->sector)];
+	sd->sector = &sectors[READ_LE_I16(msd->sector)];
     }
 
     W_ReleaseLumpNum(lump);
@@ -509,24 +509,23 @@ void P_LoadBlockMap (int lump)
 
     lumplen = W_LumpLength(lump);
     count = lumplen / 2;
-	
-    blockmaplump = Z_Malloc(lumplen, PU_LEVEL, NULL);
-    W_ReadLump(lump, blockmaplump);
+
+    blockmaplump = W_CacheLumpNum(lump, PU_LEVEL);
     blockmap = blockmaplump + 4;
 
     // Swap all short integers to native byte ordering.
   
     for (i=0; i<count; i++)
     {
-	blockmaplump[i] = SHORT(blockmaplump[i]);
+	//blockmaplump[i] = ReadLe16(&blockmaplump[i]);
     }
 		
     // Read the header
 
-    bmaporgx = blockmaplump[0]<<FRACBITS;
-    bmaporgy = blockmaplump[1]<<FRACBITS;
-    bmapwidth = blockmaplump[2];
-    bmapheight = blockmaplump[3];
+    bmaporgx = READ_LE_I16(blockmaplump[0])<<FRACBITS;
+    bmaporgy = READ_LE_I16(blockmaplump[1])<<FRACBITS;
+    bmapwidth = READ_LE_I16(blockmaplump[2]);
+    bmapheight = READ_LE_I16(blockmaplump[3]);
 	
     // Clear out mobj chains
 
@@ -801,8 +800,8 @@ P_SetupLevel
     P_LoadNodes (lumpnum+ML_NODES);
     P_LoadSegs (lumpnum+ML_SEGS);
 
-    P_GroupLines ();
     P_LoadReject (lumpnum+ML_REJECT);
+    P_GroupLines ();
 
     bodyqueslot = 0;
     deathmatch_p = deathmatchstarts;

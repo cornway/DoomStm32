@@ -283,7 +283,7 @@ void F_TextWrite (void)
 	    continue;
 	}
 		
-	w = SHORT (hu_font[c]->width);
+	w = READ_LE_I16 (hu_font[c]->width);
 	if (cx+w > SCREENWIDTH)
 	    break;
 	V_DrawPatch(cx, cy, hu_font[c]);
@@ -507,7 +507,7 @@ void F_CastPrint (char* text)
 	    continue;
 	}
 		
-	w = SHORT (hu_font[c]->width);
+	w = READ_LE_I16 (hu_font[c]->width);
 	width += w;
     }
     
@@ -526,7 +526,7 @@ void F_CastPrint (char* text)
 	    continue;
 	}
 		
-	w = SHORT (hu_font[c]->width);
+	w = READ_LE_I16 (hu_font[c]->width);
 	V_DrawPatch(cx, 180, hu_font[c]);
 	cx+=w;
     }

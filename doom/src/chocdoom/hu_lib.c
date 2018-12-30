@@ -110,7 +110,7 @@ HUlib_drawTextLine
 	    && c >= l->sc
 	    && c <= '_')
 	{
-	    w = SHORT(l->f[c - l->sc]->width);
+	    w = READ_LE_I16(l->f[c - l->sc]->width);
 	    if (x+w > SCREENWIDTH)
 		break;
 	    V_DrawPatchDirect(x, l->y, l->f[c - l->sc]);
@@ -126,7 +126,7 @@ HUlib_drawTextLine
 
     // draw the cursor if requested
     if (drawcursor
-	&& x + SHORT(l->f['_' - l->sc]->width) <= SCREENWIDTH)
+	&& x + READ_LE_I16(l->f['_' - l->sc]->width) <= SCREENWIDTH)
     {
 	V_DrawPatchDirect(x, l->y, l->f['_' - l->sc]);
     }
@@ -147,7 +147,7 @@ void HUlib_eraseTextLine(hu_textline_t* l)
     if (!automapactive &&
 	viewwindowx && l->needsupdate)
     {
-	lh = SHORT(l->f[0]->height) + 1;
+	lh = READ_LE_I16(l->f[0]->height) + 1;
 	for (y=l->y,yoffset=y*SCREENWIDTH ; y<l->y+lh ; y++,yoffset+=SCREENWIDTH)
 	{
 	    if (y < viewwindowy || y >= viewwindowy + viewheight)
@@ -184,7 +184,7 @@ HUlib_initSText
     s->cl = 0;
     for (i=0;i<h;i++)
 	HUlib_initTextLine(&s->l[i],
-			   x, y - i*(SHORT(font[0]->height)+1),
+			   x, y - i*(READ_LE_I16(font[0]->height)+1),
 			   font, startchar);
 
 }

@@ -257,7 +257,7 @@ wad_file_t *W_AddLumpFile (char *filename)
     lumpinfo_t *lump_p;
     unsigned int i;
     wad_file_t *wad_file;
-    int newnumlumps;
+    int newnumlumps, startlump, length;
     filelump_t *filerover;
     filelump_t *fileinfo;
 
@@ -269,44 +269,85 @@ wad_file_t *W_AddLumpFile (char *filename)
         return NULL;
     } 
 
-    header = (wadinfo_t *)wad_file->mapped;
+    newnumlumps = numlumps;
 
-    newnumlumps = LONG(header->numlumps);
-    header->numlumps = newnumlumps;
-    header->infotableofs = LONG(header->infotableofs);
+    if (strcasecmp(filename+strlen(filename)-3 , "wad" ) )
+    {
+        // single lump file
 
-    filerover = (filelump_t *)(wad_file->mapped + header->infotableofs);
-    fileinfo = filerover;
+        // fraggle: Swap the filepos and size here.  The WAD directory
+        // parsing code expects a little-endian directory, so will swap
+        // them back.  Effectively we're constructing a "fake WAD directory"
+        // here, as it would appear on disk.
 
-    
+		fileinfo = Z_Malloc(sizeof(filelump_t), PU_STATIC, 0);
+		fileinfo->filepos = LONG(0);
+		fileinfo->size = LONG(wad_file->length);
+
+        // Name the lump after the base of the filename (without the
+        // extension).
+
+		M_ExtractFileBase (filename, fileinfo->name);
+		newnumlumps++;
+    }
+    else
+    {
+        // WAD file
+        header = (wadinfo_t *)((uint8_t *)wad_file->mapped);
+
+		if (strncmp(header->identification,"IWAD",4))
+		{
+			// Homebrew levels?
+			if (strncmp(header->identification,"PWAD",4))
+			{
+			I_Error ("Wad file %s doesn't have IWAD "
+				 "or PWAD id\n", filename);
+			}
+
+			// ???modifiedgame = true;
+		}
+
+		header->numlumps = READ_LE_U32(header->numlumps);
+		header->infotableofs = READ_LE_U32(header->infotableofs);
+		length = header->numlumps*sizeof(filelump_t);
+		fileinfo = (filelump_t *)((uint8_t *)wad_file->mapped + header->infotableofs);
+
+        newnumlumps += header->numlumps;
+    }
+
+    // Increase size of numlumps array to accomodate the new file.
+    startlump = numlumps;
+    ExtendLumpInfo(newnumlumps);
+
+    lump_p = &lumpinfo[startlump];
 
     filerover = fileinfo;
 
-    for (i=0; i<newnumlumps; ++i)
+    for (i=startlump; i<numlumps; ++i)
     {
-        lump_p = &lumpinfo[0];
-
-        for (int j = 0; j < numlumps; j++) {
-            if (strncmp(lump_p->name, filerover->name, 8) == 0) {
-                lump_p->wad_file = wad_file;
-                mem_cpy((char *)&lump_p->position,
-                    (char *)&filerover->filepos,
-                    sizeof(lump_p->position));
-
-                mem_cpy((char *)&lump_p->size,
-                    (char *)&filerover->size,
-                    sizeof(lump_p->size));
-
-                lump_p->cache = NULL;
-                break;
-            }
-            ++lump_p;
+		lump_p->wad_file = wad_file;
+		lump_p->position = READ_LE_I32(filerover->filepos);
+		lump_p->size     = READ_LE_I32(filerover->size);
+        lump_p->cache = NULL;
+		strncpy(lump_p->name, filerover->name, 8);
+        if (0 == strncmp(lump_p->name, "MAP", 3)) {
+            maps_total++;
+        } else if (((lump_p->name[0] == 'E') && (lump_p->name[2] == 'M'))) {
+            maps_total++;
         }
 
+        ++lump_p;
         ++filerover;
     }
 
+    if (lumphash != NULL)
+    {
+        Z_Free(lumphash);
+        lumphash = NULL;
+    }
+
     return wad_file;
+
 }
 
 

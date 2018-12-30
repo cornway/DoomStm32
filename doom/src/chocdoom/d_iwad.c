@@ -59,7 +59,7 @@ static const iwad_t iwads[] =
 
 static char *iwad_dirs[MAX_IWAD_DIRS];
 static int num_iwad_dirs = 0;
-static const char pwads_path[] = "/doom/wads";
+static const char pwads_path[] = "/doom/wad";
 
 static void AddIWADDir(char *dir)
 {
