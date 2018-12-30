@@ -89,8 +89,8 @@ STlib_drawNum
     int		numdigits = n->width;
     int		num = *n->num;
     
-    int		w = SHORT(n->p[0]->width);
-    int		h = SHORT(n->p[0]->height);
+    int		w = READ_LE_I16(n->p[0]->width);
+    int		h = READ_LE_I16(n->p[0]->height);
     int		x = n->x;
     
     int		neg;
@@ -215,10 +215,10 @@ STlib_updateMultIcon
     {
 	if (mi->oldinum != -1)
 	{
-	    x = mi->x - SHORT(mi->p[mi->oldinum]->leftoffset);
-	    y = mi->y - SHORT(mi->p[mi->oldinum]->topoffset);
-	    w = SHORT(mi->p[mi->oldinum]->width);
-	    h = SHORT(mi->p[mi->oldinum]->height);
+	    x = mi->x - READ_LE_I16(mi->p[mi->oldinum]->leftoffset);
+	    y = mi->y - READ_LE_I16(mi->p[mi->oldinum]->topoffset);
+	    w = READ_LE_I16(mi->p[mi->oldinum]->width);
+	    h = READ_LE_I16(mi->p[mi->oldinum]->height);
 
 	    if (y - ST_Y < 0)
 		I_Error("updateMultIcon: y - ST_Y < 0");
@@ -264,10 +264,10 @@ STlib_updateBinIcon
     if (*bi->on
      && (bi->oldval != *bi->val || refresh))
     {
-	x = bi->x - SHORT(bi->p->leftoffset);
-	y = bi->y - SHORT(bi->p->topoffset);
-	w = SHORT(bi->p->width);
-	h = SHORT(bi->p->height);
+	x = bi->x - READ_LE_I16(bi->p->leftoffset);
+	y = bi->y - READ_LE_I16(bi->p->topoffset);
+	w = READ_LE_I16(bi->p->width);
+	h = READ_LE_I16(bi->p->height);
 
 	if (y - ST_Y < 0)
 	    I_Error("updateBinIcon: y - ST_Y < 0");

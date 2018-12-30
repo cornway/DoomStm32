@@ -33,6 +33,7 @@
 #else
 
 #include "string.h"
+#include "arch.h"
 
 #endif
 
@@ -46,7 +47,9 @@
 // to disk.
 //
 
-#ifdef __GNUC__
+#if     defined(V_PREPACK) && defined(V_POSTPACK)
+#define PACKEDATTR V_POSTPACK
+#elif defined(__GNUC__)
 #define PACKEDATTR __attribute__((packed))
 #else
 #define PACKEDATTR
@@ -124,6 +127,7 @@ typedef uint8_t byte;
 #endif
 
 #define arrlen(array) (sizeof(array) / sizeof(*array))
+
 
 #endif
 

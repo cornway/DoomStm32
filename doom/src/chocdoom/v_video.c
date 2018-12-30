@@ -146,8 +146,8 @@ void V_DrawPatch(int x, int y, patch_t *patch)
     byte *source;
     int w;
 
-    y -= SHORT(patch->topoffset);
-    x -= SHORT(patch->leftoffset);
+    y -= READ_LE_I16(patch->topoffset);
+    x -= READ_LE_I16(patch->leftoffset);
 
     // haleyjd 08/28/10: Strife needs silent error checking here.
     if(patchclip_callback)
@@ -158,20 +158,20 @@ void V_DrawPatch(int x, int y, patch_t *patch)
 
 #ifdef RANGECHECK
     if (x < 0
-     || x + SHORT(patch->width) > SCREENWIDTH
+     || x + READ_LE_I16(patch->width) > SCREENWIDTH
      || y < 0
-     || y + SHORT(patch->height) > SCREENHEIGHT)
+     || y + READ_LE_I16(patch->height) > SCREENHEIGHT)
     {
         I_Error("Bad V_DrawPatch x=%i y=%i patch.width=%i patch.height=%i topoffset=%i leftoffset=%i", x, y, patch->width, patch->height, patch->topoffset, patch->leftoffset);
     }
 #endif
 
-    V_MarkRect(x, y, SHORT(patch->width), SHORT(patch->height));
+    V_MarkRect(x, y, READ_LE_I16(patch->width), READ_LE_I16(patch->height));
 
     col = 0;
     desttop = dest_screen + y * SCREENWIDTH + x;
 
-    w = SHORT(patch->width);
+    w = READ_LE_I16(patch->width);
 
     for ( ; col<w ; x++, col++, desttop++)
     {
@@ -210,8 +210,8 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
     byte *source; 
     int w; 
  
-    y -= SHORT(patch->topoffset); 
-    x -= SHORT(patch->leftoffset); 
+    y -= READ_LE_I16(patch->topoffset); 
+    x -= READ_LE_I16(patch->leftoffset); 
 
     // haleyjd 08/28/10: Strife needs silent error checking here.
     if(patchclip_callback)
@@ -222,20 +222,20 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
 
 #ifdef RANGECHECK 
     if (x < 0
-     || x + SHORT(patch->width) > SCREENWIDTH
+     || x + READ_LE_I16(patch->width) > SCREENWIDTH
      || y < 0
-     || y + SHORT(patch->height) > SCREENHEIGHT)
+     || y + READ_LE_I16(patch->height) > SCREENHEIGHT)
     {
         I_Error("Bad V_DrawPatchFlipped");
     }
 #endif
 
-    V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height));
+    V_MarkRect (x, y, READ_LE_I16(patch->width), READ_LE_I16(patch->height));
 
     col = 0;
     desttop = dest_screen + y * SCREENWIDTH + x;
 
-    w = SHORT(patch->width);
+    w = READ_LE_I16(patch->width);
 
     for ( ; col<w ; x++, col++, desttop++)
     {
@@ -283,13 +283,13 @@ void V_DrawTLPatch(int x, int y, patch_t * patch)
     byte *desttop, *dest, *source;
     int w;
 
-    y -= SHORT(patch->topoffset);
-    x -= SHORT(patch->leftoffset);
+    y -= READ_LE_I16(patch->topoffset);
+    x -= READ_LE_I16(patch->leftoffset);
 
     if (x < 0
-     || x + SHORT(patch->width) > SCREENWIDTH 
+     || x + READ_LE_I16(patch->width) > SCREENWIDTH 
      || y < 0
-     || y + SHORT(patch->height) > SCREENHEIGHT)
+     || y + READ_LE_I16(patch->height) > SCREENHEIGHT)
     {
         I_Error("Bad V_DrawTLPatch");
     }
@@ -297,7 +297,7 @@ void V_DrawTLPatch(int x, int y, patch_t * patch)
     col = 0;
     desttop = dest_screen + y * SCREENWIDTH + x;
 
-    w = SHORT(patch->width);
+    w = READ_LE_I16(patch->width);
     for (; col < w; x++, col++, desttop++)
     {
         column = (column_t *) ((byte *) patch + LONG(patch->columnofs[col]));
@@ -333,8 +333,8 @@ void V_DrawXlaPatch(int x, int y, patch_t * patch)
     byte *desttop, *dest, *source;
     int w;
 
-    y -= SHORT(patch->topoffset);
-    x -= SHORT(patch->leftoffset);
+    y -= READ_LE_I16(patch->topoffset);
+    x -= READ_LE_I16(patch->leftoffset);
 
     if(patchclip_callback)
     {
@@ -345,7 +345,7 @@ void V_DrawXlaPatch(int x, int y, patch_t * patch)
     col = 0;
     desttop = dest_screen + y * SCREENWIDTH + x;
 
-    w = SHORT(patch->width);
+    w = READ_LE_I16(patch->width);
     for(; col < w; x++, col++, desttop++)
     {
         column = (column_t *) ((byte *) patch + LONG(patch->columnofs[col]));
@@ -382,13 +382,13 @@ void V_DrawAltTLPatch(int x, int y, patch_t * patch)
     byte *desttop, *dest, *source;
     int w;
 
-    y -= SHORT(patch->topoffset);
-    x -= SHORT(patch->leftoffset);
+    y -= READ_LE_I16(patch->topoffset);
+    x -= READ_LE_I16(patch->leftoffset);
 
     if (x < 0
-     || x + SHORT(patch->width) > SCREENWIDTH
+     || x + READ_LE_I16(patch->width) > SCREENWIDTH
      || y < 0
-     || y + SHORT(patch->height) > SCREENHEIGHT)
+     || y + READ_LE_I16(patch->height) > SCREENHEIGHT)
     {
         I_Error("Bad V_DrawAltTLPatch");
     }
@@ -396,7 +396,7 @@ void V_DrawAltTLPatch(int x, int y, patch_t * patch)
     col = 0;
     desttop = dest_screen + y * SCREENWIDTH + x;
 
-    w = SHORT(patch->width);
+    w = READ_LE_I16(patch->width);
     for (; col < w; x++, col++, desttop++)
     {
         column = (column_t *) ((byte *) patch + LONG(patch->columnofs[col]));
@@ -433,13 +433,13 @@ void V_DrawShadowedPatch(int x, int y, patch_t *patch)
     byte *desttop2, *dest2;
     int w;
 
-    y -= SHORT(patch->topoffset);
-    x -= SHORT(patch->leftoffset);
+    y -= READ_LE_I16(patch->topoffset);
+    x -= READ_LE_I16(patch->leftoffset);
 
     if (x < 0
-     || x + SHORT(patch->width) > SCREENWIDTH
+     || x + READ_LE_I16(patch->width) > SCREENWIDTH
      || y < 0
-     || y + SHORT(patch->height) > SCREENHEIGHT)
+     || y + READ_LE_I16(patch->height) > SCREENHEIGHT)
     {
         I_Error("Bad V_DrawShadowedPatch");
     }
@@ -448,7 +448,7 @@ void V_DrawShadowedPatch(int x, int y, patch_t *patch)
     desttop = dest_screen + y * SCREENWIDTH + x;
     desttop2 = dest_screen + (y + 2) * SCREENWIDTH + x + 2;
 
-    w = SHORT(patch->width);
+    w = READ_LE_I16(patch->width);
     for (; col < w; x++, col++, desttop++, desttop2++)
     {
         column = (column_t *) ((byte *) patch + LONG(patch->columnofs[col]));

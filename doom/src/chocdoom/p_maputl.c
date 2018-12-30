@@ -494,11 +494,11 @@ P_BlockLinesIterator
     
     offset = y*bmapwidth+x;
 	
-    offset = *(blockmap+offset);
+    offset = READ_LE_I16_P(blockmap+offset);
 
-    for ( list = blockmaplump+offset ; *list != -1 ; list++)
+    for ( list = blockmaplump+offset ; READ_LE_U16_P(list) != 0xffff ; list++)
     {
-	ld = &lines[*list];
+	ld = &lines[READ_LE_I16_P(list)];
 
 	if (ld->validcount == validcount)
 	    continue; 	// line has already been checked

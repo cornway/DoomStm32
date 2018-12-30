@@ -26,7 +26,7 @@
 
 // Parse the command line, merging WAD files that are sppecified.
 // Returns true if at least one file was added.
-
+extern void D_AddPwads();
 boolean W_ParseCommandLine(void)
 {
     boolean modifiedgame = false;
@@ -183,6 +183,8 @@ boolean W_ParseCommandLine(void)
 
 	    W_AddFile(filename);
         }
+    } else {
+        D_AddPwads();
     }
 
 //    W_PrintDirectory();

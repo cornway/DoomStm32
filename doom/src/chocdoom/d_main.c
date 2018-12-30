@@ -872,10 +872,12 @@ static boolean D_AddFile(char *filename)
 static void D_ForeachFileHdlr(void *_filename)
 {
     char *filename = (char *)_filename;
-    W_AddFile(filename);
+    modifiedgame = true;
+    W_AddLumpFile(filename);
+    //W_AddFile(filename);
 }
 
-static void D_AddPwads()
+void D_AddPwads()
 {
     D_FindWADByExt(D_ForeachFileHdlr);
 
@@ -1372,7 +1374,7 @@ void D_DoomMain (void)
 
     DEH_printf("W_Init: Init WADfiles.\n");
     D_AddFile(iwadfile);
-    D_AddPwads();
+    //D_AddPwads();
 #if ORIGCODE
     numiwadlumps = numlumps;
 #endif
@@ -1507,7 +1509,6 @@ void D_DoomMain (void)
     I_AtExit((atexit_func_t) G_CheckDemoStatus, true);
 
     // Generate the WAD hash table.  Speed things up a bit.
-    W_GenerateHashTable();
     // Load DEHACKED lumps from WAD files - but only if we give the right
     // command line parameter.
 

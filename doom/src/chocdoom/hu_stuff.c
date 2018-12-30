@@ -51,11 +51,11 @@
 #define HU_TITLE_CHEX   (mapnames[gamemap - 1])
 #define HU_TITLEHEIGHT	1
 #define HU_TITLEX	0
-#define HU_TITLEY	(167 - SHORT(hu_font[0]->height))
+#define HU_TITLEY	(167 - READ_LE_I16(hu_font[0]->height))
 
 #define HU_INPUTTOGGLE	't'
 #define HU_INPUTX	HU_MSGX
-#define HU_INPUTY	(HU_MSGY + HU_MSGHEIGHT*(SHORT(hu_font[0]->height) +1))
+#define HU_INPUTY	(HU_MSGY + HU_MSGHEIGHT*(READ_LE_I16(hu_font[0]->height) +1))
 #define HU_INPUTWIDTH	64
 #define HU_INPUTHEIGHT	1
 

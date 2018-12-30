@@ -474,7 +474,7 @@ R_DrawVisSprite
     {
         texturecolumn = frac>>FRACBITS;
 #ifdef RANGECHECK
-        if (texturecolumn < 0 || texturecolumn >= SHORT(patch->width))
+        if (texturecolumn < 0 || texturecolumn >= READ_LE_I16(patch->width))
             I_Error ("R_DrawSpriteRange: bad texturecolumn");
 #endif
         column = (column_t *) ((byte *)patch +

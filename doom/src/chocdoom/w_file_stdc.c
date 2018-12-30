@@ -138,25 +138,26 @@ static wad_file_t *W_StdC_MMapFile(char *path)
 {
     stdc_wad_file_t *result;
     unsigned int length;
-    FIL file;
 
-    if (f_open (&file, path, FA_OPEN_EXISTING | FA_READ) != FR_OK)
+    // Create a new stdc_wad_file_t to hold the file handle.
+    result = Z_Malloc(sizeof(stdc_wad_file_t), PU_STATIC, 0);
+    result->wad.file_class = &stdc_wad_file;
+    
+    result->wad.length = length;
+
+    if (f_open (&result->fstream, path, FA_OPEN_EXISTING | FA_READ) != FR_OK)
     {
+        Z_Free(result);
         return NULL;
     }
 
-    // Create a new stdc_wad_file_t to hold the file handle.
-    length = M_FileLength(&file);
-    result = Z_Malloc(sizeof(stdc_wad_file_t), PU_STATIC, 0);
-    result->wad.file_class = &stdc_wad_file;
+    length = M_FileLength(&result->fstream);
     result->wad.mapped = Z_Malloc(length, PU_STATIC, 0);
-    result->wad.length = length;
-    result->fstream = file;
-    if (f_read (&file, result->wad.mapped, length, &length) != FR_OK)
+
+    if (f_read (&result->fstream, result->wad.mapped, length, &length) != FR_OK)
     {
         I_Error("Ooops!");
     }
-    f_close(&file);
 
     return &result->wad;
 
