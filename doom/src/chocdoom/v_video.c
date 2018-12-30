@@ -175,7 +175,7 @@ void V_DrawPatch(int x, int y, patch_t *patch)
 
     for ( ; col<w ; x++, col++, desttop++)
     {
-        column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
+        column = (column_t *)((byte *)patch + READ_LE_U32_P(patch->columnofs + col));
 
         // step through the posts in a column
         while (column->topdelta != 0xff)

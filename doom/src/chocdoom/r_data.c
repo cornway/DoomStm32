@@ -272,7 +272,7 @@ void R_GenerateComposite (int texnum)
 		continue;
 	    
 	    patchcol = (column_t *)((byte *)realpatch
-				    + LONG(realpatch->columnofs[x-x1]));
+				    + READ_LE_U32_P(realpatch->columnofs + x-x1));
 	    R_DrawColumnInCache (patchcol,
 				 block + colofs[x],
 				 patch->originy,
@@ -340,7 +340,7 @@ void R_GenerateLookup (int texnum)
 	{
 	    patchcount[x]++;
 	    collump[x] = patch->patch;
-	    colofs[x] = LONG(realpatch->columnofs[x-x1])+3;
+	    colofs[x] = READ_LE_U32_P(realpatch->columnofs + x-x1)+3;
 	}
     }
 	
@@ -479,7 +479,7 @@ void R_InitTextures (void)
     // Load the patch names from pnames.lmp.
     name[8] = 0;
     names = W_CacheLumpName (DEH_String("PNAMES"), PU_STATIC);
-    nummappatches = LONG ( *((int *)names) );
+    nummappatches = READ_LE_I32_P (names);
     name_p = names + 4;
     patchlookup = Z_Malloc(nummappatches*sizeof(*patchlookup), PU_STATIC, NULL);
 
@@ -494,14 +494,14 @@ void R_InitTextures (void)
     // The data is contained in one or two lumps,
     //  TEXTURE1 for shareware, plus TEXTURE2 for commercial.
     maptex = W_CacheLumpName (DEH_String("TEXTURE1"), PU_STATIC);
-    numtextures1 = LONG(*maptex);
+    numtextures1 = READ_LE_U32_P(maptex);
     maxoff = W_LumpLength (W_GetNumForName (DEH_String("TEXTURE1")));
     directory = maptex+1;
 	
     if (W_CheckNumForName (DEH_String("TEXTURE2")) != -1)
     {
 	maptex2 = W_CacheLumpName (DEH_String("TEXTURE2"), PU_STATIC);
-	numtextures2 = LONG(*maptex2);
+	numtextures2 = READ_LE_U32_P(maptex2);
 	maxoff2 = W_LumpLength (W_GetNumForName (DEH_String("TEXTURE2")));
     }
     else
@@ -542,7 +542,7 @@ void R_InitTextures (void)
 	    directory = maptex+1;
 	}
 		
-	offset = LONG(*directory);
+	offset = READ_LE_U32_P(directory);
 
 	if (offset > maxoff)
 	    I_Error ("R_InitTextures: bad texture directory");
