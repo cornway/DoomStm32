@@ -36,6 +36,10 @@
 
 #include "w_wad.h"
 
+extern GameMode_t gamemode;
+
+boolean doom_3do_edition = false;
+
 typedef struct
 {
     // Should be "IWAD" or "PWAD".
