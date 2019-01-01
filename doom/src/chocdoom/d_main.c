@@ -75,6 +75,7 @@
 
 #include "d_main.h"
 #include "main.h"
+#include "w_merge.h"
 
 //
 // D-DoomLoop()
@@ -873,7 +874,7 @@ static void D_ForeachFileHdlr(void *_filename)
 {
     char *filename = (char *)_filename;
     modifiedgame = true;
-    W_AddLumpFile(filename);
+    W_MergeFile(filename);
     //W_AddFile(filename);
 }
 

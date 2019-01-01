@@ -158,7 +158,7 @@ static wad_file_t *W_StdC_MMapFile(char *path)
     {
         I_Error("Ooops!");
     }
-
+    f_close(&result->fstream);
     return &result->wad;
 
 }

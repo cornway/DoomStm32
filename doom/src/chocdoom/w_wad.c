@@ -139,6 +139,28 @@ static void ExtendLumpInfo(int newnumlumps)
 //  for the lump name.
 int maps_total = 0;
 
+static void
+W_CheckLumpName (lumpinfo_t *lump)
+{
+    if (0 == strncmp(lump->name, "MAP", 3) &&
+        isdigit(lump->name[3])) {
+
+        if (gamemode != commercial) {
+            int map = atoi(lump->name + 3);
+            int ep = map / 8;
+
+            map--;
+            map = map % 8;
+            map++;
+            snprintf(lump->name, 8, "E%dM%d", ep + 1, map);
+            doom_3do_edition = true;
+        }
+        maps_total++;
+    } else if (((lump->name[0] == 'E') && (lump->name[2] == 'M'))) {
+        maps_total++;
+    }
+}
+
 wad_file_t *W_AddFile (char *filename)
 {
     wadinfo_t header;
@@ -222,11 +244,7 @@ wad_file_t *W_AddFile (char *filename)
 		lump_p->size = LONG(filerover->size);
 			lump_p->cache = NULL;
 		strncpy(lump_p->name, filerover->name, 8);
-        if (0 == strncmp(lump_p->name, "MAP", 3)) {
-            maps_total++;
-        } else if (((lump_p->name[0] == 'E') && (lump_p->name[2] == 'M'))) {
-            maps_total++;
-        }
+        W_CheckLumpName(lump_p);
 
         ++lump_p;
         ++filerover;
@@ -330,11 +348,7 @@ wad_file_t *W_AddLumpFile (char *filename)
 		lump_p->size     = READ_LE_I32(filerover->size);
         lump_p->cache = NULL;
 		strncpy(lump_p->name, filerover->name, 8);
-        if (0 == strncmp(lump_p->name, "MAP", 3)) {
-            maps_total++;
-        } else if (((lump_p->name[0] == 'E') && (lump_p->name[2] == 'M'))) {
-            maps_total++;
-        }
+        W_CheckLumpName(lump_p);
 
         ++lump_p;
         ++filerover;
