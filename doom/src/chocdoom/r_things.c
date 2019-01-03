@@ -303,20 +303,6 @@ void R_InitSpriteDefs (char** namelist)
 	    Z_Malloc (maxframe * sizeof(spriteframe_t), PU_STATIC, NULL);
 	memcpy (sprites[i].spriteframes, sprtemp, maxframe*sizeof(spriteframe_t));
     }
-    /*TODO :  move to deh.c*/
-    if (game_alt_pkg == pkg_psx_final) {
-        mobjinfo_t *info = &mobjinfo[MT_SHADOWS];
-
-        info->spawnstate    = S_SPEC_STND;
-        info->spawnhealth   = 240;
-        info->seestate      = S_SPEC_RUN1;
-        info->painstate     = S_SPEC_PAIN;
-        info->meleestate    = S_SPEC_ATK1;
-        info->deathstate    = S_SPEC_DIE1;
-        info->flags         &= ~MF_SHADOW;
-        info->raisestate    = S_SPEC_RAISE1;
-    }
-
 }
 
 //

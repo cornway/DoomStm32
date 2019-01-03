@@ -54,6 +54,7 @@ void V_CopyRect(int srcx, int srcy, byte *source,
                 int width, int height,
                 int destx, int desty);
 
+void V_DrawPatchC (patch_t *patch, int yoff);
 void V_DrawPatch(int x, int y, patch_t *patch);
 void V_DrawPatchFlipped(int x, int y, patch_t *patch);
 void V_DrawTLPatch(int x, int y, patch_t *patch);

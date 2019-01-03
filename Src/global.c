@@ -433,7 +433,8 @@ int		ptflags;
 
 gamestate_t     oldgamestate; 
  
-gameaction_t    gameaction; 
+gameaction_t    gameaction;
+gameaction_t    gameaction_next;
 gamestate_t     gamestate; 
 skill_t         gameskill; 
 boolean		respawnmonsters;

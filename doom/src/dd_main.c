@@ -25,7 +25,14 @@
 #include "spi.h"
 #include "images.h"
 #include "touch.h"
-extern void D_DoomMain (void);
+#include "doom.h"
+#include "d_main.h"
+#include "d_mode.h"
+#include "w_wad.h"
+#include "info.h"
+#include "p_mobj.h"
+#include "v_video.h"
+#include "z_zone.h"
 
 /*---------------------------------------------------------------------*
  *  public functions                                                   *
@@ -80,6 +87,44 @@ void fatal_error (const char* message)
 	}
 }
 
+
+
+
+static gameaction_t alt_gameaction = ga_nothing;
+
+void DD_SetGameAct (gameaction_t action)
+{
+    alt_gameaction = action;
+}
+
+void DD_ProcGameAct (void)
+{
+    alt_gameaction = ga_nothing;
+}
+
+void DD_LoadAltPkgGame (void)
+{
+    if (game_alt_pkg == pkg_psx_final) {
+        mobjinfo_t *info = &mobjinfo[MT_SHADOWS];
+
+        info->spawnstate    = S_SPEC_STND;
+        info->spawnhealth   = 240;
+        info->seestate      = S_SPEC_RUN1;
+        info->painstate     = S_SPEC_PAIN;
+        info->meleestate    = S_SPEC_ATK1;
+        info->deathstate    = S_SPEC_DIE1;
+        info->flags         &= ~MF_SHADOW;
+        info->raisestate    = S_SPEC_RAISE1;
+    }
+}
+
+void DD_UpdateNoBlit (void)
+{
+    if (alt_gameaction == ga_cachelevel) {
+        patch_t *ld = W_CacheLumpName("LOADING", PU_CACHE);
+        V_DrawPatchC(ld, 0);
+    }
+}
 /*---------------------------------------------------------------------*
  *  eof                                                                *
  *---------------------------------------------------------------------*/

@@ -114,7 +114,7 @@ void I_StartFrame (void)
 }
 void I_UpdateNoBlit (void)
 {
-
+    DD_UpdateNoBlit();
 }
 
 #if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)

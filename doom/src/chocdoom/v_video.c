@@ -131,6 +131,16 @@ void V_SetPatchClipCallback(vpatchclipfunc_t func)
     patchclip_callback = func;
 }
 
+
+void V_DrawPatchC (patch_t *patch, int yoff)
+{
+    int x = SCREENWIDTH / 2 - READ_LE_U16(patch->width) / 2;
+    int y = SCREENHEIGHT / 2 - READ_LE_U16(patch->height) / 2;
+    y = y + yoff;
+
+    V_DrawPatch(x, y, patch);
+}
+
 //
 // V_DrawPatch
 // Masks a column based masked pic to the screen. 

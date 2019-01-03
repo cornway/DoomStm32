@@ -456,6 +456,7 @@ void D_DoomLoop (void)
         {
             D_Display ();
         }
+        DD_ProcGameAct();
         frame_end();
         fps_update();
     }
@@ -1753,6 +1754,8 @@ void D_DoomMain (void)
 
     DEH_printf("\nP_Init: Init Playloop state.\n");
     P_Init ();
+
+    DD_LoadAltPkgGame();
 
     DEH_printf("S_Init: Setting up sound.\n");
     S_Init (sfxVolume * 8, musicVolume * 8);
