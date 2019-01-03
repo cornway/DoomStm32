@@ -112,48 +112,9 @@ void I_StartFrame (void)
 {
 
 }
-
-#define CROSS_R 200
-#define CROSS_G 200
-#define CROSS_B 200
-#define CROSS_W 6
-#define CROSS_H 6
-
-extern int cross_x;
-extern int cross_y;
-
-static uint8_t cross_color;
-
-
-static void
-draw_cross ()
-{
-    int cross_top = cross_y - CROSS_H / 2;
-    int cross_left = cross_x - CROSS_W / 2;
-
-    byte *buffer = I_VideoBuffer;
-
-    for (; cross_top < cross_y + CROSS_H / 2; cross_top++)
-        buffer[cross_x + cross_top * SCREENWIDTH] = cross_color;
-
-    for (; cross_left < cross_x + CROSS_W / 2; cross_left++)
-        buffer[cross_left + cross_y * SCREENWIDTH] = cross_color;
-}
-
-extern gamestate_t     gamestate;
-extern boolean         automapactive;
-extern boolean         menuactive;
-
 void I_UpdateNoBlit (void)
 {
-    if (gamestate != GS_LEVEL) {
-        return;
-    }
-    if (automapactive ||
-        menuactive) {
-        return;
-    }
-    draw_cross();
+
 }
 
 #if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
@@ -386,9 +347,6 @@ void I_SetPalette (byte* palette)
     }
 #if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
     lcd_load_palette(rgb_palette, pal_size, SCREENWIDTH, SCREENHEIGHT);
-    cross_color = I_GetPaletteIndex(CROSS_R, CROSS_G, CROSS_B);
-#else
-    cross_color = GFX_RGB(CROSS_R, CROSS_G, CROSS_B, GFX_OPAQUE);
 #endif
 }
 

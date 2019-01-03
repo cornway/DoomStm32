@@ -303,6 +303,19 @@ void R_InitSpriteDefs (char** namelist)
 	    Z_Malloc (maxframe * sizeof(spriteframe_t), PU_STATIC, NULL);
 	memcpy (sprites[i].spriteframes, sprtemp, maxframe*sizeof(spriteframe_t));
     }
+    /*TODO :  move to deh.c*/
+    if (game_alt_pkg == pkg_psx_final) {
+        mobjinfo_t *info = &mobjinfo[MT_SHADOWS];
+
+        info->spawnstate    = S_SPEC_STND;
+        info->spawnhealth   = 240;
+        info->seestate      = S_SPEC_RUN1;
+        info->painstate     = S_SPEC_PAIN;
+        info->meleestate    = S_SPEC_ATK1;
+        info->deathstate    = S_SPEC_DIE1;
+        info->flags         &= ~MF_SHADOW;
+        info->raisestate    = S_SPEC_RAISE1;
+    }
 
 }
 
@@ -478,7 +491,7 @@ R_DrawVisSprite
             I_Error ("R_DrawSpriteRange: bad texturecolumn");
 #endif
         column = (column_t *) ((byte *)patch +
-                LONG(patch->columnofs[texturecolumn]));
+                READ_LE_U32_P(patch->columnofs + texturecolumn));
         R_DrawMaskedColumn (column);
         if (render_on_distance) {
             byte downscale = 1 << rw_render_downscale[rw_render_range].shift;

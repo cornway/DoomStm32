@@ -85,8 +85,6 @@ int			showMessages = 1;
 // Blocky mode, has default, 0 = high, 1 = normal
 int			detailLevel = 0;
 int			screenblocks = 10;
-int cross_x = SCREENWIDTH / 2;
-int cross_y = SCREENHEIGHT / 2;
 
 // temp for screenblocks (0-9)
 int			screenSize;
@@ -1315,9 +1313,6 @@ void M_SizeDisplay(int choice)
 	{
 	    screenblocks--;
 	    screenSize--;
-        if (screenSize == 7) {
-            cross_y -= 16;
-        }
 	}
 	break;
       case 1:
@@ -1325,9 +1320,6 @@ void M_SizeDisplay(int choice)
 	{
 	    screenblocks++;
 	    screenSize++;
-        if (screenSize == 8) {
-            cross_y += 16;
-        }
 	}
 	break;
     }

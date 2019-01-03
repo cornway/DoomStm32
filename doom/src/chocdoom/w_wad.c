@@ -38,7 +38,10 @@
 
 extern GameMode_t gamemode;
 
-boolean doom_3do_edition = false;
+GameAltPackage_t game_alt_pkg = pkg_none;
+
+#define GAME_3D0_PKG_MARKER "V3DO"
+#define GAME_PSX_PKG_MARKER "VPSX"
 
 typedef struct
 {
@@ -157,12 +160,27 @@ W_CheckLumpName (lumpinfo_t *lump)
             map = map % 8;
             map++;
             snprintf(lump->name, 8, "E%dM%d", ep + 1, map);
-            doom_3do_edition = true;
         }
         maps_total++;
     } else if (((lump->name[0] == 'E') && (lump->name[2] == 'M'))) {
         maps_total++;
     }
+}
+
+static void
+W_SetAltPkgType (lumpinfo_t *lump)
+{
+    GameAltPackage_t pkg = pkg_none;
+
+    if (game_alt_pkg != pkg_none) {
+        return;
+    }
+    if (!strcmp(GAME_3D0_PKG_MARKER, lump->name)) {
+        pkg = pkg_3d0_doom;
+    } else if (!strcmp(GAME_PSX_PKG_MARKER, lump->name)) {
+        pkg = pkg_psx_final;
+    }
+    game_alt_pkg = pkg;
 }
 
 wad_file_t *W_AddFile (char *filename)
@@ -265,21 +283,13 @@ wad_file_t *W_AddFile (char *filename)
     return wad_file;
 }
 
-static void mem_cpy (char *dest, char *src, int size)
-{
-    int i = 0;
-    for (i = 0; i < size; i++) {
-        dest[i] = src[i];
-    }
-}
-
 wad_file_t *W_AddLumpFile (char *filename)
 {
     wadinfo_t *header;
     lumpinfo_t *lump_p;
     unsigned int i;
     wad_file_t *wad_file;
-    int newnumlumps, startlump, length;
+    int newnumlumps, startlump;
     filelump_t *filerover;
     filelump_t *fileinfo;
 
@@ -331,7 +341,6 @@ wad_file_t *W_AddLumpFile (char *filename)
 
 		header->numlumps = READ_LE_U32(header->numlumps);
 		header->infotableofs = READ_LE_U32(header->infotableofs);
-		length = header->numlumps*sizeof(filelump_t);
 		fileinfo = (filelump_t *)((uint8_t *)wad_file->mapped + header->infotableofs);
 
         newnumlumps += header->numlumps;
@@ -353,6 +362,7 @@ wad_file_t *W_AddLumpFile (char *filename)
         lump_p->cache = NULL;
 		strncpy(lump_p->name, filerover->name, 8);
         W_CheckLumpName(lump_p);
+        W_SetAltPkgType(lump_p);
 
         ++lump_p;
         ++filerover;

@@ -364,17 +364,6 @@ static void GenerateSpriteList(void)
 //  * All Sprites and Flats are ignored, with the assumption they have
 //    already been merged into the IWAD's sections.
 
-static int
-get_Linfo (searchlist_t *list, const char *name)
-{
-    for (int i = 0; i < list->numlumps; i++) {
-        if (strcmp(name, list->lumps[i].name) == 0) {
-            return i;
-        }
-    }
-    return -1;
-}
-
 static void DoMerge(void)
 {
     section_t   current_section;
@@ -392,7 +381,6 @@ static void DoMerge(void)
     for (int i = 0; i < iwad.numlumps; i++)
     {
         lumpinfo_t  *lump = &iwad.lumps[i];
-        static int start_reject = 0;
 
         switch (current_section)
         {
