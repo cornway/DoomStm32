@@ -32,6 +32,7 @@
 #include "info.h"
 #include "p_mobj.h"
 #include "v_video.h"
+#include "i_video.h"
 #include "z_zone.h"
 
 /*---------------------------------------------------------------------*
@@ -87,6 +88,69 @@ void fatal_error (const char* message)
 	}
 }
 
+typedef enum {
+    anim_none,
+    anim_start,
+    anim_proc,
+    anim_end,
+} anim_state_t;
+
+typedef struct {
+    int start;
+    int end;
+    int frame;
+    anim_state_t state;
+} anim_t;
+
+static anim_t fire_anim = {-1, -1, -1, anim_none};
+
+static void DD_LoadAnim (anim_t *anim, char *start, char *end)
+{
+    anim->start = W_CheckNumForName(start);
+    anim->end = W_CheckNumForName(end);
+    anim->frame = anim->start;
+    anim->state = anim_proc;
+}
+
+static void DD_ProcAnim (anim_t *anim)
+{
+    switch (anim->state) {
+        case anim_none:
+            break;
+        case anim_start:
+            break;
+        case anim_proc:
+            anim->frame++;
+            if (anim->frame > anim->end) {
+                anim->state = anim_end;
+            }
+            break;
+        case anim_end:
+            anim->frame = -1;
+            anim->state = anim_none;
+            break;
+    }
+}
+
+static void DD_DrawAnimTileW (anim_t *anim)
+{
+    int x, y, w, h, f_num, i;
+    if (anim->frame < 0)
+        return;
+
+    patch_t *patch = W_CacheLumpNum(anim->frame, PU_CACHE);
+
+    x = 0;
+    w = READ_LE_U16(patch->width);
+    h = READ_LE_U16(patch->height);
+    f_num = SCREENWIDTH / w;
+    y = SCREENHEIGHT - h;
+
+    for (i = 0; i < f_num; i++) {
+        V_DrawPatch(x, y, patch);
+        x += w;
+    }
+}
 
 
 
@@ -115,6 +179,8 @@ void DD_LoadAltPkgGame (void)
         info->deathstate    = S_SPEC_DIE1;
         info->flags         &= ~MF_SHADOW;
         info->raisestate    = S_SPEC_RAISE1;
+
+        DD_LoadAnim(&fire_anim, "FIRE001", "FIRE317");
     }
 }
 
@@ -123,7 +189,12 @@ void DD_UpdateNoBlit (void)
     if (alt_gameaction == ga_cachelevel) {
         patch_t *ld = W_CacheLumpName("LOADING", PU_CACHE);
         V_DrawPatchC(ld, 0);
+        goto done;
     }
+    DD_ProcAnim(&fire_anim);
+    DD_DrawAnimTileW(&fire_anim);
+done:
+    return;
 }
 /*---------------------------------------------------------------------*
  *  eof                                                                *
