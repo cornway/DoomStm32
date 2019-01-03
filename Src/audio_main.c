@@ -905,7 +905,7 @@ search_ext_sound (char *_name, int num)
     static FIL file;
 
     char path[64];
-    char name[SND_LUMP_NAME_LENGTH + 1] = {[SND_LUMP_NAME_LENGTH] = 0};
+    char name[SND_LUMP_NAME_LENGTH + 1] = {0};
 
     cache_num = snd_ext_get_slot(num);
     if (cache_num >= 0) {
@@ -926,7 +926,7 @@ search_ext_sound (char *_name, int num)
         error_handle();
     }
     snd_cache_set_name(cache_num, name);
-    snd_num_cache[cache_num].lumpnum = num;
+    snd_num_cache[cache_num].lumpnum = cache_num;
     snd_num_cache[cache_num].size = f_size(&file);
     f_close(&file);
     return cache_num;

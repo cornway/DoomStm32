@@ -919,8 +919,14 @@ static boolean LockSound(sfxinfo_t *sfxinfo)
 static int I_SDL_GetSfxLumpNum(sfxinfo_t *sfx)
 {
     char namebuf[9];
+    int s;
 
     GetSfxLumpName(sfx, namebuf, sizeof(namebuf));
+
+    s = search_ext_sound(namebuf, -1);
+    if (s >= 0) {
+        return s;
+    }
 
     return W_GetNumForName(namebuf);
 }
