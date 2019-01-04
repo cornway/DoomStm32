@@ -101,8 +101,10 @@
 
 #define ST_NUMEXTRAFACES		2
 
+#define ST_NUMEXPFACES 6
+
 #define ST_NUMFACES \
-          (ST_FACESTRIDE*ST_NUMPAINFACES+ST_NUMEXTRAFACES)
+          (ST_FACESTRIDE*ST_NUMPAINFACES+ST_NUMEXTRAFACES + ST_NUMEXPFACES)
 
 #define ST_TURNOFFSET		(ST_NUMSTRAIGHTFACES)
 #define ST_OUCHOFFSET		(ST_TURNOFFSET + ST_NUMTURNFACES)
@@ -110,6 +112,8 @@
 #define ST_RAMPAGEOFFSET		(ST_EVILGRINOFFSET + 1)
 #define ST_GODFACE			(ST_NUMPAINFACES*ST_FACESTRIDE)
 #define ST_DEADFACE			(ST_GODFACE+1)
+#define ST_EXPFACE0         (ST_NUMFACES - ST_NUMEXPFACES)
+#define ST_EXPFACEDELAY     (7)
 
 #define ST_FACESX			143
 #define ST_FACESY			168
@@ -331,6 +335,8 @@ static st_multicon_t	w_arms[6];
 
 // face status widget
 static st_multicon_t	w_faces; 
+int                     w_expfacecnt;
+int                     w_expfacedelay;
 
 // keycard widgets
 static st_multicon_t	w_keyboxes[3];
@@ -676,13 +682,30 @@ void ST_updateFaceWidget(void)
 
     if (priority < 10)
     {
-	// dead
-	if (!plyr->health)
-	{
-	    priority = 9;
-	    st_faceindex = ST_DEADFACE;
-	    st_facecount = 1;
-	}
+    // dead
+    if (!plyr->health)
+    {
+        priority = 9;
+        if (st_faceindex < ST_EXPFACE0) {
+            st_faceindex = ST_DEADFACE;
+        }
+        if (game_alt_pkg == pkg_psx_final) {
+            if (st_oldhealth > ST_MUCHPAIN) {
+                st_faceindex = ST_EXPFACE0;
+                w_expfacecnt = ST_NUMEXPFACES - 1;
+                w_expfacedelay = ST_EXPFACEDELAY;
+            } else if (w_expfacecnt) {
+                if (!w_expfacedelay) {
+                    st_faceindex++;
+                    w_expfacecnt--;
+                    w_expfacedelay = ST_EXPFACEDELAY;
+                } else {
+                    w_expfacedelay--;
+                }
+            }
+        }
+        st_facecount = 1;
+    }
     }
 
     if (priority < 9)
@@ -1132,6 +1155,14 @@ static void ST_loadUnloadGraphics(load_callback_t callback)
     ++facenum;
     callback(DEH_String("STFDEAD0"), &faces[facenum]);
     ++facenum;
+
+    if (game_alt_pkg == pkg_psx_final) {
+        for (j=0; j<ST_NUMEXPFACES; j++) {
+            DEH_snprintf(namebuf, 9, "STFEXP%d", j);
+                callback(namebuf, &faces[facenum]);
+                ++facenum;
+        }
+    }
 }
 
 static void ST_loadCallback(char *lumpname, patch_t **variable)
@@ -1249,13 +1280,18 @@ void ST_createWidgets(void)
 		  ST_FRAGSWIDTH);
 
     // faces
-    STlib_initMultIcon(&w_faces,
-		       ST_FACESX,
-		       ST_FACESY,
-		       faces,
-		       &st_faceindex,
-		       &st_statusbaron);
-
+    {
+        int offx = ST_FACESX;
+        if (game_alt_pkg == pkg_psx_final) {
+            offx += 7;
+        }
+        STlib_initMultIcon(&w_faces,
+                   offx,
+                   ST_FACESY,
+                   faces,
+                   &st_faceindex,
+                   &st_statusbaron);
+    }
     // armor percentage - should be colored later
     STlib_initPercent(&w_armor,
 		      ST_ARMORX,

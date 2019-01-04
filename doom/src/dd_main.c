@@ -88,6 +88,9 @@ void fatal_error (const char* message)
 	}
 }
 
+extern gamestate_t gamestate;
+
+
 typedef enum {
     anim_none,
     anim_start,
@@ -99,17 +102,21 @@ typedef struct {
     int start;
     int end;
     int frame;
+    int elapse;
+    int delay;
     anim_state_t state;
 } anim_t;
 
-static anim_t fire_anim = {-1, -1, -1, anim_none};
+static anim_t fire_anim = {-1, -1, -1, -1, -1, anim_none};
 
-static void DD_LoadAnim (anim_t *anim, char *start, char *end)
+static void DD_LoadAnim (anim_t *anim, char *start, char *end, int delay)
 {
     anim->start = W_CheckNumForName(start);
     anim->end = W_CheckNumForName(end);
     anim->frame = anim->start;
     anim->state = anim_proc;
+    anim->delay = delay;
+    anim->elapse = delay;
 }
 
 static void DD_ProcAnim (anim_t *anim)
@@ -120,6 +127,11 @@ static void DD_ProcAnim (anim_t *anim)
         case anim_start:
             break;
         case anim_proc:
+            if (anim->elapse> 0) {
+                anim->elapse--;
+                break;
+            }
+            anim->elapse = anim->delay;
             anim->frame++;
             if (anim->frame > anim->end) {
                 anim->state = anim_end;
@@ -180,7 +192,7 @@ void DD_LoadAltPkgGame (void)
         info->flags         &= ~MF_SHADOW;
         info->raisestate    = S_SPEC_RAISE1;
 
-        DD_LoadAnim(&fire_anim, "FIRE001", "FIRE317");
+        DD_LoadAnim(&fire_anim, "FIRE001", "FIRE317", -1);
     }
 }
 
@@ -191,8 +203,10 @@ void DD_UpdateNoBlit (void)
         V_DrawPatchC(ld, 0);
         goto done;
     }
-    DD_ProcAnim(&fire_anim);
-    DD_DrawAnimTileW(&fire_anim);
+    if (gamestate == GS_DEMOSCREEN) {
+        DD_ProcAnim(&fire_anim);
+        DD_DrawAnimTileW(&fire_anim);
+    }
 done:
     return;
 }
