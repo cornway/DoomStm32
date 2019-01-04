@@ -147,12 +147,12 @@ static void ExtendLumpInfo(int newnumlumps)
 int maps_total = 0;
 
 static void
-W_CheckLumpName (lumpinfo_t *lump)
+W_CountMaps (lumpinfo_t *lump, boolean pwad)
 {
     if (0 == strncmp(lump->name, "MAP", 3) &&
         isdigit(lump->name[3])) {
 
-        if (gamemode != commercial) {
+        if (pwad && game_alt_pkg == pkg_3d0_doom) {
             int map = atoi(lump->name + 3);
             int ep = map / 8;
 
@@ -266,7 +266,7 @@ wad_file_t *W_AddFile (char *filename)
 		lump_p->size = LONG(filerover->size);
 			lump_p->cache = NULL;
 		strncpy(lump_p->name, filerover->name, 8);
-        W_CheckLumpName(lump_p);
+        W_CountMaps(lump_p, false);
 
         ++lump_p;
         ++filerover;
@@ -283,7 +283,7 @@ wad_file_t *W_AddFile (char *filename)
     return wad_file;
 }
 
-wad_file_t *W_AddLumpFile (char *filename)
+wad_file_t *W_AddPwad (char *filename)
 {
     wadinfo_t *header;
     lumpinfo_t *lump_p;
@@ -361,7 +361,7 @@ wad_file_t *W_AddLumpFile (char *filename)
 		lump_p->size     = READ_LE_I32(filerover->size);
         lump_p->cache = NULL;
 		strncpy(lump_p->name, filerover->name, 8);
-        W_CheckLumpName(lump_p);
+        W_CountMaps(lump_p, true);
         W_SetAltPkgType(lump_p);
 
         ++lump_p;

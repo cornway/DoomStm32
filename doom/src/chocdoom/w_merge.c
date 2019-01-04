@@ -512,7 +512,7 @@ boolean W_MergeFile(char *filename, boolean automatic)
     int old_numlumps = numlumps;
 
     // Load PWAD
-    if (!W_AddLumpFile(filename))
+    if (!W_AddPwad(filename))
         return false;
 
     // IWAD is at the start, PWAD was appended to the end
