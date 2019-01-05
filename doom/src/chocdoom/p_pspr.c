@@ -246,6 +246,9 @@ void P_FireWeapon (player_t* player)
     newstate = (statenum_t)weaponinfo[player->readyweapon].atkstate;
     P_SetPsprite (player, ps_weapon, newstate);
     P_NoiseAlert (player->mo, player->mo);
+    if (game_alt_pkg == pkg_psx_final) {
+        player->wpfired_ev = 8;
+    }
 }
 
 
