@@ -225,7 +225,7 @@ static allocated_sound_t *AllocateSound(sfxinfo_t *sfxinfo, size_t len)
 
     // Skip past the chunk structure for the audio buffer
 
-    snd->chunk.abuf = (Uint16 *)(snd + 1);
+    snd->chunk.abuf = (snd_sample_t *)(snd + 1);
     snd->chunk.alen = len;
     snd->chunk.allocated = 1;
     snd->chunk.volume = sfxinfo->volume;

@@ -12,6 +12,7 @@
 
 #define AUDIO_SAMPLE_RATE I2S_AUDIOFREQ_22K
 #define AUDIO_MAX_CHANS 12
+#define AUDIO_MUS_CHAN_START AUDIO_MAX_CHANS
 #define AUDIO_OUT_BUFFER_SIZE 0x400
 #define AUDIO_BUFFER_MS AUDIO_SIZE_TO_MS(AUDIO_SAMPLE_RATE, AUDIO_OUT_BUFFER_SIZE)
 
@@ -45,7 +46,7 @@ typedef int16_t snd_sample_t;
 
 typedef struct Mix_Chunk {
     int allocated;
-    uint16_t *abuf;
+    snd_sample_t *abuf;
     int32_t alen;
     uint8_t volume;     /* Per-sample volume, 0-128 */
 } Mix_Chunk;
@@ -55,6 +56,7 @@ typedef struct {
     Mix_Chunk chunk;
     int8_t is_playing;
     uint8_t id;
+    int (*complete) (int);
 } audio_channel_t;
 
 void audio_init (void);
