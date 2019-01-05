@@ -343,17 +343,13 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     // use two stage accelerative turning
     // on the keyboard and joystick
     if (gamekeydown[key_right] || gamekeydown[key_left]) {
-        turnheld += ticdup;
+        if (turnheld + angleturn[0] > angleturn[1]) {
+            turnheld = angleturn[1] - angleturn[0];
+        }
+        turnheld += 25;
+        t_angleturn = angleturn[0] + turnheld;
         if (gamekeydown[key_right]) {
-            t_angleturn = -angleturn[0] - (turnheld << 4);
-            if (t_angleturn < -angleturn[1]) {
-                t_angleturn = angleturn[1];
-            }
-        } else {
-            t_angleturn = angleturn[0] + (turnheld << 4);
-            if (t_angleturn > angleturn[1]) {
-                t_angleturn = angleturn[1];
-            }
+            t_angleturn = -t_angleturn;
         }
     } else { 
         turnheld = 0;
