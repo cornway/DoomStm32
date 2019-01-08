@@ -187,8 +187,6 @@ void R_DrawColumn (void)
                 }
             break;
             case R_RANGE_MID:
-                fracstep += fracstep;
-                fracstep += fracstep;
                 if (count >= 4) {
                     do  {
                         // Re-map color indices from wall texture column
@@ -204,13 +202,12 @@ void R_DrawColumn (void)
                         dest2 += SCREENWIDTH * 4;
                         dest3 += SCREENWIDTH * 4;
                         dest4 += SCREENWIDTH * 4;
-                        frac += fracstep;
+                        frac += fracstep * 4;
                         count -= 4;
                     } while (count > 0);
                 }
             break;
             case R_RANGE_NEAR:
-                fracstep += fracstep;
                 if (count >= 2) {
                     do  {
                         // Re-map color indices from wall texture column
@@ -221,7 +218,7 @@ void R_DrawColumn (void)
                         *(uint16_t *)dest2 = c;
                         dest += SCREENWIDTH * 2;
                         dest2 += SCREENWIDTH * 2;
-                        frac += fracstep;
+                        frac += fracstep * 2;
                         count -= 2;
                     } while (count > 0);
                 }

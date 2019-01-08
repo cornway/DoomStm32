@@ -1012,7 +1012,7 @@ static void D_ForeachFileHdlr(void *_filename)
     filename[0] = 0;
 }
 
-extern int maps_total;
+extern int game_levels_total;
 static void M_SetLevel(int choice)
 {
     memset(level_select_message, 0, sizeof(level_select_message));
@@ -1022,7 +1022,7 @@ static void M_SetLevel(int choice)
             level_selected--;        
     } else if (choice == 1) {
 
-        if (level_selected < maps_total) {
+        if (level_selected < game_levels_total) {
             level_selected++;
         } else {
             D_FindWADByExt(D_ForeachFileHdlr);

@@ -144,7 +144,7 @@ static void ExtendLumpInfo(int newnumlumps)
 //  with multiple lumps.
 // Other files are single lumps with the base filename
 //  for the lump name.
-int maps_total = 0;
+int game_levels_total = 0;
 
 static void
 W_CountMaps (lumpinfo_t *lump, boolean pwad)
@@ -161,9 +161,9 @@ W_CountMaps (lumpinfo_t *lump, boolean pwad)
             map++;
             snprintf(lump->name, 8, "E%dM%d", ep + 1, map);
         }
-        maps_total++;
+        game_levels_total++;
     } else if (((lump->name[0] == 'E') && (lump->name[2] == 'M'))) {
-        maps_total++;
+        game_levels_total++;
     }
 }
 

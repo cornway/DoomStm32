@@ -413,11 +413,7 @@ int music_play_song_name (const char *name)
 
 int music_pause (void)
 {
-    if (mus.state == MUS_PLAYING ||
-        mus.state == MUS_UPDATING) {
-        mus.state = MUS_PAUSE;
-        return 0;
-    }
+    mus.state = MUS_PAUSE;
     return 1;
 }
 

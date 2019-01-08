@@ -4,6 +4,10 @@
 
 #define COMPRESSION 1
 #define USE_FLOAT 1
+#ifdef USE_REVERB
+//#undef USE_REVERB
+//#define USE_REVERB 1
+#endif
 
 extern void music_tickle (void);
 extern snd_sample_t *music_get_next_chunk (int32_t *size);
@@ -162,47 +166,44 @@ static void AUDIO_InitApplication(void);
 
 #if USE_REVERB
 
-static int reverb_life_time;/*1s*/
+#define REVERB_END_BUFFER (0x800)
+#define REVERB_END_BUFFER_M (REVERB_END_BUFFER - 1)
 
-static void process_reverb (uint8_t idx, uint8_t force)
+#define REVERB2_END_BUFFER (0x100)
+#define REVERB2_END_BUFFER_M (REVERB2_END_BUFFER - 1)
+
+static snd_sample_t reverb_raw_buf[REVERB_END_BUFFER];
+static snd_sample_t reverb2_raw_buf[REVERB2_END_BUFFER];
+
+
+static uint16_t  rev_rd_idx = 0, rev_wr_idx = 0;
+static uint16_t  rev2_rd_idx = 0, rev2_wr_idx = 0;
+
+static inline void
+a_rev_push (snd_sample_t s)
 {
-    int16_t *dest, *src;
-    int16_t samples_cnt;
-    int16_t delay_start_sample = REVERB_DELAY;
-
-    if (force) {
-        reverb_life_time = 1000;
-    } else {
-        reverb_life_time -= AUDIO_BUFFER_MS;
-    }
-
-    if (reverb_life_time < 0)
-        return;
-    
-    while (delay_start_sample > AUDIO_OUT_BUFFER_SIZE) {
-        delay_start_sample -= AUDIO_OUT_BUFFER_SIZE;
-        idx ^= 1;
-    }
-    samples_cnt = AUDIO_OUT_BUFFER_SIZE - delay_start_sample;
-    src = (int16_t *)audio_raw_buf[idx];
-    dest = dest + delay_start_sample;
-
-    for (int i = 0; i < samples_cnt; i++) {
-        dest[i] += ((int32_t)src[i] * REVERB_DECAY) / REVERB_DECAY_MAX;
-    }
-    src += samples_cnt;
-    dest = (int16_t *)audio_raw_buf[idx ^ 1];
-    samples_cnt = AUDIO_OUT_BUFFER_SIZE - samples_cnt;
-
-    for (int i = 0; i < samples_cnt; i++ ) {
-        dest[i] += ((int32_t)src[i] * REVERB_DECAY) / REVERB_DECAY_MAX;
-    }
-
+    reverb_raw_buf[(rev_rd_idx++) & REVERB_END_BUFFER_M] = s;
 }
-static int reverb_done ()
+
+static inline snd_sample_t
+a_rev_pop (void)
 {
-    return 1;
+    return reverb_raw_buf[(rev_wr_idx++) & REVERB_END_BUFFER_M];
 }
+
+static inline void
+a_rev2_push (snd_sample_t s)
+{
+    reverb2_raw_buf[(rev2_rd_idx++) & REVERB2_END_BUFFER_M] = s;
+}
+
+static inline snd_sample_t
+a_rev2_pop (void)
+{
+    return reverb2_raw_buf[(rev2_wr_idx++) & REVERB2_END_BUFFER_M];
+}
+
+
 #endif
 
 static void chan_remove_helper (chan_desc_t *desc);
@@ -267,6 +268,18 @@ static void ll_init ()
     chan_llist_ready.first_link_handle = ll_ready_first_link_handle;
     chan_llist_ready.remove_handle = ll_ready_remove_handle;
     AUDIO_InitApplication();
+
+#if (USE_REVERB)
+    {
+        int i;
+        for (i = 0; i < REVERB_END_BUFFER; i++) {
+            a_rev_push(0);
+        }
+        for (i = 0; i < REVERB2_END_BUFFER; i++) {
+            a_rev2_push(0);
+        }
+    }
+#endif
 }
 
 static void
@@ -474,7 +487,7 @@ void audio_set_pan (int handle, int l, int r)
 
 static void AUDIO_InitApplication(void)
 {
-  BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_AUTO, 60, AUDIO_SAMPLE_RATE);
+  BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_AUTO, 75, AUDIO_SAMPLE_RATE);
   BSP_AUDIO_OUT_SetAudioFrameSlot(CODEC_AUDIOFRAME_SLOT_02);
 }
 
@@ -742,9 +755,10 @@ static void chan_proc_raw_all_ex (snd_sample_t *dest, uint8_t idx)
     int32_t size;
     snd_sample_t *ps;
     uint8_t vol;
-    uint8_t mark_to_clear = 0;
+    uint16_t mark_to_clear = 0;
     chan_foreach(&chan_llist_ready, cur) {
         if (chan_complete(cur) && chan_complete(cur)(1)) {
+            mark_to_clear++;
             continue;
         }
         chan_move_win(cur, AUDIO_OUT_BUFFER_SIZE, &ps, &size);
@@ -754,6 +768,26 @@ static void chan_proc_raw_all_ex (snd_sample_t *dest, uint8_t idx)
             mark_to_clear++;
         }
     }
+#if (USE_REVERB)
+    {
+        int i = 0;
+        snd_sample_t s;
+        for (i = 0; i < AUDIO_OUT_BUFFER_SIZE; i++) {
+            s = a_rev_pop();
+            if (s) {
+                dest[i] = dest[i] / 2 + s / 2;
+                mark_to_clear++;
+            }
+            a_rev_push(dest[i]);
+            s = a_rev2_pop();
+            if (s) {
+                dest[i] = dest[i] / 2 + s / 2;
+                mark_to_clear++;
+            }
+            a_rev2_push(dest[i]);
+        }
+    }
+#endif
     if (mark_to_clear) {
         buf_cleared[idx] = 0;
     }

@@ -264,14 +264,14 @@ static const fixed_t wp_fired_mo[][9] =
     [wp_chainsaw] = {0},
     [wp_pistol] = {
         FRACUNIT * 0,
-        FRACUNIT * 1,
+        FRACUNIT * 0,
         FRACUNIT * 1,
         FRACUNIT * 1,
         FRACUNIT * 1,
         FRACUNIT * 0,
         FRACUNIT * 0,
-        FRACUNIT * 1,
-        FRACUNIT * 2,/*Highest rise*/
+        FRACUNIT * 0,
+        FRACUNIT * 3,/*Highest rise*/
     },
     [wp_shotgun] = {
         FRACUNIT * 0,
@@ -279,10 +279,10 @@ static const fixed_t wp_fired_mo[][9] =
         FRACUNIT * 1,
         FRACUNIT * 2,
         FRACUNIT * 4,
+        FRACUNIT * 0,
         FRACUNIT * 1,
         FRACUNIT * 1,
-        FRACUNIT * 2,
-        FRACUNIT * 4,/*Highest rise*/
+        FRACUNIT * 6,/*Highest rise*/
     },
     [wp_supershotgun] = {
         FRACUNIT * 0,
@@ -290,10 +290,10 @@ static const fixed_t wp_fired_mo[][9] =
         FRACUNIT * 2,
         FRACUNIT * 3,
         FRACUNIT * 6,
+        FRACUNIT * 0,
+        FRACUNIT * 1,
         FRACUNIT * 2,
-        FRACUNIT * 2,
-        FRACUNIT * 3,
-        FRACUNIT * 5,/*Highest rise*/
+        FRACUNIT * 10,/*Highest rise*/
     },
     [wp_chaingun] = {
         FRACUNIT * 0,

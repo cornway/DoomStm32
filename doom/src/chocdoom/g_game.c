@@ -666,16 +666,17 @@ void G_Ticker (void)
         DD_SetGameAct(ga_cachelevel);
         break;
 	  case ga_loadlevel: 
-	    G_DoLoadLevel (); 
+	    G_DoLoadLevel ();
 	    break; 
 	  case ga_newgame: 
-	    G_DoNewGame (); 
-	    break; 
+	    G_DoNewGame ();
+        S_Start ();
 	  case ga_loadgame: 
-	    G_DoLoadGame (); 
+	    G_DoLoadGame ();
+        S_Start ();
 	    break; 
 	  case ga_savegame: 
-	    G_DoSaveGame (); 
+	    G_DoSaveGame ();
 	    break; 
 	  case ga_playdemo: 
 	    G_DoPlayDemo (); 

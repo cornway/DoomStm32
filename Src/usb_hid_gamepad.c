@@ -96,7 +96,7 @@ set_pad_state (int pad_idx, int state)
     } else if (keypads[pad_idx] >= 0) {
         keypads[pad_idx]--;
     }
-    if (keypads[pad_idx]) {
+    if (keypads[pad_idx] >= 0) {
         return 1;
     }
     return 0;

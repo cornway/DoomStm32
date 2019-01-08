@@ -60,11 +60,8 @@ static void CPU_CACHE_Enable(void);
 #define SDRAM_VOL_END   0xC1000000
 #define SDRAM_VOL_SIZE (SDRAM_VOL_END - SDRAM_VOL_START)
 volatile pal_t *__lcd_frame_buf_raw = (void *)SDRAM_VOL_START;
-#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
-#define RAW_LCD_FBUF_SIZE_MAX 0x00040000
-#else
-#define RAW_LCD_FBUF_SIZE_MAX 0x00200000
-#endif
+
+#define RAW_LCD_FBUF_SIZE_MAX (800 * 600 * PAL_SIZE * 2)
 
 volatile uint8_t *__heap_buf_raw = (void *)(SDRAM_VOL_START + RAW_LCD_FBUF_SIZE_MAX);
 volatile size_t __heap_buf_raw_size = (SDRAM_VOL_SIZE - RAW_LCD_FBUF_SIZE_MAX);
@@ -84,11 +81,7 @@ int main(void)
   lcd_init();
   gamepad_init();  
   audio_init();
-  
-  screen_res_x = BSP_LCD_GetXSize();
-  screen_res_y = BSP_LCD_GetYSize();
 
-    
   if(FATFS_LinkDriver(&SD_Driver, SDPath) == 0)
   {
     if(f_mount(&SDFatFs, (TCHAR const*)SDPath, 0) == FR_OK)

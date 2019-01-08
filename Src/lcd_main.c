@@ -57,55 +57,6 @@ static const uint8_t layer_transparency[] =
 
 static uint32_t layer_addr [LCD_MAX_LAYER];
 
-void lcd_load_clut (void *_buf, int size, int layer)
-{
-    HAL_LTDC_ConfigCLUT(&hltdc_discovery, (uint32_t *)_buf, size, layer);
-    HAL_LTDC_EnableCLUT(&hltdc_discovery, layer);
-}
-
-void lcd_init (void)
-{
-    if(BSP_LCD_Init())
-    {
-        while (1) {}
-    }
-    BSP_LCD_SetLayerVisible(LCD_FOREGROUND, ENABLE);
-    BSP_LCD_SetLayerVisible(LCD_BACKGROUND, ENABLE);
-
-    lcd_frame_buffer = (uint32_t)__lcd_frame_buf_raw;
-    layer_addr[LCD_BACKGROUND] = (uint32_t)__lcd_frame_buf_raw + LCD_FRAME_SIZE;
-    layer_addr[LCD_FOREGROUND] = (uint32_t)__lcd_frame_buf_raw;
-}
-
-/*
- * Set the layer to draw to
- *
- * This has no effect on the LCD itself, only to drawing routines
- *
- * @param[in]	layer	layer to change to
- */
-static inline void lcd_set_layer (lcd_layers_t layer)
-{
-    lcd_frame_buffer = layer_addr[layer];
-    BSP_LCD_SetTransparency(LCD_FOREGROUND, layer_transparency[layer]);
-}
-
-static inline void lcd_wait_ready ()
-{
-    while (!(LTDC->CDSR & LTDC_CDSR_VSYNCS));
-}
-
-void lcd_refresh (void)
-{
-    lcd_wait_ready();
-    lcd_layer = layer_switch[lcd_layer];
-    lcd_set_layer(lcd_layer);
-}
-
-uint32_t lcd_get_ready_layer_addr (void)
-{
-    return layer_addr[layer_switch[lcd_layer]];
-}
 
 static void _BSP_LCD_LayerDefaultInit(
     lcd_layers_t LayerIndex,
@@ -127,7 +78,7 @@ static void _BSP_LCD_LayerDefaultInit(
   Layercfg.PixelFormat = format;
   Layercfg.FBStartAdress = FB_Address;
   Layercfg.Alpha = 255;
-  Layercfg.Alpha0 = 255;
+  Layercfg.Alpha0 = 0;
   Layercfg.Backcolor.Blue = 0;
   Layercfg.Backcolor.Green = 0;
   Layercfg.Backcolor.Red = 0;
@@ -139,6 +90,81 @@ static void _BSP_LCD_LayerDefaultInit(
   HAL_LTDC_ConfigLayer(&hltdc_discovery, &Layercfg, LayerIndex);
 }
 
+void lcd_load_clut (void *_buf, int size, int layer)
+{
+    HAL_LTDC_ConfigCLUT(&hltdc_discovery, (uint32_t *)_buf, size, layer);
+    HAL_LTDC_EnableCLUT(&hltdc_discovery, layer);
+}
+
+void lcd_init (void)
+{
+    if(BSP_LCD_Init())
+    {
+        while (1) {}
+    }
+
+    screen_res_x = BSP_LCD_GetXSize();
+    screen_res_y = BSP_LCD_GetYSize();
+
+    lcd_frame_buffer = (uint32_t)__lcd_frame_buf_raw;
+    layer_addr[LCD_BACKGROUND] = (uint32_t)__lcd_frame_buf_raw + LCD_FRAME_SIZE;
+    layer_addr[LCD_FOREGROUND] = (uint32_t)__lcd_frame_buf_raw;
+#if (GFX_COLOR_MODE == GFX_COLOR_MODE_RGB565)
+    {
+        int layer;
+        int i;
+        pal_t *buf;
+        for (layer = 0; layer < (int)LCD_MAX_LAYER; layer++) {
+            _BSP_LCD_LayerDefaultInit(
+                (lcd_layers_t)layer,
+                layer_addr[layer],
+                LTDC_PIXEL_FORMAT_RGB565,
+                0, 0, GFX_MAX_WIDTH, GFX_MAX_HEIGHT);
+            buf = (pal_t *)layer_addr[layer];
+            for (i = 0; i < LCD_FRAME_SIZE / PAL_SIZE; i++) {
+                buf[i] = 0;
+            }
+        }
+    }
+#elif (GFX_COLOR_MODE == GFX_COLOR_MODE_RGBA8888)
+#error "Must be fixed!"
+#endif
+    BSP_LCD_SetLayerVisible(LCD_FOREGROUND, ENABLE);
+    BSP_LCD_SetLayerVisible(LCD_BACKGROUND, ENABLE);
+}
+
+/*
+ * Set the layer to draw to
+ *
+ * This has no effect on the LCD itself, only to drawing routines
+ *
+ * @param[in]	layer	layer to change to
+ */
+static inline void lcd_set_layer (lcd_layers_t layer)
+{
+    lcd_frame_buffer = layer_addr[layer];
+    BSP_LCD_SetTransparency(LCD_FOREGROUND, layer_transparency[layer]);
+}
+
+static inline void lcd_wait_ready ()
+{
+    while (!(LTDC->CDSR & LTDC_CDSR_VSYNCS));
+}
+
+void lcd_sync (int wait)
+{
+    if (wait) {
+        lcd_wait_ready();
+    } else {
+        lcd_set_layer(lcd_layer);
+        lcd_layer = layer_switch[lcd_layer];
+    }
+}
+
+uint32_t lcd_get_ready_layer_addr (void)
+{
+    return layer_addr[layer_switch[lcd_layer]];
+}
 
 void lcd_load_palette (pal_t *palette, uint32_t pal_size, uint32_t width, uint32_t height)
 {

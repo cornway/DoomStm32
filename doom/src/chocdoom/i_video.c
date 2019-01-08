@@ -50,7 +50,7 @@
 
 
 #define IVID_IRAM 1
-#define GFX_PRECISE_SCALE 1
+#define GFX_PRECISE_SCALE 0
 
 // The screen buffer; this is modified to draw things to the screen
 
@@ -90,6 +90,12 @@ typedef struct
 
 static pal_t rgb_palette[256];
 
+static inline void
+I_FlushCache (void)
+{
+    SCB_CleanDCache();
+}
+
 void I_InitGraphics (void)
 {
 #if !IVID_IRAM
@@ -127,17 +133,20 @@ typedef union {
 
 void I_FinishUpdate (void)
 {
-    lcd_refresh ();
     int src_fsize = SCREENHEIGHT * SCREENWIDTH;
 
-    uint64_t *d_y0 = (uint64_t *)lcd_get_ready_layer_addr();
-    uint64_t *d_y1 = (uint64_t *)((uint32_t)d_y0 + SCREENWIDTH * 2);
+    uint64_t *d_y0;
+    uint64_t *d_y1;
     wrd_t *line;
     wrd_t d_yt0, d_yt1;
     int s_y, i;
     uint64_t d0;
 
-    SCB_CleanDCache();
+    lcd_sync (0);
+    I_FlushCache();
+    d_y0 = (uint64_t *)lcd_get_ready_layer_addr();
+    d_y1 = (uint64_t *)((uint32_t)d_y0 + SCREENWIDTH * 2);
+
     for (s_y = 0; s_y < src_fsize; s_y += SCREENWIDTH) {
 
         line = (wrd_t *)&I_VideoBuffer[s_y];
@@ -204,7 +213,7 @@ static inline void update_line_direct (
         boolean update_cache
 )
 {
-    int i, s_i, d_i;
+    int s_i, d_i;
     pal_t cache_pix = 0;
     uint8_t index = 0;
     for (s_i = src_y * SCREENWIDTH, d_i = 0; d_i < GFX_MAX_WIDTH; d_i++) {
@@ -230,15 +239,14 @@ static inline void update_line_cache (pal_t *dest, uint8_t *cache)
 
 void I_FinishUpdate (void)
 {
-    byte index;
     pal_t *d_y = (pal_t*)lcd_get_ready_layer_addr();
     int src_y = 0, dest_y;
-    pal_t cache_pix = 0;
     uint8_t pattern_x[GFX_MAX_WIDTH + 1], pattern_y[GFX_MAX_HEIGHT + 1];
     uint8_t cache_line[MAX(GFX_MAX_WIDTH, GFX_MAX_HEIGHT)];
     boolean cache_upd;
 
-    lcd_refresh ();
+    lcd_sync (0);
+    I_FlushCache();
     fill_scale_pattern(pattern_x, pattern_y);
 
     for (dest_y = 0; dest_y < GFX_MAX_HEIGHT; dest_y++ , d_y += GFX_MAX_WIDTH) {
@@ -247,7 +255,7 @@ void I_FinishUpdate (void)
             src_y++;
             update_line_direct(d_y, src_y, pattern_x, cache_line, cache_upd);
         } else {
-            update_line_cache(d_y);
+            update_line_cache(d_y, cache_line);
         }
     }
 }
@@ -281,7 +289,7 @@ void I_FinishUpdate (void)
     int src_max_y = SCREENHEIGHT * SCREENWIDTH;
     uint32_t cache_pix = 0;
 
-    lcd_refresh ();
+    lcd_sync (0);
     d_y = (pal_t*)lcd_get_ready_layer_addr() + (x_offset + y_offset * GFX_MAX_WIDTH);
     SCB_CleanDCache();
 #if (GFX_COLOR_MODE == GFX_COLOR_MODE_RGB565)
@@ -346,6 +354,7 @@ void I_SetPalette (byte* palette)
         palette += 3;
     }
 #if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
+    lcd_sync(1);
     lcd_load_palette(rgb_palette, pal_size, SCREENWIDTH, SCREENHEIGHT);
 #endif
 }

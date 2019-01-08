@@ -123,7 +123,7 @@ void lcd_init (void);
 
 uint32_t lcd_get_ready_layer_addr (void);
 
-void lcd_refresh (void);
+void lcd_sync (int wait);
 
 void lcd_load_palette (pal_t *palette, uint32_t pal_size, uint32_t w, uint32_t h);
 
