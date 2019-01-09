@@ -616,11 +616,6 @@
               <FilePath>..\Src\audio_main.c</FilePath>
             </File>
             <File>
-              <FileName>gfx_main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\gfx_main.c</FilePath>
-            </File>
-            <File>
               <FileName>input_main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\input_main.c</FilePath>
@@ -649,11 +644,6 @@
               <FileName>font.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\doom\src\font.c</FilePath>
-            </File>
-            <File>
-              <FileName>gfx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\doom\src\gfx.c</FilePath>
             </File>
             <File>
               <FileName>images.c</FileName>
@@ -689,6 +679,11 @@
               <FileName>usb_hid_gamepad.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\usb_hid_gamepad.c</FilePath>
+            </File>
+            <File>
+              <FileName>mach_stub.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\mach_stub.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -779,13 +774,6 @@
         </Group>
         <Group>
           <GroupName>Utilities</GroupName>
-          <Files>
-            <File>
-              <FileName>jpeg_utils.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Utilities\JPEG\jpeg_utils.c</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>doom</GroupName>
@@ -1194,6 +1182,11 @@
               <FileName>global.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\global.c</FilePath>
+            </File>
+            <File>
+              <FileName>w_merge.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\doom\src\chocdoom\w_merge.c</FilePath>
             </File>
           </Files>
         </Group>
