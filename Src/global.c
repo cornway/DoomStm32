@@ -17,7 +17,7 @@ int		scaledviewwidth;
 int		viewheight;
 int		viewwindowx;
 int		viewwindowy; 
-byte*		ylookup[MAXHEIGHT]; 
+pix_t*		ylookup[MAXHEIGHT]; 
 int		columnofs[MAXWIDTH]; 
 
 

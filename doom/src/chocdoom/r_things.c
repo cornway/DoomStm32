@@ -469,6 +469,8 @@ R_DrawVisSprite
     spryscale = vis->scale;
     sprtopscreen = centeryfrac - FixedMul(dc_texturemid,spryscale);
 
+    ST_StartFog(vis->distance);
+
     for (dc_x=vis->x1 ; dc_x<=vis->x2 ; dc_x++, frac += vis->xiscale)
     {
         texturecolumn = frac>>FRACBITS;
@@ -497,6 +499,8 @@ R_DrawVisSprite
     }
     render_on_distance = false;
     colfunc = basecolfunc;
+
+    ST_ReleaseFog();
 }
 
 

@@ -48,16 +48,19 @@
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
 
-
+#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
 #define IVID_IRAM 1
+#else
+#define IVID_IRAM 0
+#endif
 #define GFX_PRECISE_SCALE 0
 
 // The screen buffer; this is modified to draw things to the screen
 
 #if IVID_IRAM
-byte I_VideoBuffer_static[SCREENWIDTH * SCREENHEIGHT];
+pix_t I_VideoBuffer_static[SCREENWIDTH * SCREENHEIGHT * sizeof(pix_t)];
 #endif
-byte *I_VideoBuffer = NULL;
+pix_t *I_VideoBuffer = NULL;
 
 // If true, game is running as a screensaver
 
@@ -88,7 +91,10 @@ typedef struct
 
 // Palette converted to RGB565
 
-static pal_t rgb_palette[256];
+static pal_t *rgb_palette;
+
+pal_t *p_palette;
+
 
 static inline void
 I_FlushCache (void)
@@ -99,11 +105,12 @@ I_FlushCache (void)
 void I_InitGraphics (void)
 {
 #if !IVID_IRAM
-    I_VideoBuffer = (byte*)Z_Malloc (SCREENWIDTH * SCREENHEIGHT, PU_STATIC, NULL);
+    I_VideoBuffer = (pix_t*)Z_Malloc (SCREENWIDTH * SCREENHEIGHT * sizeof(pix_t), PU_STATIC, NULL);
 #else
     I_VideoBuffer = I_VideoBuffer_static;
 #endif
 	screenvisible = true;
+    p_palette = rgb_palette;
 }
 
 void I_ShutdownGraphics (void)
@@ -206,7 +213,7 @@ static void fill_scale_pattern (uint8_t *p_x, uint8_t *p_y)
 }
 
 static inline void update_line_direct (
-        pal_t *dest,
+        pix_t *dest,
         int src_y,
         uint8_t *p_x,
         uint8_t *cache,
@@ -214,7 +221,7 @@ static inline void update_line_direct (
 )
 {
     int s_i, d_i;
-    pal_t cache_pix = 0;
+    pix_t cache_pix = 0;
     uint8_t index = 0;
     for (s_i = src_y * SCREENWIDTH, d_i = 0; d_i < GFX_MAX_WIDTH; d_i++) {
         if (p_x[d_i]) {
@@ -229,7 +236,7 @@ static inline void update_line_direct (
     }
 }
 
-static inline void update_line_cache (pal_t *dest, uint8_t *cache)
+static inline void update_line_cache (pix_t *dest, uint8_t *cache)
 {
     int d_i;
     for (d_i = 0; d_i < GFX_MAX_WIDTH; d_i++) {
@@ -239,7 +246,7 @@ static inline void update_line_cache (pal_t *dest, uint8_t *cache)
 
 void I_FinishUpdate (void)
 {
-    pal_t *d_y = (pal_t*)lcd_get_ready_layer_addr();
+    pix_t *d_y = (pix_t*)lcd_get_ready_layer_addr();
     int src_y = 0, dest_y;
     uint8_t pattern_x[GFX_MAX_WIDTH + 1], pattern_y[GFX_MAX_HEIGHT + 1];
     uint8_t cache_line[MAX(GFX_MAX_WIDTH, GFX_MAX_HEIGHT)];
@@ -262,10 +269,10 @@ void I_FinishUpdate (void)
 
 #else /*GFX_PRECISE_SCALE*/
 
-static inline void update_line_direct (pal_t *dest, int src_y)
+static inline void update_line_direct (pix_t *dest, int src_y)
 {
     int i, s_i, d_i;
-    pal_t cache_pix = 0;
+    pix_t cache_pix = 0;
     uint8_t index = 0;
 
     for (s_i = src_y * SCREENWIDTH, d_i = 0; d_i < SCREENWIDTH * 2; s_i++) {
@@ -278,19 +285,17 @@ static inline void update_line_direct (pal_t *dest, int src_y)
 
 void I_FinishUpdate (void)
 {
-    byte index;
-
     int32_t x_offset = (GFX_MAX_WIDTH - (SCREENWIDTH * 2)) / 2;
     int32_t y_offset = (GFX_MAX_HEIGHT - (SCREENHEIGHT * 2)) / 2;
 
     int src_y = 0, dest_y;
     int i, s_i, d_i;
-    pal_t *d_y;
+    pix_t *d_y;
     int src_max_y = SCREENHEIGHT * SCREENWIDTH;
     uint32_t cache_pix = 0;
 
     lcd_sync (0);
-    d_y = (pal_t*)lcd_get_ready_layer_addr() + (x_offset + y_offset * GFX_MAX_WIDTH);
+    d_y = (pix_t*)lcd_get_ready_layer_addr() + (x_offset + y_offset * GFX_MAX_WIDTH);
     SCB_CleanDCache();
 #if (GFX_COLOR_MODE == GFX_COLOR_MODE_RGB565)
     uint32_t *d_y0 = (uint32_t *)d_y;
@@ -298,8 +303,7 @@ void I_FinishUpdate (void)
     for (src_y = 0; src_y < src_max_y; src_y += SCREENWIDTH) {
 
         for (s_i = src_y, d_i = 0; d_i < SCREENWIDTH; s_i++, d_i++) {
-            index = I_VideoBuffer[s_i];
-            cache_pix = rgb_palette[index];
+            cache_pix = I_VideoBuffer[s_i];
             cache_pix = (cache_pix << 16) | cache_pix;
             d_y0[d_i] = cache_pix;
             d_y1[d_i] = cache_pix;
@@ -329,33 +333,51 @@ void I_FinishUpdate (void)
 //
 // I_ReadScreen
 //
-void I_ReadScreen (byte* scr)
+void I_ReadScreen (pix_t* scr)
 {
-    memcpy (scr, I_VideoBuffer, SCREENWIDTH * SCREENHEIGHT);
+    memcpy (scr, I_VideoBuffer, SCREENWIDTH * SCREENHEIGHT * sizeof(pix_t));
 }
 
 //
 // I_SetPalette
 //
 
-void I_SetPalette (byte* palette)
+static pal_t *palettes[16] = {NULL};
+
+void I_SetPalette (byte* palette, int idx)
 {
     unsigned int i;
     rgb_raw_t* color;
-    unsigned int pal_size = sizeof(rgb_palette) / sizeof(rgb_palette[0]);
+    pal_t *pal;
+    unsigned int pal_size = 256;
 
+    if (idx > 16) {
+        p_palette = rgb_palette;
+        goto sw_done;
+    }
+    if (palettes[idx]) {
+        p_palette = palettes[idx];
+        goto sw_done;
+    }
+    pal = Z_Malloc(pal_size * sizeof(pal_t), PU_STATIC, 0);
+    palettes[idx] = pal;
+    p_palette = pal;
+    if (idx == 0) {
+        rgb_palette = pal;
+    }
     for (i = 0; i < pal_size; i++)
     {
         color = (rgb_raw_t*)palette;
-        rgb_palette[i] = GFX_RGB(gammatable[usegamma][color->r],
+        pal[i] = GFX_RGB(gammatable[usegamma][color->r],
                         gammatable[usegamma][color->g],
                         gammatable[usegamma][color->b],
                         GFX_OPAQUE);
         palette += 3;
     }
+sw_done:
 #if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
     lcd_sync(1);
-    lcd_load_palette(rgb_palette, pal_size, SCREENWIDTH, SCREENHEIGHT);
+    lcd_load_palette(p_palette, pal_size, SCREENWIDTH, SCREENHEIGHT);
 #endif
 }
 

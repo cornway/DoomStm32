@@ -31,6 +31,7 @@
 
 #include "r_local.h"
 #include "r_sky.h"
+#include "st_stuff.h"
 
 
 
@@ -120,6 +121,7 @@ R_MapPlane
     fixed_t	distance;
     fixed_t	length;
     unsigned	index;
+    int prev_pal = -1;
 	
 #ifdef RANGECHECK
     if (x2 < x1
@@ -144,7 +146,9 @@ R_MapPlane
 	ds_xstep = cachedxstep[y];
 	ds_ystep = cachedystep[y];
     }
-	
+
+    prev_pal = ST_StartFog(distance);
+
     length = FixedMul (distance,distscale[x1]);
     angle = (viewangle + xtoviewangle[x1])>>ANGLETOFINESHIFT;
     ds_xfrac = viewx + FixedMul(finecosine[angle], length);
@@ -168,6 +172,10 @@ R_MapPlane
 
     // high or low detail
     spanfunc ();	
+
+    if (prev_pal >= 0) {
+        ST_ReleaseFog();
+    }
 }
 
 

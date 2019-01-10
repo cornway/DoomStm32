@@ -107,8 +107,8 @@ void R_FillBackScreen (void);
 void R_DrawViewBorder (void);
 
 #define R_DISTANCE_NEAR (200 * FRACUNIT)
-#define R_DISTANCE_MID  (500 * FRACUNIT)
-#define R_DISTANCE_FAR  (1000 * FRACUNIT)
+#define R_DISTANCE_MID  (400 * FRACUNIT)
+#define R_DISTANCE_FAR  (800 * FRACUNIT)
 #define R_DISTANCE_INVIS (1200 * FRACUNIT)
 
 

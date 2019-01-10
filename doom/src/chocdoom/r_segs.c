@@ -31,6 +31,7 @@
 
 #include "r_local.h"
 #include "r_sky.h"
+#include "st_stuff.h"
 
 
 // OPTIMIZE: closed two sided lines as single sided
@@ -195,7 +196,7 @@ R_RenderMaskedSegRange
 #define HEIGHTBITS		12
 #define HEIGHTUNIT		(1<<HEIGHTBITS)
 
-extern byte*		ylookup[MAXHEIGHT];
+extern pix_t*		ylookup[MAXHEIGHT];
 extern int		columnofs[MAXWIDTH];
 
 int rw_scale_var = 0;
@@ -208,7 +209,7 @@ static void R_CopySeg (
     boolean floor,
     boolean ceiling)
 {
-    if (midtexture || bottomtexture || markfloor) {
+    {
         floorclip[dest] = floorclip[src];
     }
     if (floor) {
@@ -219,7 +220,7 @@ static void R_CopySeg (
         ceilingplane->top[dest] = ceilingplane->top[src];
         ceilingplane->bottom[dest] = ceilingplane->bottom[src];
     }
-    if (midtexture || toptexture || markceiling) {
+    {
         ceilingclip[dest] = ceilingclip[src];
     }
     if (maskedtexture) {
@@ -239,6 +240,8 @@ void R_RenderSegLoop (void)
     int			bottom;
     boolean col_done;
     boolean _markfloor = false, _markceiling = false;
+    fixed_t hyp = 0;
+    int prev_pal;
 
     rw_render_range = R_RANGE_NEAREST;
     R_SetRwRange(rw_distance);
@@ -298,11 +301,16 @@ void R_RenderSegLoop (void)
             }
         }
         // texturecolumn and lighting are independent of wall tiers
+        hyp = 0;
         if (segtextured)
         {
             // calculate texture offset
             angle = (rw_centerangle + xtoviewangle[rw_x])>>ANGLETOFINESHIFT;
             texturecolumn = rw_offset-FixedMul(finetangent[angle],rw_distance);
+            hyp = FixedMul(finesine_n[angle], rw_distance);
+            if (ST_StartFog(hyp) >= 0) {
+                prev_pal = 1;
+            }
             texturecolumn >>= FRACBITS;
             // calculate lighting
             index = rw_scale>>LIGHTSCALESHIFT;
@@ -404,6 +412,8 @@ void R_RenderSegLoop (void)
                 i--;
             }
         }
+        if (hyp)
+            R_SetRwRange(hyp);
         rw_scale += rw_scalestep;
         topfrac += topstep;
         bottomfrac += bottomstep;
@@ -477,6 +487,7 @@ R_CheckPlane
 }
 
 
+extern int st_palette;
 //
 // R_StoreWallRange
 // A wall segment will be drawn
@@ -519,9 +530,6 @@ R_StoreWallRange
     hyp = R_PointToDist (curline->v1->x, curline->v1->y);
     sineval = finesine[distangle>>ANGLETOFINESHIFT];
     rw_distance = FixedMul (hyp, sineval);//
-    if (abs(rw_distance_prev - rw_distance) > 200) {
-        //R_ExecuteSetViewSize();
-    }
     rw_distance_prev = 0;
     project_rw_dist = FixedDiv(projection, rw_distance);
 		
@@ -840,5 +848,6 @@ R_StoreWallRange
 	ds_p->bsilheight = INT_MAX;
     }
     ds_p++;
+    ST_ReleaseFog();
 }
 

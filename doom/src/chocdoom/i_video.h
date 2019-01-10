@@ -21,6 +21,7 @@
 #define __I_VIDEO__
 
 #include "doomtype.h"
+#include "gfx.h"
 
 // Screen width and height.
 
@@ -101,13 +102,13 @@ void I_GraphicsCheckCommandLine(void);
 void I_ShutdownGraphics(void);
 
 // Takes full 8 bit values.
-void I_SetPalette (byte* palette);
+void I_SetPalette (byte* palette, int idx);
 int I_GetPaletteIndex(int r, int g, int b);
 
 void I_UpdateNoBlit (void);
 void I_FinishUpdate (void);
 
-void I_ReadScreen (byte* scr);
+void I_ReadScreen (pix_t* scr);
 
 void I_BeginRead (void);
 void I_EndRead (void);
@@ -145,7 +146,7 @@ extern int mouse_threshold;
 extern int vanilla_keyboard_mapping;
 extern boolean screensaver_mode;
 extern int usegamma;
-extern byte *I_VideoBuffer;
+extern pix_t *I_VideoBuffer;
 
 extern int screen_width;
 extern int screen_height;

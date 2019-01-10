@@ -56,7 +56,7 @@ extern int		scaledviewwidth;
 extern int		viewheight;
 extern int		viewwindowx;
 extern int		viewwindowy; 
-extern byte*		ylookup[MAXHEIGHT]; 
+extern pix_t*		ylookup[MAXHEIGHT]; 
 extern int		columnofs[MAXWIDTH]; 
 
 // Color tables for different players,
@@ -68,7 +68,7 @@ extern byte		translations[3][256];
 // Backing buffer containing the bezel drawn around the screen and 
 // surrounding background.
 
-extern byte *background_buffer = NULL;
+extern pix_t *background_buffer = NULL;
 
 
 //
@@ -101,8 +101,8 @@ rw_range_attr rw_render_downscale[R_RANGE_MAX] =
     [R_RANGE_NEAREST]   = {0, R_RANGE_NEAREST},
     [R_RANGE_NEAR]      = {1, R_RANGE_NEAREST},
     [R_RANGE_MID]       = {2, R_RANGE_NEAR},
-    [R_RANGE_FAR]       = {2, R_RANGE_NEAR},
-    [R_RANGE_INVIS]     = {2, R_RANGE_NEAR},
+    [R_RANGE_FAR]       = {3, R_RANGE_MID},
+    [R_RANGE_INVIS]     = {3, R_RANGE_MID},
 };
 
 void R_SetRwRange (fixed_t distance)
@@ -125,13 +125,107 @@ void R_SetRwRange (fixed_t distance)
     }
 }
 
+void v_set_line4 (pix_t *dest, pix_t c)
+{
+    size_t i = 0;
+    dest[i] = c;
+    dest[i + 1] = c;
+    dest[i + 2] = c;
+    dest[i + 3] = c;
+}
+
+
+void v_set_line8 (pix_t *dest, pix_t c)
+{
+    size_t i = 0;
+    dest[i] = c;
+    dest[i + 1] = c;
+    dest[i + 2] = c;
+    dest[i + 3] = c;
+    dest[i + 4] = c;
+    dest[i + 5] = c;
+    dest[i + 6] = c;
+    dest[i + 7] = c;
+}
+
+
+static boolean
+R_RenderColVar (
+    pix_t *dest,
+    float frac,
+    float fracstep,
+    int *_count)
+{
+    pix_t c;
+    boolean low_detail = true;
+    int count = *_count;
+    switch (rw_render_range) {
+        case R_RANGE_INVIS:
+        case R_RANGE_FAR:
+            if (count >= 8) {
+                do  {
+                    c = dc_colormap[dc_source[(int)frac & 0x7f]];
+                    c = pixel(c);
+                    v_set_line8(dest, c);
+                    v_set_line8(dest + (SCREENWIDTH * 1), c);
+                    v_set_line8(dest + (SCREENWIDTH * 2), c);
+                    v_set_line8(dest + (SCREENWIDTH * 3), c);
+                    v_set_line8(dest + (SCREENWIDTH * 4), c);
+                    v_set_line8(dest + (SCREENWIDTH * 5), c);
+                    v_set_line8(dest + (SCREENWIDTH * 6), c);
+                    v_set_line8(dest + (SCREENWIDTH * 7), c);
+                    frac += fracstep * 8;
+                    dest += SCREENWIDTH * 8;
+                    count -= 8;
+                } while (count > 0);
+            }
+        break;
+        case R_RANGE_MID:
+            if (count >= 4) {
+                do  {
+                    // Re-map color indices from wall texture column
+                    //  using a lighting/special effects LUT.
+                    c = dc_colormap[dc_source[(int)frac & 0x7f]];
+                    c = pixel(c);
+                    v_set_line4(dest, c);
+                    v_set_line4(dest + (SCREENWIDTH * 1), c);
+                    v_set_line4(dest + (SCREENWIDTH * 2), c);
+                    v_set_line4(dest + (SCREENWIDTH * 3), c);
+                    dest += SCREENWIDTH * 4;
+                    frac += fracstep * 4;
+                    count -= 4;
+                } while (count > 0);
+            }
+        break;
+        case R_RANGE_NEAR:
+            if (count >= 2) {
+                do  {
+                    // Re-map color indices from wall texture column
+                    //  using a lighting/special effects LUT.
+                    c = dc_colormap[dc_source[(int)frac & 0x7f]];
+                    c = pixel(c);
+                    v_set_line(dest, c, 2 * sizeof(pix_t));
+                    v_set_line(dest + (SCREENWIDTH * 1), c, 2 * sizeof(pix_t));
+                    dest += SCREENWIDTH * 2;
+                    frac += fracstep * 2;
+                    count -= 2;
+                } while (count > 0);
+            }
+        break;
+        default : low_detail = false;
+        break;
+    }
+    *_count = count;
+    return low_detail;
+}
+
 void R_DrawColumn (void) 
 { 
     int			count; 
-    byte*		dest; 
+    pix_t*		dest; 
     float		frac;
     float		fracstep;
-    boolean     low_detail = render_on_distance ? true : false;
+    boolean     low_detail = false;
 
     count = dc_yh - dc_yl; 
 
@@ -162,71 +256,9 @@ void R_DrawColumn (void)
     //  e.g. a DDA-lile scaling.
     // This is as fast as it gets.
     if (render_on_distance) {
-        uint32_t c;
-        byte *dest2 = dest + SCREENWIDTH;
-        byte *dest3 = dest2 + SCREENWIDTH;
-        byte *dest4 = dest3 + SCREENWIDTH;
-        switch (rw_render_range) {
-            case R_RANGE_INVIS:
-            case R_RANGE_FAR:
-                c = dc_colormap[dc_source[(int)frac & 0x7f]];
-                c = (c << 8) | c;
-                c = (c << 16) | c;
-                if (count >= 4) {
-                    do  {
-                        *(uint32_t *)dest = c;
-                        *(uint32_t *)dest2 = c;
-                        *(uint32_t *)dest3 = c;
-                        *(uint32_t *)dest4 = c;
-                        dest += SCREENWIDTH * 4;
-                        dest2 += SCREENWIDTH * 4;
-                        dest3 += SCREENWIDTH * 4;
-                        dest4 += SCREENWIDTH * 4;
-                        count -= 4;
-                    } while (count > 0);
-                }
-            break;
-            case R_RANGE_MID:
-                if (count >= 4) {
-                    do  {
-                        // Re-map color indices from wall texture column
-                        //  using a lighting/special effects LUT.
-                        c = dc_colormap[dc_source[(int)frac & 0x7f]];
-                        c = (c << 8) | c;
-                        c = (c << 16) | c;
-                        *(uint32_t *)dest = c;
-                        *(uint32_t *)dest2 = c;
-                        *(uint32_t *)dest3 = c;
-                        *(uint32_t *)dest4 = c;
-                        dest += SCREENWIDTH * 4;
-                        dest2 += SCREENWIDTH * 4;
-                        dest3 += SCREENWIDTH * 4;
-                        dest4 += SCREENWIDTH * 4;
-                        frac += fracstep * 4;
-                        count -= 4;
-                    } while (count > 0);
-                }
-            break;
-            case R_RANGE_NEAR:
-                if (count >= 2) {
-                    do  {
-                        // Re-map color indices from wall texture column
-                        //  using a lighting/special effects LUT.
-                        c = dc_colormap[dc_source[(int)frac & 0x7f]];
-                        c = (c << 8) | c;
-                        *(uint16_t *)dest = c;
-                        *(uint16_t *)dest2 = c;
-                        dest += SCREENWIDTH * 2;
-                        dest2 += SCREENWIDTH * 2;
-                        frac += fracstep * 2;
-                        count -= 2;
-                    } while (count > 0);
-                }
-            break;
-            default : low_detail = false;
-            break;
-        }
+        low_detail = R_RenderColVar(dest, frac, fracstep, &count);
     }
+#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
     if (low_detail) {
         uint32_t c = dc_colormap[dc_source[(int)frac & 0x7f]];
         c = (c << 8) | c;
@@ -246,11 +278,13 @@ void R_DrawColumn (void)
             }
             dest += SCREENWIDTH;
         }
-    } else {
+    } else 
+#endif /*(GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)*/
+    {
         while (count-- >= 0) {
             // Re-map color indices from wall texture column
             //  using a lighting/special effects LUT.
-            *dest = dc_colormap[dc_source[(int)frac & 0x7f]];
+            *dest = pixel(dc_colormap[dc_source[(int)frac & 0x7f]]);
 
             dest += SCREENWIDTH;
             frac += fracstep;
@@ -322,8 +356,8 @@ void R_DrawColumn (void)
 void R_DrawColumnLow (void) 
 { 
     int			count; 
-    byte*		dest; 
-    byte*		dest2;
+    pix_t*		dest; 
+    pix_t*		dest2;
     float		frac;
     float		fracstep;	 
     int                 x;
@@ -357,7 +391,7 @@ void R_DrawColumnLow (void)
     do 
     {
         // Hack. Does not work corretly.
-        *dest2 = *dest = dc_colormap[dc_source[(int)frac & 0x7f]];
+        *dest2 = *dest = pixel(dc_colormap[dc_source[(int)frac & 0x7f]]);
         dest += SCREENWIDTH;
         dest2 += SCREENWIDTH;
         frac += fracstep;
@@ -398,7 +432,7 @@ int	fuzzpos = 0;
 void R_DrawFuzzColumn (void) 
 { 
     int			count; 
-    byte*		dest; 
+    pix_t*		dest; 
     fixed_t		frac;
     fixed_t		fracstep;	 
 
@@ -440,7 +474,7 @@ void R_DrawFuzzColumn (void)
 	//  a pixel that is either one column
 	//  left or right of the current one.
 	// Add index from colormap to index.
-	*dest = colormaps[6*256+dest[fuzzoffset[fuzzpos]]]; 
+	*dest = pixel(colormaps[6*256+dest[fuzzoffset[fuzzpos]]]);
 
 	// Clamp table lookup index.
 	if (++fuzzpos == FUZZTABLE) 
@@ -457,8 +491,8 @@ void R_DrawFuzzColumn (void)
 void R_DrawFuzzColumnLow (void) 
 { 
     int			count; 
-    byte*		dest; 
-    byte*		dest2; 
+    pix_t*		dest; 
+    pix_t*		dest2; 
     fixed_t		frac;
     fixed_t		fracstep;	 
     int x;
@@ -506,8 +540,8 @@ void R_DrawFuzzColumnLow (void)
 	//  a pixel that is either one column
 	//  left or right of the current one.
 	// Add index from colormap to index.
-	*dest = colormaps[6*256+dest[fuzzoffset[fuzzpos]]]; 
-	*dest2 = colormaps[6*256+dest2[fuzzoffset[fuzzpos]]]; 
+	*dest = pixel(colormaps[6*256+dest[fuzzoffset[fuzzpos]]]);
+	*dest2 = pixel(colormaps[6*256+dest2[fuzzoffset[fuzzpos]]]);
 
 	// Clamp table lookup index.
 	if (++fuzzpos == FUZZTABLE) 
@@ -539,7 +573,7 @@ byte*	translationtables;
 void R_DrawTranslatedColumn (void) 
 { 
     int			count; 
-    byte*		dest; 
+    pix_t*		dest; 
     float		frac;
     float		fracstep;	 
  
@@ -573,7 +607,7 @@ void R_DrawTranslatedColumn (void)
         //  used with PLAY sprites.
         // Thus the "green" ramp of the player 0 sprite
         //  is mapped to gray, red, black/indigo. 
-        *dest = dc_colormap[dc_source[(int)frac]];
+        *dest = pixel(dc_colormap[dc_source[(int)frac]]);
         dest += SCREENWIDTH;
 
         frac += fracstep; 
@@ -583,8 +617,8 @@ void R_DrawTranslatedColumn (void)
 void R_DrawTranslatedColumnLow (void) 
 { 
     int			count; 
-    byte*		dest; 
-    byte*		dest2; 
+    pix_t*		dest; 
+    pix_t*		dest2; 
     float		frac;
     float		fracstep;	 
     int                 x;
@@ -624,8 +658,8 @@ void R_DrawTranslatedColumnLow (void)
         //  used with PLAY sprites.
         // Thus the "green" ramp of the player 0 sprite
         //  is mapped to gray, red, black/indigo. 
-        *dest = dc_colormap[dc_source[(int)frac]];
-        *dest2 = dc_colormap[dc_source[(int)frac]];
+        *dest = pixel(dc_colormap[dc_source[(int)frac]]);
+        *dest2 = pixel(dc_colormap[dc_source[(int)frac]]);
         dest += SCREENWIDTH;
         dest2 += SCREENWIDTH;
 
@@ -706,7 +740,7 @@ int			dscount;
 void R_DrawSpan (void) 
 { 
     unsigned int position, step;
-    byte *dest;
+    pix_t *dest;
     int count;
     int spot;
     unsigned int xtemp, ytemp;
@@ -747,7 +781,7 @@ void R_DrawSpan (void)
 
 	// Lookup pixel from flat texture tile,
 	//  re-index using light/colormap.
-	*dest++ = ds_colormap[ds_source[spot]];
+	*dest++ = pixel(ds_colormap[ds_source[spot]]);
 
         position += step;
 
@@ -836,7 +870,7 @@ void R_DrawSpanLow (void)
 {
     unsigned int position, step;
     unsigned int xtemp, ytemp;
-    byte *dest;
+    pix_t *dest;
     int count;
     int spot;
 
@@ -874,8 +908,8 @@ void R_DrawSpanLow (void)
 
 	// Lowres/blocky mode does it twice,
 	//  while scale is adjusted appropriately.
-	*dest++ = ds_colormap[ds_source[spot]];
-	*dest++ = ds_colormap[ds_source[spot]];
+	*dest++ = pixel(ds_colormap[ds_source[spot]]);
+	*dest++ = pixel(ds_colormap[ds_source[spot]]);
 
 	position += step;
 
@@ -928,7 +962,7 @@ R_InitBuffer
 void R_FillBackScreen (void) 
 { 
     byte*	src;
-    byte*	dest; 
+    pix_t*	dest; 
     int		x;
     int		y; 
     patch_t*	patch;
@@ -975,13 +1009,13 @@ void R_FillBackScreen (void)
     { 
 	for (x=0 ; x<SCREENWIDTH/64 ; x++) 
 	{ 
-	    memcpy (dest, src+((y&63)<<6), 64); 
+	    memcpy (dest, src+((y&63)<<6), 64 * sizeof(pix_t)); 
 	    dest += 64; 
 	} 
 
 	if (SCREENWIDTH&63) 
 	{ 
-	    memcpy (dest, src+((y&63)<<6), SCREENWIDTH&63); 
+	    memcpy (dest, src+((y&63)<<6), SCREENWIDTH&63 * sizeof(pix_t)); 
 	    dest += (SCREENWIDTH&63); 
 	} 
     } 
@@ -1044,7 +1078,7 @@ R_VideoErase
 
     if (background_buffer != NULL)
     {
-        memcpy(I_VideoBuffer + ofs, background_buffer + ofs, count); 
+        memcpy(I_VideoBuffer + ofs, background_buffer + ofs, count * sizeof(pix_t)); 
     }
 } 
 

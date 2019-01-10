@@ -59,9 +59,9 @@ static void CPU_CACHE_Enable(void);
 #define SDRAM_VOL_START 0xC0000000
 #define SDRAM_VOL_END   0xC1000000
 #define SDRAM_VOL_SIZE (SDRAM_VOL_END - SDRAM_VOL_START)
-volatile pal_t *__lcd_frame_buf_raw = (void *)SDRAM_VOL_START;
+volatile pix_t *__lcd_frame_buf_raw = (void *)SDRAM_VOL_START;
 
-#define RAW_LCD_FBUF_SIZE_MAX (800 * 600 * PAL_SIZE * 2)
+#define RAW_LCD_FBUF_SIZE_MAX (800 * 600 * sizeof(pix_t) * 2)
 
 volatile uint8_t *__heap_buf_raw = (void *)(SDRAM_VOL_START + RAW_LCD_FBUF_SIZE_MAX);
 volatile size_t __heap_buf_raw_size = (SDRAM_VOL_SIZE - RAW_LCD_FBUF_SIZE_MAX);

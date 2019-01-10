@@ -264,7 +264,7 @@
 #define ST_MAPHEIGHT		1
 
 // graphics are drawn to a backing screen and blitted to the real screen
-byte                   *st_backing_screen;
+pix_t                   *st_backing_screen;
 	    
 // main player in game
 static player_t*	plyr; 
@@ -929,7 +929,7 @@ void ST_Ticker (void)
 
 }
 
-static int st_palette = 0;
+int st_palette = 0;
 
 void ST_doPaletteStuff(void)
 {
@@ -991,7 +991,7 @@ void ST_doPaletteStuff(void)
     {
 	st_palette = palette;
 	pal = (byte *) W_CacheLumpNum (lu_palette, PU_CACHE)+palette*768;
-	I_SetPalette (pal);
+	I_SetPalette (pal, palette);
     }
 
 }
@@ -1030,6 +1030,48 @@ void ST_drawWidgets(boolean refresh)
     STlib_updateNum(&w_frags, refresh);
 
 }
+
+#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
+
+#else
+int ST_setPaletteNum (int num)
+{
+    int prev_pal = st_palette;
+    byte *pal;
+    if (num > RADIATIONPAL) {
+        return -1;
+    }
+    pal = (byte *) W_CacheLumpNum (lu_palette, PU_CACHE)+num*768;
+    I_SetPalette (pal, num);
+    return prev_pal;
+}
+
+static int prev_palette = -1;
+
+int ST_StartFog (fixed_t distance)
+{
+    if (distance > R_DISTANCE_NEAR + R_DISTANCE_NEAR / 2) {
+        fixed_t n  = distance / R_DISTANCE_NEAR - 1;
+        if (n >= NUMBONUSPALS) {
+            n = NUMBONUSPALS - 1;
+        }
+        n += STARTBONUSPALS;
+        if (prev_palette == n) {
+            return -1;
+        }
+        prev_palette = n;
+        return ST_setPaletteNum(n);
+    }
+    return -1;
+}
+
+void ST_ReleaseFog (void)
+{
+    ST_setPaletteNum(st_palette);
+    prev_palette = st_palette;
+}
+
+#endif
 
 void ST_doRefresh(void)
 {
@@ -1410,7 +1452,7 @@ void ST_Stop (void)
     if (st_stopped)
 	return;
 
-    I_SetPalette (W_CacheLumpNum (lu_palette, PU_CACHE));
+    I_SetPalette (W_CacheLumpNum (lu_palette, PU_CACHE), 0);
 
     st_stopped = true;
 }
@@ -1418,6 +1460,6 @@ void ST_Stop (void)
 void ST_Init (void)
 {
     ST_loadData();
-    st_backing_screen = (byte *) Z_Malloc(ST_WIDTH * ST_HEIGHT, PU_STATIC, 0);
+    st_backing_screen = (pix_t *) Z_Malloc(ST_WIDTH * ST_HEIGHT * sizeof(pix_t), PU_STATIC, 0);
 }
 

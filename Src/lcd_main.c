@@ -39,7 +39,7 @@
 
 extern LTDC_HandleTypeDef  hltdc_discovery;
 
-extern volatile pal_t *__lcd_frame_buf_raw;
+extern volatile pix_t *__lcd_frame_buf_raw;
 uint32_t lcd_frame_buffer;
 lcd_layers_t lcd_layer = LCD_BACKGROUND;
 
@@ -109,19 +109,21 @@ void lcd_init (void)
     lcd_frame_buffer = (uint32_t)__lcd_frame_buf_raw;
     layer_addr[LCD_BACKGROUND] = (uint32_t)__lcd_frame_buf_raw + LCD_FRAME_SIZE;
     layer_addr[LCD_FOREGROUND] = (uint32_t)__lcd_frame_buf_raw;
-#if (GFX_COLOR_MODE == GFX_COLOR_MODE_RGB565)
+#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
+
+#elif (GFX_COLOR_MODE == GFX_COLOR_MODE_RGB565)
     {
         int layer;
         int i;
-        pal_t *buf;
+        pix_t *buf;
         for (layer = 0; layer < (int)LCD_MAX_LAYER; layer++) {
             _BSP_LCD_LayerDefaultInit(
                 (lcd_layers_t)layer,
                 layer_addr[layer],
                 LTDC_PIXEL_FORMAT_RGB565,
                 0, 0, GFX_MAX_WIDTH, GFX_MAX_HEIGHT);
-            buf = (pal_t *)layer_addr[layer];
-            for (i = 0; i < LCD_FRAME_SIZE / PAL_SIZE; i++) {
+            buf = (pix_t *)layer_addr[layer];
+            for (i = 0; i < LCD_FRAME_SIZE / sizeof(pix_t); i++) {
                 buf[i] = 0;
             }
         }

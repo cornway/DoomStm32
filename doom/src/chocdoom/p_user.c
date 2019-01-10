@@ -288,7 +288,7 @@ static const fixed_t wp_fired_mo[][9] =
         FRACUNIT * 0,
         FRACUNIT * 1,
         FRACUNIT * 2,
-        FRACUNIT * 3,
+        FRACUNIT * 4,
         FRACUNIT * 6,
         FRACUNIT * 0,
         FRACUNIT * 1,

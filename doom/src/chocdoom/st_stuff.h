@@ -22,8 +22,10 @@
 #define __STSTUFF_H__
 
 #include "doomtype.h"
+#include "m_fixed.h"
 #include "d_event.h"
 #include "m_cheat.h"
+#include "gfx.h"
 
 // Size of statusbar.
 // Now sensitive for scaling.
@@ -51,6 +53,17 @@ void ST_Start (void);
 // Called by startup code.
 void ST_Init (void);
 
+#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
+static inline int ST_setPaletteNum (int num);
+static int ST_StartFog (fixed_t distance) {return -1;};
+static void ST_ReleaseFog (void) {};
+#else
+int ST_setPaletteNum (int num);
+int ST_StartFog (fixed_t distance);
+void ST_ReleaseFog (void);
+#endif
+
+
 
 
 // States for status bar code.
@@ -73,7 +86,7 @@ typedef enum
 
 
 
-extern byte *st_backing_screen;
+extern pix_t *st_backing_screen;
 extern cheatseq_t cheat_mus;
 extern cheatseq_t cheat_god;
 extern cheatseq_t cheat_ammo;

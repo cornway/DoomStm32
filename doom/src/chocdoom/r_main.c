@@ -581,8 +581,8 @@ void R_ExecuteSetViewSize (void)
     int		level;
     int		startmap; 	
     int tempCentery;
-    fixed_t _detailshift = setdetail;
-    detailshift = _detailshift;
+
+    detailshift = setdetail;
 
     setsizeneeded = false;
 
@@ -596,12 +596,7 @@ void R_ExecuteSetViewSize (void)
 	scaledviewwidth = setblocks*32;
 	viewheight = (setblocks*168/10)&~7;
     }
-    if (rw_distance > 200 * FRACUNIT) {
-        //_detailshift = 1;
-    } else if (rw_distance > 400 * FRACUNIT) {
-        //_detailshift = 2;
-    }
-    viewwidth = scaledviewwidth>>_detailshift;
+    viewwidth = scaledviewwidth>>detailshift;
     centerx = viewwidth/2;
     centerxfrac = centerx<<FRACBITS;
     projection = centerxfrac;
@@ -651,7 +646,7 @@ void R_ExecuteSetViewSize (void)
         centeryfrac = centery << FRACBITS;
         for (i = 0; i < viewheight; i++)
         {
-            yslope[i] = FixedDiv((viewwidth << _detailshift) / 2 * FRACUNIT,
+            yslope[i] = FixedDiv((viewwidth << detailshift) / 2 * FRACUNIT,
                                  abs(((i - centery) << FRACBITS) +
                                      FRACUNIT / 2));
         }
@@ -668,7 +663,7 @@ void R_ExecuteSetViewSize (void)
     for (i=0 ; i< LIGHTLEVELS ; i++)
     {
 	startmap = ((LIGHTLEVELS-1-i)*2)*NUMCOLORMAPS/LIGHTLEVELS;
-    int level_mul = SCREENWIDTH/(viewwidth<<_detailshift)/DISTMAP;
+    int level_mul = SCREENWIDTH/(viewwidth<<detailshift)/DISTMAP;
 	for (j=0 ; j<MAXLIGHTSCALE ; j++)
 	{
 	    level = startmap - j*level_mul;

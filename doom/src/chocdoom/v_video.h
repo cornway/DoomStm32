@@ -26,7 +26,7 @@
 
 // Needed because we are refering to patches.
 #include "v_patch.h"
-
+#include "gfx.h"
 //
 // VIDEO
 //
@@ -37,6 +37,35 @@
 extern int dirtybox[4];
 
 extern byte *tinttable;
+
+
+extern pal_t *p_palette;
+
+#if (GFX_COLOR_MODE == GFX_COLOR_MODE_RGB565)
+#define pixel(p) (p_palette[p])
+#else
+#define pixel(p) (p)
+#endif
+
+static inline void
+v_copy_line (pix_t *dest, byte *src, size_t cnt)
+{
+    size_t i;
+    for (i = 0; i < cnt; i++) {
+        dest[i] = pixel(src[i]);
+    }
+}
+
+static inline void
+v_set_line (pix_t *dest, pix_t c, size_t cnt)
+{
+    size_t i;
+    for (i = 0; i < cnt; i++) {
+        dest[i] = c;
+    }
+}
+
+
 
 // haleyjd 08/28/10: implemented for Strife support
 // haleyjd 08/28/10: Patch clipping callback, implemented to support Choco
@@ -50,7 +79,7 @@ void V_Init (void);
 
 // Draw a block from the specified source screen to the screen.
 
-void V_CopyRect(int srcx, int srcy, byte *source,
+void V_CopyRect(int srcx, int srcy, pix_t *source,
                 int width, int height,
                 int destx, int desty);
 
@@ -65,7 +94,7 @@ void V_DrawPatchDirect(int x, int y, patch_t *patch);
 
 // Draw a linear block of pixels into the view buffer.
 
-void V_DrawBlock(int x, int y, int width, int height, byte *src);
+void V_DrawBlock(int x, int y, int width, int height, pix_t *src);
 
 void V_MarkRect(int x, int y, int width, int height);
 
@@ -80,7 +109,7 @@ void V_DrawRawScreen(byte *raw);
 
 // Temporarily switch to using a different buffer to draw graphics, etc.
 
-void V_UseBuffer(byte *buffer);
+void V_UseBuffer(pix_t *buffer);
 
 // Return to using the normal screen buffer to draw graphics.
 

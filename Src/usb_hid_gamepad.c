@@ -135,7 +135,7 @@ int gamepad_read (int8_t *pads)
     uint8_t ctls_pads = 0;
 
     /*Skip each first 'frame'*/
-    if (gamepad_data_ready < 2) {
+    if (0 && gamepad_data_ready < 2) {
         return -1;
     }
     if ((gamepad_data_ev == 0) && (needs_handle_cnt == 0)) {
