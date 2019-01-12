@@ -37,6 +37,7 @@
 #include "doomtype.h"
 
 #include "m_fixed.h"
+
 	
 #define FINEANGLES		8192
 #define FINEMASK		(FINEANGLES-1)
@@ -47,7 +48,7 @@
 
 // Effective size is 10240.
 extern const fixed_t finesine[5*FINEANGLES/4];
-extern int finesine_n[10240];
+extern int *finesine_n;
 
 // Re-use data, is just PI/2 pahse shift.
 extern const fixed_t *finecosine;

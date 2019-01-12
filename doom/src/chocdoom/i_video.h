@@ -138,6 +138,25 @@ void I_StartTic (void);
 
 void I_EnableLoadingDisk(void);
 
+void I_RefreshClutsButPlaypal (void);
+void I_SetPlayPal (void);
+void I_RestorePal (void);
+
+#if (GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)
+
+int I_GetClutIndex (pix_t pix);
+
+#else
+
+static inline int
+I_GetClutIndex (pix_t pix)
+{
+    return (int)pix;
+}
+
+#endif
+
+
 extern char *video_driver;
 extern boolean screenvisible;
 

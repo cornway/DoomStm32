@@ -579,7 +579,7 @@ const int finetangent[4096] =
     11392683,13145455,15535599,18988036,24413316,34178904,56965752,170910304
 };
 
-int finesine_n[10240];
+int *finesine_n;
 
 const int finesine[10240] =
 {

@@ -33,7 +33,7 @@
 #include "r_local.h"
 
 #include "doomstat.h"
-#include "stm32f769i_discovery_audio.h"
+#include "st_stuff.h"
 
 
 
@@ -434,6 +434,7 @@ R_DrawVisSprite
     int			texturecolumn;
     fixed_t		frac;
     patch_t*		patch;
+    int downscale;
 
     rw_render_range = R_RANGE_NEAREST;
     R_SetRwRange(vis->distance);
@@ -469,7 +470,7 @@ R_DrawVisSprite
     spryscale = vis->scale;
     sprtopscreen = centeryfrac - FixedMul(dc_texturemid,spryscale);
 
-    ST_StartFog(vis->distance);
+    ST_StartFog((vis->distance > 0) ? vis->distance : -vis->distance);
 
     for (dc_x=vis->x1 ; dc_x<=vis->x2 ; dc_x++, frac += vis->xiscale)
     {
@@ -481,19 +482,11 @@ R_DrawVisSprite
         column = (column_t *) ((byte *)patch +
                 READ_LE_U32_P(patch->columnofs + texturecolumn));
         R_DrawMaskedColumn (column);
-        if (render_on_distance) {
-            byte downscale = 1 << rw_render_downscale[rw_render_range].shift;
-            rw_render_range_t next_range = rw_render_downscale[rw_render_range].next;
-            while ((dc_x + downscale > vis->x2) && (downscale > 1)) {
-                rw_render_range = next_range;
-                downscale = 1 << rw_render_downscale[rw_render_range].shift;
-                next_range = rw_render_downscale[rw_render_range].next;
-            }
-            if (rw_render_range) {
-                downscale--;
-                dc_x += downscale;
-                frac += vis->xiscale * downscale;
-            }
+        downscale = R_ProcDownscale(dc_x, vis->x2);
+        if (downscale > 1) {
+            downscale--;
+            dc_x += downscale;
+            frac += vis->xiscale * downscale;
         }
 
     }

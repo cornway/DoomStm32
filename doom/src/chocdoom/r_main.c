@@ -35,7 +35,7 @@
 #include "r_local.h"
 #include "r_sky.h"
 
-
+#include "z_zone.h"
 
 
 
@@ -436,7 +436,8 @@ fixed_t R_ScaleFromGlobalAngle (angle_t visangle)
 //
 void R_InitTables (void)
 {
-    for (int i = 0; i < sizeof(finesine_n) / sizeof(finesine_n[0]); i++) {
+    finesine_n = (int *)Z_Malloc(10240 * sizeof(int), PU_STATIC, 0);
+    for (int i = 0; i < 10240; i++) {
         finesine_n[i] = FixedDiv(FRACUNIT, finesine[i]);
     }
 }
@@ -745,7 +746,7 @@ void R_SetupFrame (player_t* player)
     viewx = player->mo->x;
     viewy = player->mo->y;
     viewangle = player->mo->angle + viewangleoffset;
-    extralight = player->extralight;
+    extralight = player->extralight + 3;
 
     viewz = player->viewz;
     

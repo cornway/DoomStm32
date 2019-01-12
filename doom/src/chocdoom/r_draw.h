@@ -87,6 +87,8 @@ void 	R_DrawSpan (void);
 // Low resolution mode, 160x200?
 void 	R_DrawSpanLow (void);
 
+int
+R_ProcDownscale (int start, int stop);
 
 void
 R_InitBuffer

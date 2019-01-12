@@ -1034,28 +1034,34 @@ void ST_drawWidgets(boolean refresh)
 #if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
 
 #else
+
 int ST_setPaletteNum (int num)
 {
-    int prev_pal = st_palette;
     byte *pal;
     if (num > RADIATIONPAL) {
         return -1;
     }
     pal = (byte *) W_CacheLumpNum (lu_palette, PU_CACHE)+num*768;
     I_SetPalette (pal, num);
-    return prev_pal;
+    return 0;
 }
 
 static int prev_palette = -1;
 
+#define STARTFOGPALS STARTBONUSPALS
+#define NUMFOGPALS   NUMBONUSPALS
+
 int ST_StartFog (fixed_t distance)
 {
+    if (st_palette != 0) {
+        return -1;
+    }
     if (distance > R_DISTANCE_NEAR + R_DISTANCE_NEAR / 2) {
         fixed_t n  = distance / R_DISTANCE_NEAR - 1;
-        if (n >= NUMBONUSPALS) {
-            n = NUMBONUSPALS - 1;
+        if (n >= NUMFOGPALS) {
+            n = NUMFOGPALS - 1;
         }
-        n += STARTBONUSPALS;
+        n += STARTFOGPALS;
         if (prev_palette == n) {
             return -1;
         }
@@ -1094,18 +1100,20 @@ void ST_diffDraw(void)
 
 void ST_Drawer (boolean fullscreen, boolean refresh)
 {
-  
     st_statusbaron = (!fullscreen) || automapactive;
     st_firsttime = st_firsttime || refresh;
 
     // Do red-/gold-shifts from damage/items
     ST_doPaletteStuff();
 
+    I_SetPlayPal();
+
     // If just after ST_Start(), refresh all
     if (st_firsttime) ST_doRefresh();
     // Otherwise, update as little as possible
     else ST_diffDraw();
 
+    I_RestorePal();
 }
 
 typedef void (*load_callback_t)(char *lumpname, patch_t **variable); 

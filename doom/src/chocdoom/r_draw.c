@@ -125,6 +125,7 @@ void R_SetRwRange (fixed_t distance)
     }
 }
 
+static inline
 void v_set_line4 (pix_t *dest, pix_t c)
 {
     size_t i = 0;
@@ -134,7 +135,7 @@ void v_set_line4 (pix_t *dest, pix_t c)
     dest[i + 3] = c;
 }
 
-
+static inline
 void v_set_line8 (pix_t *dest, pix_t c)
 {
     size_t i = 0;
@@ -149,74 +150,92 @@ void v_set_line8 (pix_t *dest, pix_t c)
 }
 
 
-static boolean
+int
+R_ProcDownscale (int start, int stop)
+{
+    byte downscale = 1;
+    rw_render_range_t next;
+
+    if (render_on_distance) {
+        downscale = 1 << rw_render_downscale[rw_render_range].shift;
+        next = rw_render_downscale[rw_render_range].next;
+        while ((start + downscale >= stop) && (downscale > 1)) {
+            rw_render_range = next;
+            downscale = 1 << rw_render_downscale[rw_render_range].shift;
+            next = rw_render_downscale[rw_render_range].next;
+        }
+    }
+    return downscale;
+}
+
+static void
 R_RenderColVar (
     pix_t *dest,
     float frac,
     float fracstep,
-    int *_count)
+    int count)
 {
     pix_t c;
-    boolean low_detail = true;
-    int count = *_count;
+    byte downscale;
+
     switch (rw_render_range) {
         case R_RANGE_INVIS:
         case R_RANGE_FAR:
-            if (count >= 8) {
-                do  {
-                    c = dc_colormap[dc_source[(int)frac & 0x7f]];
-                    c = pixel(c);
-                    v_set_line8(dest, c);
-                    v_set_line8(dest + (SCREENWIDTH * 1), c);
-                    v_set_line8(dest + (SCREENWIDTH * 2), c);
-                    v_set_line8(dest + (SCREENWIDTH * 3), c);
-                    v_set_line8(dest + (SCREENWIDTH * 4), c);
-                    v_set_line8(dest + (SCREENWIDTH * 5), c);
-                    v_set_line8(dest + (SCREENWIDTH * 6), c);
-                    v_set_line8(dest + (SCREENWIDTH * 7), c);
-                    frac += fracstep * 8;
-                    dest += SCREENWIDTH * 8;
-                    count -= 8;
-                } while (count > 0);
+            while (count >= 7) {
+                c = dc_colormap[dc_source[(int)frac & 0x7f]];
+                c = pixel(c);
+                v_set_line8(dest, c);
+                v_set_line8(dest + (SCREENWIDTH * 1), c);
+                v_set_line8(dest + (SCREENWIDTH * 2), c);
+                v_set_line8(dest + (SCREENWIDTH * 3), c);
+                v_set_line8(dest + (SCREENWIDTH * 4), c);
+                v_set_line8(dest + (SCREENWIDTH * 5), c);
+                v_set_line8(dest + (SCREENWIDTH * 6), c);
+                v_set_line8(dest + (SCREENWIDTH * 7), c);
+                frac += fracstep * 8;
+                dest += SCREENWIDTH * 8;
+                count -= 8;
             }
-        break;
+            break;
         case R_RANGE_MID:
-            if (count >= 4) {
-                do  {
-                    // Re-map color indices from wall texture column
-                    //  using a lighting/special effects LUT.
-                    c = dc_colormap[dc_source[(int)frac & 0x7f]];
-                    c = pixel(c);
-                    v_set_line4(dest, c);
-                    v_set_line4(dest + (SCREENWIDTH * 1), c);
-                    v_set_line4(dest + (SCREENWIDTH * 2), c);
-                    v_set_line4(dest + (SCREENWIDTH * 3), c);
-                    dest += SCREENWIDTH * 4;
-                    frac += fracstep * 4;
-                    count -= 4;
-                } while (count > 0);
+            while (count >= 3) {
+                // Re-map color indices from wall texture column
+                //  using a lighting/special effects LUT.
+                c = dc_colormap[dc_source[(int)frac & 0x7f]];
+                c = pixel(c);
+                v_set_line4(dest, c);
+                v_set_line4(dest + (SCREENWIDTH * 1), c);
+                v_set_line4(dest + (SCREENWIDTH * 2), c);
+                v_set_line4(dest + (SCREENWIDTH * 3), c);
+                dest += SCREENWIDTH * 4;
+                frac += fracstep * 4;
+                count -= 4;
             }
-        break;
+            break;
         case R_RANGE_NEAR:
-            if (count >= 2) {
-                do  {
-                    // Re-map color indices from wall texture column
-                    //  using a lighting/special effects LUT.
-                    c = dc_colormap[dc_source[(int)frac & 0x7f]];
-                    c = pixel(c);
-                    v_set_line(dest, c, 2 * sizeof(pix_t));
-                    v_set_line(dest + (SCREENWIDTH * 1), c, 2 * sizeof(pix_t));
-                    dest += SCREENWIDTH * 2;
-                    frac += fracstep * 2;
-                    count -= 2;
-                } while (count > 0);
+            while (count >= 1) {
+                // Re-map color indices from wall texture column
+                //  using a lighting/special effects LUT.
+                c = dc_colormap[dc_source[(int)frac & 0x7f]];
+                c = pixel(c);
+                v_set_line(dest, c, 2);
+                v_set_line(dest + (SCREENWIDTH * 1), c, 2);
+                dest += SCREENWIDTH * 2;
+                frac += fracstep * 2;
+                count -= 2;
             }
-        break;
-        default : low_detail = false;
+            break;
+        default :
         break;
     }
-    *_count = count;
-    return low_detail;
+    downscale = 1 << rw_render_downscale[rw_render_range].shift;
+    while (count >= 0) {
+        c = pixel(dc_colormap[dc_source[(int)frac & 0x7f]]);
+        v_set_line(dest, c, downscale);
+        dest += SCREENWIDTH;
+        frac += fracstep;
+        count--;
+    };
 }
 
 void R_DrawColumn (void) 
@@ -225,7 +244,6 @@ void R_DrawColumn (void)
     pix_t*		dest; 
     float		frac;
     float		fracstep;
-    boolean     low_detail = false;
 
     count = dc_yh - dc_yl; 
 
@@ -256,31 +274,8 @@ void R_DrawColumn (void)
     //  e.g. a DDA-lile scaling.
     // This is as fast as it gets.
     if (render_on_distance) {
-        low_detail = R_RenderColVar(dest, frac, fracstep, &count);
-    }
-#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
-    if (low_detail) {
-        uint32_t c = dc_colormap[dc_source[(int)frac & 0x7f]];
-        c = (c << 8) | c;
-        c = (c << 16) | c;
-        while (count-- >= 0) {
-            switch(rw_render_range) {
-                case R_RANGE_INVIS:
-                case R_RANGE_FAR:
-                    c = 0;
-                case R_RANGE_MID:
-                    *(uint32_t *)dest = c;
-                    break;
-                case R_RANGE_NEAR:
-                    *(uint16_t *)dest = c;
-                    break;
-                default: *dest = c;
-            }
-            dest += SCREENWIDTH;
-        }
-    } else 
-#endif /*(GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)*/
-    {
+        R_RenderColVar(dest, frac, fracstep, count);
+    } else {
         while (count-- >= 0) {
             // Re-map color indices from wall texture column
             //  using a lighting/special effects LUT.
@@ -434,7 +429,8 @@ void R_DrawFuzzColumn (void)
     int			count; 
     pix_t*		dest; 
     fixed_t		frac;
-    fixed_t		fracstep;	 
+    fixed_t		fracstep;
+    int         clut_idx;
 
     // Adjust borders. Low... 
     if (!dc_yl) 
@@ -474,7 +470,8 @@ void R_DrawFuzzColumn (void)
 	//  a pixel that is either one column
 	//  left or right of the current one.
 	// Add index from colormap to index.
-	*dest = pixel(colormaps[6*256+dest[fuzzoffset[fuzzpos]]]);
+    clut_idx = I_GetClutIndex(dest[fuzzoffset[fuzzpos]]);
+	*dest = pixel(colormaps[6*256+clut_idx]);
 
 	// Clamp table lookup index.
 	if (++fuzzpos == FUZZTABLE) 
@@ -494,7 +491,8 @@ void R_DrawFuzzColumnLow (void)
     pix_t*		dest; 
     pix_t*		dest2; 
     fixed_t		frac;
-    fixed_t		fracstep;	 
+    fixed_t		fracstep;
+    int         clut_idx;
     int x;
 
     // Adjust borders. Low... 
@@ -540,8 +538,10 @@ void R_DrawFuzzColumnLow (void)
 	//  a pixel that is either one column
 	//  left or right of the current one.
 	// Add index from colormap to index.
-	*dest = pixel(colormaps[6*256+dest[fuzzoffset[fuzzpos]]]);
-	*dest2 = pixel(colormaps[6*256+dest2[fuzzoffset[fuzzpos]]]);
+    clut_idx = I_GetClutIndex(dest[fuzzoffset[fuzzpos]]);
+	*dest = pixel(colormaps[6*256+clut_idx]);
+    clut_idx = I_GetClutIndex(dest2[fuzzoffset[fuzzpos]]);
+	*dest2 = pixel(colormaps[6*256+clut_idx]);
 
 	// Clamp table lookup index.
 	if (++fuzzpos == FUZZTABLE) 

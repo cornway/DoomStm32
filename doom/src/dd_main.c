@@ -14,16 +14,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "button.h"
 #include "debug.h"
 #include "ff.h"
-#include "i2c.h"
-#include "jpeg.h"
-#include "led.h"
 #include "main.h"
-#include "sdram.h"
-#include "spi.h"
-#include "images.h"
 #include "touch.h"
 #include "doom.h"
 #include "d_main.h"
@@ -41,10 +34,6 @@
 
 int d_main(void)
 {
-    // show title as soon as possible
-    //show_image (img_loading);
-    touch_init ();
-    button_init ();
     D_DoomMain ();
     return 0;
 }
@@ -83,9 +72,7 @@ void frame_end ()
  */
 void fatal_error (const char* message)
 {
-	while (1)
-	{
-	}
+    while (1) {}
 }
 
 extern gamestate_t gamestate;

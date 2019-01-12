@@ -25,15 +25,18 @@ typedef enum
     LCD_MAX_LAYER,
 } lcd_layers_t;
 
+typedef struct {
+    pix_t *buf;
+    uint32_t width, height;
+} screen_t;
+
 /*---------------------------------------------------------------------*
  *  function prototypes                                                *
  *---------------------------------------------------------------------*/
-void lcd_init (void);
-
-uint32_t lcd_get_ready_layer_addr (void);
-
-void lcd_sync (int wait);
-
-void lcd_load_palette (pal_t *palette, uint32_t pal_size, uint32_t w, uint32_t h);
+void screen_init (void);
+void screen_win_cfg (screen_t *screen);
+void screen_get_invis_screen (screen_t *screen);
+void screen_sync (int wait);
+void screen_set_clut (pal_t *palette, uint32_t clut_num_entries);
 
 #endif /*_LCD_MAIN_H*/
