@@ -157,7 +157,6 @@ int		rw_stopx;
 angle_t		rw_centerangle;
 fixed_t		rw_offset;
 fixed_t		rw_distance;
-fixed_t		rw_distance_prev;
 fixed_t		rw_scale;
 fixed_t		rw_scalestep;
 fixed_t		rw_midtexturemid;

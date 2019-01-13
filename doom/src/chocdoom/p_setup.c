@@ -796,8 +796,8 @@ P_SetupLevel
     P_LoadNodes (lumpnum+ML_NODES);
     P_LoadSegs (lumpnum+ML_SEGS);
 
-    P_LoadReject (lumpnum+ML_REJECT);
     P_GroupLines ();
+    P_LoadReject (lumpnum+ML_REJECT);
 
     bodyqueslot = 0;
     deathmatch_p = deathmatchstarts;

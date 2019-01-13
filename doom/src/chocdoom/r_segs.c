@@ -61,7 +61,6 @@ extern int		rw_stopx;
 extern angle_t		rw_centerangle;
 extern fixed_t		rw_offset;
 extern fixed_t		rw_distance;
-extern fixed_t		rw_distance_prev;
 extern fixed_t		rw_scale;
 extern fixed_t		rw_scalestep;
 extern fixed_t		rw_midtexturemid;
@@ -203,20 +202,18 @@ int rw_scale_var = 0;
 
 void (*render_col) (void);
 
-static void R_CopySeg (
+static void R_CopySegClip (
     int dest,
-    int src,
-    boolean floor,
-    boolean ceiling)
+    int src)
 {
     if (midtexture || bottomtexture || markfloor) {
         floorclip[dest] = floorclip[src];
     }
-    if (floor) {
+    if (markfloor) {
         floorplane->top[dest] = floorplane->top[src];
         floorplane->bottom[dest] = floorplane->bottom[src];
     }
-    if (ceiling) {
+    if (markceiling) {
         ceilingplane->top[dest] = ceilingplane->top[src];
         ceilingplane->bottom[dest] = ceilingplane->bottom[src];
     }
@@ -225,6 +222,53 @@ static void R_CopySeg (
     }
     if (maskedtexture) {
         maskedtexturecol[dest] = maskedtexturecol[src];
+    }
+}
+
+static fixed_t rw_scalestep_lut[R_RANGE_MAX];
+static fixed_t topstep_lut[R_RANGE_MAX];
+static fixed_t bottomstep_lut[R_RANGE_MAX];
+static fixed_t pixlowstep_lut[R_RANGE_MAX];
+static fixed_t pixhighstep_lut[R_RANGE_MAX];
+static byte dscale_lut[R_RANGE_MAX];
+
+static void R_SetStepLut (void)
+{
+    int i;
+    byte shift, downscale;
+    for (i = 0; i < R_RANGE_MAX; i++) {
+
+        shift = rw_render_downscale[i].shift;
+        downscale = (1 << shift) - 1;
+
+        dscale_lut[i]       = downscale;
+        rw_scalestep_lut[i] = rw_scalestep * downscale;
+        topstep_lut[i]      = topstep * downscale;
+        bottomstep_lut[i]   = bottomstep * downscale;
+        pixlowstep_lut[i]   = pixlowstep * downscale;
+        pixhighstep_lut[i]  = pixhighstep * downscale;
+    }
+}
+
+static void R_CopySegRange (void)
+{
+    byte downscale = dscale_lut[rw_render_range];
+
+    if (downscale && render_on_distance && segtextured) {
+
+        rw_scale    += rw_scalestep_lut[rw_render_range];
+        topfrac     += topstep_lut[rw_render_range];
+        bottomfrac  += bottomstep_lut[rw_render_range];
+        if (bottomtexture) {
+            pixlow += pixlowstep_lut[rw_render_range];;
+        }
+        if (toptexture) {
+            pixhigh += pixhighstep_lut[rw_render_range];
+        }
+        while (downscale--) {
+            rw_x++;
+            R_CopySegClip(rw_x, rw_x - 1);
+        }
     }
 }
 
@@ -238,22 +282,14 @@ void R_RenderSegLoop (void)
     fixed_t		texturecolumn;
     int			top;
     int			bottom;
-    boolean col_done;
-    boolean _markfloor = false, _markceiling = false;
-    fixed_t hyp = 0;
+    fixed_t     hyp = 0;
 
     rw_render_range = R_RANGE_NEAREST;
-    R_SetRwRange(rw_distance);
+    R_SetStepLut();
 
     for ( ; rw_x < rw_stopx ; rw_x++) {
         short temp_ceil = ceilingclip[rw_x]+1;
         short temp_floor = floorclip[rw_x]-1;
-
-        col_done = false;
-        _markfloor = false;
-        _markceiling = false;
-
-        R_ProcDownscale(rw_x, rw_stopx);
 
         // mark floor / ceiling areas
         yl = (topfrac+HEIGHTUNIT-1)>>HEIGHTBITS;
@@ -271,7 +307,6 @@ void R_RenderSegLoop (void)
             if (top <= bottom) {
                 ceilingplane->top[rw_x] = top;
                 ceilingplane->bottom[rw_x] = bottom;
-                _markceiling = true;
             }
         }
         yh = bottomfrac>>HEIGHTBITS;
@@ -288,7 +323,6 @@ void R_RenderSegLoop (void)
             {
                 floorplane->top[rw_x] = top;
                 floorplane->bottom[rw_x] = bottom;
-                _markfloor = true;
             }
         }
         // texturecolumn and lighting are independent of wall tiers
@@ -299,6 +333,9 @@ void R_RenderSegLoop (void)
             angle = (rw_centerangle + xtoviewangle[rw_x])>>ANGLETOFINESHIFT;
             texturecolumn = rw_offset-FixedMul(finetangent[angle],rw_distance);
             hyp = FixedMul(finesine_n[angle], rw_distance);
+
+            R_SetRwRange(hyp);
+            R_ProcDownscale(rw_x, rw_stopx);
             ST_StartFog(hyp);
             texturecolumn >>= FRACBITS;
             // calculate lighting
@@ -326,7 +363,6 @@ void R_RenderSegLoop (void)
             dc_texturemid = rw_midtexturemid;
             dc_source = R_GetColumn(midtexture,texturecolumn);
             colfunc ();
-            col_done = true;
             ceilingclip[rw_x] = viewheight;
             floorclip[rw_x] = -1;
         } else {
@@ -346,7 +382,6 @@ void R_RenderSegLoop (void)
                     dc_texturemid = rw_toptexturemid;
                     dc_source = R_GetColumn(toptexture,texturecolumn);
                     colfunc ();
-                    col_done = true;
                     ceilingclip[rw_x] = mid;
                 }
                 else
@@ -373,7 +408,6 @@ void R_RenderSegLoop (void)
                     dc_source = R_GetColumn(bottomtexture,
                                 texturecolumn);
                     colfunc ();
-                    col_done = true;
                     floorclip[rw_x] = mid;
                 }
                 else
@@ -389,20 +423,7 @@ void R_RenderSegLoop (void)
                 maskedtexturecol[rw_x] = texturecolumn;
             }
         }
-        if (render_on_distance && col_done) {
-            byte downscale = 1 << rw_render_downscale[rw_render_range].shift;
-            uint8_t i = downscale - 1;
-            while (i) {
-                rw_x++;
-                R_CopySeg(rw_x, rw_x - 1, _markfloor, _markceiling);
-                rw_scale += rw_scalestep ;
-                topfrac += topstep;
-                bottomfrac += bottomstep;
-                i--;
-            }
-        }
-        if (hyp)
-            R_SetRwRange(hyp);
+        R_CopySegRange();
         rw_scale += rw_scalestep;
         topfrac += topstep;
         bottomfrac += bottomstep;
@@ -519,7 +540,6 @@ R_StoreWallRange
     hyp = R_PointToDist (curline->v1->x, curline->v1->y);
     sineval = finesine[distangle>>ANGLETOFINESHIFT];
     rw_distance = FixedMul (hyp, sineval);//
-    rw_distance_prev = 0;
     project_rw_dist = FixedDiv(projection, rw_distance);
 		
 	

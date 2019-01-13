@@ -49,6 +49,7 @@
 // Effective size is 10240.
 extern const fixed_t finesine[5*FINEANGLES/4];
 extern int *finesine_n;
+extern int *finecosine_n;
 
 // Re-use data, is just PI/2 pahse shift.
 extern const fixed_t *finecosine;

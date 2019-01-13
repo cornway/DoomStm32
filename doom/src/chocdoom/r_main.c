@@ -440,6 +440,7 @@ void R_InitTables (void)
     for (int i = 0; i < 10240; i++) {
         finesine_n[i] = FixedDiv(FRACUNIT, finesine[i]);
     }
+    finecosine_n = finesine_n + FINEANGLES/4;
 }
 
 

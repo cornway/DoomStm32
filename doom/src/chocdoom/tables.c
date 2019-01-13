@@ -580,6 +580,7 @@ const int finetangent[4096] =
 };
 
 int *finesine_n;
+int *finecosine_n;
 
 const int finesine[10240] =
 {
