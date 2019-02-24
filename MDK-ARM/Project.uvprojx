@@ -334,7 +334,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls> </MiscControls>
-              <Define>STM32F769xx,USE_HAL_DRIVER,USE_STM32F769I_DISCO,DATA_IN_ExtSDRAM,USE_LCD_HDMI,USE_USB_HS</Define>
+              <Define>STM32F769xx,USE_HAL_DRIVER,USE_STM32F769I_DISCO,DATA_IN_ExtSDRAM,USE_LCD_HDMI,USE_USB_HS,SDL_DOOM</Define>
               <Undefine></Undefine>
               <IncludePath>../Inc;..\STM32F7xx_Driver\Inc;..\Utilities\JPEG;..\FatFs\src;..\STM32F7xx_Driver\BSP\Components\Common;..\STM32F7xx_Driver\BSP\STM32F769I-Discovery;..\STM32F7xx_Driver\CMSIS\Device\ST\STM32F7xx\Include;..\doom\src;..\doom\src\chocdoom</IncludePath>
             </VariousControls>
