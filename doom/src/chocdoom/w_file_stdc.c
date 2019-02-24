@@ -182,7 +182,7 @@ static void W_StdC_Foreach(char *path, void (*handle)(void *))
                 char *ext = fno.fname + strlen(fno.fname) - sizeof(WAD_EXT) + 1;
                 strupr(ext);
                 if (0 == strncmp(ext, WAD_EXT, sizeof(WAD_EXT))) {
-                    snprintf(path_to_file, sizeof(path_to_file),
+                    M_snprintf(path_to_file, sizeof(path_to_file),
                         "%s/%s", path, fno.fname);
 
                     (*handle)(path_to_file);

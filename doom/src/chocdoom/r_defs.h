@@ -127,7 +127,9 @@ typedef	struct
 
     int			linecount;
     struct line_s**	lines;	// [linecount] size
-    
+
+    int extrlight;
+    boolean extralightown;
 } sector_t;
 
 
@@ -368,11 +370,14 @@ typedef struct vissprite_s
     // for color translation and shadow draw,
     //  maxbright frames as well
     lighttable_t*	colormap;
-   
+#if (GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)
+    byte sprflags;
+#endif
     int			mobjflags;
     
 } vissprite_t;
 
+#define VIS_SHADOW (0x1)
 
 //	
 // Sprites are patches with a special naming convention

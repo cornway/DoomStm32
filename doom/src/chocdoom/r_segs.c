@@ -197,33 +197,13 @@ R_RenderMaskedSegRange
 
 extern pix_t*		ylookup[MAXHEIGHT];
 extern int		columnofs[MAXWIDTH];
+extern int plyr_wpflash_light;
 
 int rw_scale_var = 0;
 
 void (*render_col) (void);
 
-static void R_CopySegClip (
-    int dest,
-    int src)
-{
-    if (midtexture || bottomtexture || markfloor) {
-        floorclip[dest] = floorclip[src];
-    }
-    if (markfloor) {
-        floorplane->top[dest] = floorplane->top[src];
-        floorplane->bottom[dest] = floorplane->bottom[src];
-    }
-    if (markceiling) {
-        ceilingplane->top[dest] = ceilingplane->top[src];
-        ceilingplane->bottom[dest] = ceilingplane->bottom[src];
-    }
-    if (midtexture || toptexture || markceiling) {
-        ceilingclip[dest] = ceilingclip[src];
-    }
-    if (maskedtexture) {
-        maskedtexturecol[dest] = maskedtexturecol[src];
-    }
-}
+
 
 static fixed_t rw_scalestep_lut[R_RANGE_MAX];
 static fixed_t topstep_lut[R_RANGE_MAX];
@@ -249,6 +229,25 @@ static void R_SetStepLut (void)
         pixhighstep_lut[i]  = pixhighstep * downscale;
     }
 }
+static void R_CopySegClip (
+    int dest,
+    int src)
+{
+    floorclip[dest] = floorclip[src];
+    ceilingclip[dest] = ceilingclip[src];
+
+    if (markfloor) {
+        floorplane->top[dest] = floorplane->top[src];
+        floorplane->bottom[dest] = floorplane->bottom[src];
+    }
+    if (markceiling) {
+        ceilingplane->top[dest] = ceilingplane->top[src];
+        ceilingplane->bottom[dest] = ceilingplane->bottom[src];
+    }
+    if (maskedtexture) {
+        maskedtexturecol[dest] = maskedtexturecol[src];
+    }
+}
 
 static void R_CopySegRange (void)
 {
@@ -259,12 +258,8 @@ static void R_CopySegRange (void)
         rw_scale    += rw_scalestep_lut[rw_render_range];
         topfrac     += topstep_lut[rw_render_range];
         bottomfrac  += bottomstep_lut[rw_render_range];
-        if (bottomtexture) {
-            pixlow += pixlowstep_lut[rw_render_range];;
-        }
-        if (toptexture) {
-            pixhigh += pixhighstep_lut[rw_render_range];
-        }
+        pixlow      += pixlowstep_lut[rw_render_range];
+        pixhigh     += pixhighstep_lut[rw_render_range];
         while (downscale--) {
             rw_x++;
             R_CopySegClip(rw_x, rw_x - 1);
@@ -286,6 +281,16 @@ void R_RenderSegLoop (void)
 
     rw_render_range = R_RANGE_NEAREST;
     R_SetStepLut();
+
+    if (frontsector) {
+        ST_StartLight(-1, 1, frontsector->extrlight, LT_SECT);
+    } else if (backsector) {
+        ST_StartLight(-1, 1, backsector->extrlight, LT_SECT);
+    }
+
+    if (plyr_wpflash_light) {
+        ST_StartLight(rw_distance, 2, plyr_wpflash_light, LT_WPN);
+    }
 
     for ( ; rw_x < rw_stopx ; rw_x++) {
         short temp_ceil = ceilingclip[rw_x]+1;
@@ -326,17 +331,44 @@ void R_RenderSegLoop (void)
             }
         }
         // texturecolumn and lighting are independent of wall tiers
-        hyp = 0;
+
+        // calculate texture offset
+        angle = (rw_centerangle + xtoviewangle[rw_x])>>ANGLETOFINESHIFT;
+        hyp = FixedMul(finesine_n[angle], rw_distance);
+
+        R_SetRwRange(hyp);
+        R_ProcDownscale(rw_x, rw_stopx);
+
         if (segtextured)
         {
-            // calculate texture offset
-            angle = (rw_centerangle + xtoviewangle[rw_x])>>ANGLETOFINESHIFT;
             texturecolumn = rw_offset-FixedMul(finetangent[angle],rw_distance);
-            hyp = FixedMul(finesine_n[angle], rw_distance);
 
-            R_SetRwRange(hyp);
-            R_ProcDownscale(rw_x, rw_stopx);
-            ST_StartFog(hyp);
+            if (rw_render_range == R_RANGE_MID && bottomtexture) {
+                if (rw_x < rw_stopx - 4) {
+                    rw_render_range = R_RANGE_MID;
+                }
+            }
+#ifdef NOT_YET
+            if (0 && frontsector) {
+                mobj_t *t = frontsector->thinglist;
+                fixed_t m_dist;
+                while (t)
+                {
+                    if (t->flags2 & MOBJ_LIGHT_SRC_BM && t->data) {
+                        m_dist = P_AproxDistance
+                                    (curline->v1->x - t->x,
+                                     curline->v1->y - t->y);
+                        if (m_dist < R_DISTANCE_MID) {
+                            extra = true;
+                            break;
+                        }
+                    }
+                    t = t->snext;
+                }
+            }
+#endif
+            ST_StartLight(hyp, 0, -1, LT_FOG);
+
             texturecolumn >>= FRACBITS;
             // calculate lighting
             index = rw_scale>>LIGHTSCALESHIFT;
@@ -857,6 +889,6 @@ R_StoreWallRange
 	ds_p->bsilheight = INT_MAX;
     }
     ds_p++;
-    ST_ReleaseFog();
+    ST_StopLight();
 }
 

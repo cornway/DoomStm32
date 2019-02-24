@@ -33,6 +33,8 @@
 #include "doomstat.h"
 #include "r_state.h"
 
+#include "st_stuff.h"
+
 //#include "r_local.h"
 
 
@@ -481,6 +483,8 @@ void R_Subsector (int num)
 	ceilingplane = NULL;
 		
     R_AddSprites (frontsector);	
+
+    ST_SetSectorLight(frontsector);
 
     while (count--)
     {

@@ -286,6 +286,8 @@ void P_LoadSectors (int lump)
         ss->special = READ_LE_I16(ms->special);
         ss->tag = READ_LE_I16(ms->tag);
         ss->thinglist = NULL;
+        ss->extrlight = 0;
+        ss->extralightown = false;
     }
 
     W_ReleaseLumpNum(lump);
@@ -799,6 +801,7 @@ P_SetupLevel
     P_GroupLines ();
     P_LoadReject (lumpnum+ML_REJECT);
 
+    ST_Setup();
     bodyqueslot = 0;
     deathmatch_p = deathmatchstarts;
     P_LoadThings (lumpnum+ML_THINGS);

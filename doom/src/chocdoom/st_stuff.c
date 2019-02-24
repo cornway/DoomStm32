@@ -1035,6 +1035,7 @@ void ST_drawWidgets(boolean refresh)
 
 #else
 
+/*TODO : Move palettes into IRAM*/
 int ST_setPaletteNum (int num)
 {
     byte *pal;
@@ -1051,30 +1052,168 @@ static int prev_palette = -1;
 #define STARTFOGPALS STARTBONUSPALS
 #define NUMFOGPALS   NUMBONUSPALS
 
-int ST_StartFog (fixed_t distance)
+#define STARTFIREPALS STARTBONUSPALS
+#define NUMFIREPALS   NUMBONUSPALS
+
+
+static const fixed_t wp_fire_radius[] =
 {
-    if (st_palette != 0) {
+    R_DISTANCE_NEAR / 3,
+    R_DISTANCE_NEAR / 3 + R_DISTANCE_NEAR / 3,
+    R_DISTANCE_NEAR / 2 + R_DISTANCE_NEAR / 3,
+    R_DISTANCE_NEAR,
+};
+static int ST_GetWpFirePal (fixed_t distance, int palette)
+{
+    int i;
+
+    if (distance < MELEERANGE) {
         return -1;
     }
-    if (distance > R_DISTANCE_NEAR + R_DISTANCE_NEAR / 2) {
-        fixed_t n  = distance / R_DISTANCE_NEAR - 1;
-        if (n >= NUMFOGPALS) {
-            n = NUMFOGPALS - 1;
+    for (i = 0; i < arrlen(wp_fire_radius); i++) {
+        if (distance < wp_fire_radius[i]) {
+            break;
         }
+    }
+    if (i == arrlen(wp_fire_radius)) {
+        return -1;
+    }
+    if (i >= palette) {
+        i = palette - 1;
+    }
+    return palette - i - 1;
+}
+
+static int light_prio = -1;
+
+static int __ST_StartWpFireLight (fixed_t distance, int light)
+{
+    int n = -1;
+
+    int palette = howmany(light, howmany(255, NUMFIREPALS));
+
+    if (palette >= NUMFIREPALS) {
+        palette = NUMFIREPALS;
+    }
+    n = ST_GetWpFirePal(distance, palette);
+
+    if (n >= 0) {
+        n += STARTFIREPALS;
+    }
+    return n;
+}
+
+static int __ST_StartFogLight (fixed_t distance)
+{
+    int n;
+    n  = distance / R_DISTANCE_NEAR - 1;
+    if (n >= NUMFOGPALS) {
+        n = NUMFOGPALS - 1;
+    }
+    if (n >= 0) {
         n += STARTFOGPALS;
-        if (prev_palette == n) {
+    }
+    return n;
+}
+
+static int __ST_StartLight (fixed_t distance, light_t type, int light)
+{
+    int n = -1;
+    switch (type) {
+        case LT_FOG:
+            n = __ST_StartFogLight(distance);
+            break;
+        case LT_SECT:
+            n = light;
+            break;
+        case LT_WPN:
+            n = __ST_StartWpFireLight(distance, light);
+            break;
+        default:
+            n = -1;
+            break;
+    }
+
+    if (n < 0) {
+        return n;
+    }
+
+    if (prev_palette == n) {
+        return -1;
+    }
+    prev_palette = n;
+    return ST_setPaletteNum(n);
+}
+
+int ST_StartLight (fixed_t distance, int prio, int light, light_t type)
+{
+    if (light_prio > 0) {
+        if (prio < light_prio) {
             return -1;
         }
-        prev_palette = n;
-        return ST_setPaletteNum(n);
+    }
+
+    if (__ST_StartLight(distance, type, light) >= 0) {
+        light_prio = prio;
+        return 0;
     }
     return -1;
 }
 
-void ST_ReleaseFog (void)
+void ST_StopLight (void)
 {
     ST_setPaletteNum(st_palette);
     prev_palette = st_palette;
+    light_prio = 0;
+}
+
+static const char *flat_name[] =
+{
+    "NUKAGE1", "NUKAGE3",
+    "LAVA1", "LAVA4",
+    "SLIME01", "SLIME08"
+};
+
+static const int floor_light_map[] =
+{
+    RADIATIONPAL,
+    STARTREDPALS + 2,
+    STARTBONUSPALS + NUMBONUSPALS - 3,
+};
+
+struct floor_lump_s {
+    int start, num;
+};
+
+struct floor_lump_s floor_lump[arrlen(floor_light_map) + 1] = {0};
+
+void ST_Setup (void)
+{
+    int i;
+    int n;
+    for (i = 0; i < arrlen(flat_name); i += 2) {
+        n = i / 2;
+        floor_lump[n].start = R_FlatNumForName((char *)flat_name[i]);
+        floor_lump[n].num = R_FlatNumForName((char *)flat_name[i + 1]) - floor_lump[n].start;
+    }
+}
+
+void ST_SetSectorLight (void *_sector)
+{
+    sector_t *sector = _sector;
+    int i = 0, floorpic;
+    if (sector->extrlight) {
+        return;
+    }
+    while (floor_lump[i].start && floor_lump[i].num) {
+        floorpic = sector->floorpic - floor_lump[i].start;
+        if ((floorpic > 0) && (floorpic <= floor_lump[i].num)) {
+            sector->extrlight = floor_light_map[i];
+            sector->extralightown = true;
+            break;
+        }
+        i++;
+    }
 }
 
 #endif

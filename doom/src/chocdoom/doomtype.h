@@ -129,5 +129,7 @@ typedef uint8_t byte;
 #define arrlen(array) (sizeof(array) / sizeof(*array))
 
 
+#define howmany(a, b) (((a) + (b) - 1) / (b))
+
 #endif
 

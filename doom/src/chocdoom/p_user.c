@@ -320,6 +320,8 @@ static const fixed_t wp_fired_mo[][9] =
 };
 
 
+int plyr_wpflash_light = 0;
+
 void P_PlayerThink (player_t* player)
 {
     ticcmd_t*		cmd;
@@ -358,14 +360,26 @@ void P_PlayerThink (player_t* player)
     
     P_CalcHeight (player);
 
-    if (game_alt_pkg == pkg_psx_final) {
-        if (player->wpfired_ev) {
+    if (player->wpfired_ev) {
+
+        if (game_alt_pkg == pkg_psx_final) {
             if (player->wpfired_ev > (arrlen(wp_fired_mo[0]) - 1) / 2) {
                 player->lookdir += wp_fired_mo[player->readyweapon][player->wpfired_ev];
             } else {
                 player->lookdir -= wp_fired_mo[player->readyweapon][player->wpfired_ev];
             }
-            player->wpfired_ev--;
+        }
+        player->wpfired_ev--;
+    }
+
+    if (plyr_wpflash_light) {
+        static int plyr_wpflash_ev_delay = 2;
+
+        if (plyr_wpflash_ev_delay) {
+            plyr_wpflash_ev_delay--;
+        } else {
+            plyr_wpflash_ev_delay = 2;
+            plyr_wpflash_light -= 32;
         }
     }
 

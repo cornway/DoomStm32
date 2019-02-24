@@ -146,6 +146,12 @@ static void ExtendLumpInfo(int newnumlumps)
 //  for the lump name.
 int game_levels_total = 0;
 
+static inline void
+W_ExtendMaps (lumpinfo_t *lump)
+{
+    M_snprintf(lump->name, 8, "MAP%d", game_levels_total + 1);
+}
+
 static void
 W_CountMaps (lumpinfo_t *lump, boolean pwad)
 {
@@ -159,7 +165,11 @@ W_CountMaps (lumpinfo_t *lump, boolean pwad)
             map--;
             map = map % 8;
             map++;
-            snprintf(lump->name, 8, "E%dM%d", ep + 1, map);
+            M_snprintf(lump->name, 8, "E%dM%d", ep + 1, map);
+        } else {
+            if (pwad && game_levels_total) {
+                W_ExtendMaps(lump);
+            }
         }
         game_levels_total++;
     } else if (((lump->name[0] == 'E') && (lump->name[2] == 'M'))) {

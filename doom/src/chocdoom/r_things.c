@@ -451,7 +451,11 @@ R_DrawVisSprite
     patch = W_CacheLumpNum (vis->patch+firstspritelump, PU_CACHE);
 
     dc_colormap = vis->colormap;
-    
+#if (GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)
+    if (vis->sprflags & VIS_SHADOW) {
+        colfunc = fuzzcolfunc;
+    } else
+#endif
     if (!dc_colormap)
     {
 	// NULL colormap = shadow draw
@@ -470,7 +474,7 @@ R_DrawVisSprite
     spryscale = vis->scale;
     sprtopscreen = centeryfrac - FixedMul(dc_texturemid,spryscale);
 
-    ST_StartFog((vis->distance > 0) ? vis->distance : -vis->distance);
+    ST_StartLight(abs(vis->distance), 0, -1, LT_FOG);
 
     for (dc_x=vis->x1 ; dc_x<=vis->x2 ; dc_x++, frac += vis->xiscale)
     {
@@ -492,8 +496,6 @@ R_DrawVisSprite
     }
     render_on_distance = false;
     colfunc = basecolfunc;
-
-    ST_ReleaseFog();
 }
 
 
@@ -613,7 +615,7 @@ void R_ProjectSprite (mobj_t* thing)
     vis->texturemid = vis->gzt - viewz;
     vis->x1 = x1 < 0 ? 0 : x1;
     vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;	
-    
+    vis->sprflags = 0;
 
     if (flip)
     {
@@ -633,8 +635,14 @@ void R_ProjectSprite (mobj_t* thing)
     // get light level
     if (thing->flags & MF_SHADOW)
     {
-	// shadow draw
-	vis->colormap = NULL;
+#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
+    // shadow draw
+    vis->colormap = NULL;
+#else
+    vis->sprflags = VIS_SHADOW;
+    vis->colormap = colormaps;
+#endif
+
     }
     else if (fixedcolormap)
     {
@@ -750,6 +758,9 @@ void R_SortVisSprites (void)
 //
 // R_DrawPSprite
 //
+extern player_t players[MAXPLAYERS];
+extern int consoleplayer;
+
 void R_DrawPSprite (pspdef_t* psp)
 {
     fixed_t		tx;
@@ -795,7 +806,14 @@ void R_DrawPSprite (pspdef_t* psp)
     // off the left side
     if (x2 < 0)
 	return;
-    
+
+    {
+        sector_t *sector = players[consoleplayer].mo->subsector->sector;
+        if (sector && sector->extrlight) {
+            ST_StartLight(-1, 1, sector->extrlight, LT_SECT);
+        }
+    }
+
     // store information in a vissprite
     vis = &avis;
     vis->mobjflags = 0;
@@ -803,7 +821,7 @@ void R_DrawPSprite (pspdef_t* psp)
     vis->x1 = x1 < 0 ? 0 : x1;
     vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;
     vis->scale = pspritescale<<detailshift;
-    
+    vis->sprflags = 0;
     if (flip)
     {
 	vis->xiscale = -pspriteiscale;
@@ -820,11 +838,17 @@ void R_DrawPSprite (pspdef_t* psp)
 
     vis->patch = lump;
 
+
     if (viewplayer->powers[pw_invisibility] > 4*32
 	|| viewplayer->powers[pw_invisibility] & 8)
     {
+#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
 	// shadow draw
 	vis->colormap = NULL;
+#else
+    vis->sprflags = VIS_SHADOW;
+    vis->colormap = colormaps;
+#endif
     }
     else if (fixedcolormap)
     {
@@ -842,7 +866,9 @@ void R_DrawPSprite (pspdef_t* psp)
 	vis->colormap = spritelights[MAXLIGHTSCALE-1];
     }
 	vis->distance = -1;
+
     R_DrawVisSprite (vis, vis->x1, vis->x2);
+    ST_StopLight();
 }
 
 
@@ -967,6 +993,7 @@ void R_DrawSprite (vissprite_t* spr)
   mfloorclip = clipbot;
   mceilingclip = cliptop;
   R_DrawVisSprite (spr, spr->x1, spr->x2);
+  ST_StopLight();
 }
 
 #else

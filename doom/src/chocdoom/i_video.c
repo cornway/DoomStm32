@@ -221,7 +221,84 @@ static pal_t *palettes[16] = {NULL};
 static const uint32_t clut_num_entries = (256);
 static const uint32_t clut_num_bytes = (clut_num_entries * sizeof(pal_t));
 static pal_t *prev_clut = NULL;
+static byte *aclut = NULL;
+static byte *aclut_map = NULL;
 
+#if (GFX_COLOR_MODE == GFX_COLOR_MODE_RGB565)
+static const uint16_t aclut_entry_cnt = 0xffff;
+
+pix_t I_BlendPix (pix_t fg, pix_t bg, byte a)
+{
+#define __blend(f, b, a) (byte)(((uint16_t)(f * a) + (uint16_t)(b * (255 - a))) / 255)
+    pix_t ret;
+
+    byte fg_r = GFX_ARGB_R(fg);
+    byte fg_g = GFX_ARGB_G(fg);
+    byte fg_b = GFX_ARGB_B(fg);
+
+    byte bg_r = GFX_ARGB_R(bg);
+    byte bg_g = GFX_ARGB_G(bg);
+    byte bg_b = GFX_ARGB_B(bg);
+
+    byte r = __blend(fg_r, bg_r, a) << 3;
+    byte g = __blend(fg_g, bg_g, a) << 2;
+    byte b = __blend(fg_b, bg_b, a) << 3;
+
+    ret = GFX_RGB(GFX_OPAQUE, r, g, b);
+    return ret;
+}
+
+byte I_BlendPalEntry (byte _fg, byte _bg, byte a)
+{
+    pix_t fg = rgb_palette[_fg];
+    pix_t bg = rgb_palette[_bg];
+    pix_t pix = I_BlendPix(fg, bg, a);
+
+
+    return I_GetPaletteIndex(GFX_ARGB_R(pix), GFX_ARGB_G(pix), GFX_ARGB_B(pix));
+}
+
+
+#endif
+
+static void I_GenAclut (void)
+{
+    int i, j;
+    byte *map;
+
+    if (aclut)
+        Z_Free(aclut);
+    if (aclut_map)
+        Z_Free(aclut_map);
+
+    aclut = (byte *)Z_Malloc(aclut_entry_cnt * sizeof(*aclut), PU_STATIC, 0);
+    aclut_map = (byte *)Z_Malloc(clut_num_entries * clut_num_entries * sizeof(*aclut), PU_STATIC, 0);
+
+    for (i = 0; i < aclut_entry_cnt; i++) {
+        aclut[i] = I_GetPaletteIndex(GFX_ARGB_R(i), GFX_ARGB_G(i), GFX_ARGB_B(i));
+    }
+
+    for (i = 0; i < clut_num_entries; i++) {
+        map = aclut_map + (i * clut_num_entries);
+        for (j = 0; j < clut_num_entries; j++) {
+            map[j] = I_BlendPalEntry(rgb_palette[i], rgb_palette[j], 128);
+        }
+    }
+}
+
+void I_CacheAclut (void)
+{
+    if (aclut && aclut_map)
+        return;
+
+    I_GenAclut();
+}
+
+pix_t I_BlendPixMap (pix_t fg, pix_t bg)
+{
+    byte *map = aclut_map + (aclut[bg] * clut_num_entries);
+    return map[aclut[fg]];
+}
 
 void I_SetPlayPal (void)
 {
@@ -263,10 +340,10 @@ void I_SetPalette (byte* palette, int idx)
     for (i = 0; i < clut_num_entries; i++)
     {
         color = (rgb_t*)palette;
-        pal[i] = GFX_RGB(gammatable[usegamma][color->r],
+        pal[i] = GFX_RGB(GFX_OPAQUE,
+                        gammatable[usegamma][color->r],
                         gammatable[usegamma][color->g],
-                        gammatable[usegamma][color->b],
-                        GFX_OPAQUE);
+                        gammatable[usegamma][color->b]);
         palette += 3;
     }
 sw_done:
@@ -274,6 +351,7 @@ sw_done:
     screen_sync(1);
     screen_set_clut(p_palette, clut_num_entries);
 #endif
+    //I_CacheAclut();
     return;
 }
 
@@ -296,10 +374,10 @@ static void I_RefreshPalette (int pal_idx)
         g = GFX_ARGB_G(pal[i]);
         b = GFX_ARGB_B(pal[i]);
 
-        pal[i] = GFX_RGB(gammatable[usegamma][r],
+        pal[i] = GFX_RGB(GFX_OPAQUE,
+                        gammatable[usegamma][r],
                         gammatable[usegamma][g],
-                        gammatable[usegamma][b],
-                        GFX_OPAQUE);
+                        gammatable[usegamma][b]);
     }
 }
 

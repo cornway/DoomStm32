@@ -430,7 +430,7 @@ void HU_Ticker(void)
 	    message_dontfuckwithme = 0;
 	} else if (message_counter == 0) {
 	    char msg_buf[64];
-	    snprintf(msg_buf, sizeof(msg_buf), "FPS : %d(%d)",
+	    M_snprintf(msg_buf, sizeof(msg_buf), "FPS : %d(%d)",
             fps_prev, msec_per_frame);
         HUlib_addMessageToSText(&w_message, 0, msg_buf);
 	    plr->message = NULL;

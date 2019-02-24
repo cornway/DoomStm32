@@ -533,7 +533,7 @@ menu_t  SaveDef =
 void M_DrawNewLevel (void)
 {
     char buf[64];
-    snprintf(buf, 64, "Start Level :\n %d %s",
+    M_snprintf(buf, 64, "Start Level :\n %d %s",
         level_selected, level_select_message);
     M_WriteText(NewLvlDef.x, NewLvlDef.y, buf);
 }
@@ -602,7 +602,7 @@ void M_DrawLoad(void)
         M_DrawSaveLoadBorder(LoadDef.x,LoadDef.y);
         if (game_saved_in_ram) {
             char buf[80 + 1];
-            snprintf(buf, sizeof(buf), "Map : %s", saveg_level_name);
+            M_snprintf(buf, sizeof(buf), "Map : %s", saveg_level_name);
             M_WriteText(LoadDef.x,LoadDef.y, buf);
         } else {
     	    M_WriteText(LoadDef.x,LoadDef.y, "SLOT EMPTY");
@@ -1006,7 +1006,7 @@ static void D_ForeachFileHdlr(void *_filename)
 {
     char *filename = (char *)_filename;
     W_AddFile(filename);
-    snprintf(level_select_message, sizeof(level_select_message),
+    M_snprintf(level_select_message, sizeof(level_select_message),
         "New map[%d]: %s", level_selected, filename);
     level_selected--;
     filename[0] = 0;

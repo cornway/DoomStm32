@@ -53,18 +53,27 @@ void ST_Start (void);
 // Called by startup code.
 void ST_Init (void);
 
+typedef enum {
+    LT_NONE,
+    LT_FOG,
+    LT_SECT,
+    LT_WPN,
+    LT_MAX,
+} light_t;
+
 #if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
 static inline int ST_setPaletteNum (int num);
-static int ST_StartFog (fixed_t distance) {return -1;};
-static void ST_ReleaseFog (void) {};
+static inline int ST_StartLight (fixed_t distance, int prio, int light, light_t type) {return -1;};
+static inline void ST_StopLight (void) {};
+static inline void ST_SetSectorLight (sector_t *sector) {};
+static inline void ST_Setup (void) {};
 #else
 int ST_setPaletteNum (int num);
-int ST_StartFog (fixed_t distance);
-void ST_ReleaseFog (void);
+int ST_StartLight (fixed_t distance, int prio, int light, light_t type);
+void ST_StopLight (void);
+void ST_SetSectorLight (void *sector);
+void ST_Setup (void);
 #endif
-
-
-
 
 // States for status bar code.
 typedef enum

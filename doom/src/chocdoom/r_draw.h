@@ -108,10 +108,10 @@ void R_FillBackScreen (void);
 // If the view size is not full screen, draws a border around it.
 void R_DrawViewBorder (void);
 
-#define R_DISTANCE_NEAR (200 * FRACUNIT)
-#define R_DISTANCE_MID  (400 * FRACUNIT)
-#define R_DISTANCE_FAR  (800 * FRACUNIT)
-#define R_DISTANCE_INVIS (1200 * FRACUNIT)
+#define R_DISTANCE_NEAR (MELEERANGE * 4)
+#define R_DISTANCE_MID  (MELEERANGE * 8)
+#define R_DISTANCE_FAR  (MELEERANGE * 16)
+#define R_DISTANCE_INVIS (MELEERANGE * 32)
 
 
 typedef enum {

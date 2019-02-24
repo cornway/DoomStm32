@@ -178,7 +178,7 @@ static void P_SaveEnd ()
     save_buf = NULL;
 #endif
     write8_handle = saveg_write8_file;
-    snprintf(saveg_level_name, sizeof(saveg_level_name), "%s", w_title.l);
+    M_snprintf(saveg_level_name, sizeof(saveg_level_name), "%s", w_title.l);
     game_saved_in_ram = true;
     music_resume();
 }
