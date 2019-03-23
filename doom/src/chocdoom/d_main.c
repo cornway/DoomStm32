@@ -75,6 +75,7 @@
 
 #include "d_main.h"
 #include "main.h"
+#include "w_merge.h"
 
 //
 // D-DoomLoop()
@@ -246,7 +247,7 @@ void D_Display (void)
     
     // clean up border stuff
     if (gamestate != oldgamestate && gamestate != GS_LEVEL)
-    	I_SetPalette ((byte *)W_CacheLumpName (DEH_String("PLAYPAL"),PU_CACHE));
+    	I_SetPalette ((byte *)W_CacheLumpName (DEH_String("PLAYPAL"),PU_CACHE), 0);
 
     // see if the border needs to be initially drawn
     if (gamestate == GS_LEVEL && oldgamestate != GS_LEVEL)
@@ -455,6 +456,7 @@ void D_DoomLoop (void)
         {
             D_Display ();
         }
+        DD_ProcGameAct();
         frame_end();
         fps_update();
     }
@@ -873,7 +875,7 @@ static void D_ForeachFileHdlr(void *_filename)
 {
     char *filename = (char *)_filename;
     modifiedgame = true;
-    W_AddLumpFile(filename);
+    W_MergeFile(filename);
     //W_AddFile(filename);
 }
 
@@ -1752,6 +1754,8 @@ void D_DoomMain (void)
 
     DEH_printf("\nP_Init: Init Playloop state.\n");
     P_Init ();
+
+    DD_LoadAltPkgGame();
 
     DEH_printf("S_Init: Setting up sound.\n");
     S_Init (sfxVolume * 8, musicVolume * 8);

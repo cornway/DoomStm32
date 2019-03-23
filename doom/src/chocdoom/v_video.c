@@ -55,7 +55,7 @@ byte *xlatab = NULL;
 
 // The screen buffer that the v_video.c code draws to.
 
-static byte *dest_screen = NULL;
+static pix_t *dest_screen = NULL;
 
 int dirtybox[4]; 
 
@@ -82,12 +82,12 @@ void V_MarkRect(int x, int y, int width, int height)
 //
 // V_CopyRect 
 // 
-void V_CopyRect(int srcx, int srcy, byte *source,
+void V_CopyRect(int srcx, int srcy, pix_t *source,
                 int width, int height,
                 int destx, int desty)
 { 
-    byte *src;
-    byte *dest; 
+    pix_t *src;
+    pix_t *dest; 
  
 #ifdef RANGECHECK 
     if (srcx < 0
@@ -110,7 +110,7 @@ void V_CopyRect(int srcx, int srcy, byte *source,
 
     for ( ; height>0 ; height--) 
     { 
-        memcpy(dest, src, width); 
+        memcpy(dest, src, width * sizeof(pix_t)); 
         src += SCREENWIDTH; 
         dest += SCREENWIDTH; 
     } 
@@ -131,6 +131,16 @@ void V_SetPatchClipCallback(vpatchclipfunc_t func)
     patchclip_callback = func;
 }
 
+
+void V_DrawPatchC (patch_t *patch, int yoff)
+{
+    int x = SCREENWIDTH / 2 - READ_LE_U16(patch->width) / 2;
+    int y = SCREENHEIGHT / 2 - READ_LE_U16(patch->height) / 2;
+    y = y + yoff;
+
+    V_DrawPatch(x, y, patch);
+}
+
 //
 // V_DrawPatch
 // Masks a column based masked pic to the screen. 
@@ -141,8 +151,8 @@ void V_DrawPatch(int x, int y, patch_t *patch)
     int count;
     int col;
     column_t *column;
-    byte *desttop;
-    byte *dest;
+    pix_t *desttop;
+    pix_t *dest;
     byte *source;
     int w;
 
@@ -186,7 +196,7 @@ void V_DrawPatch(int x, int y, patch_t *patch)
 
             while (count--)
             {
-                *dest = *source++;
+                *dest = pixel(*source++);
                 dest += SCREENWIDTH;
             }
             column = (column_t *)((byte *)column + column->length + 4);
@@ -205,8 +215,8 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
     int count;
     int col; 
     column_t *column; 
-    byte *desttop;
-    byte *dest;
+    pix_t *desttop;
+    pix_t *dest;
     byte *source; 
     int w; 
  
@@ -250,7 +260,7 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
 
             while (count--)
             {
-                *dest = *source++;
+                *dest = pixel(*source++);
                 dest += SCREENWIDTH;
             }
             column = (column_t *)((byte *)column + column->length + 4);
@@ -280,7 +290,8 @@ void V_DrawTLPatch(int x, int y, patch_t * patch)
 {
     int count, col;
     column_t *column;
-    byte *desttop, *dest, *source;
+    pix_t *desttop, *dest;
+    byte *source;
     int w;
 
     y -= READ_LE_I16(patch->topoffset);
@@ -312,7 +323,7 @@ void V_DrawTLPatch(int x, int y, patch_t * patch)
 
             while (count--)
             {
-                *dest = tinttable[((*dest) << 8) + *source++];
+                *dest = pixel(tinttable[((*dest) << 8) + *source++]);
                 dest += SCREENWIDTH;
             }
             column = (column_t *) ((byte *) column + column->length + 4);
@@ -330,7 +341,8 @@ void V_DrawXlaPatch(int x, int y, patch_t * patch)
 {
     int count, col;
     column_t *column;
-    byte *desttop, *dest, *source;
+    pix_t *desttop, *dest;
+    byte *source;
     int w;
 
     y -= READ_LE_I16(patch->topoffset);
@@ -360,7 +372,7 @@ void V_DrawXlaPatch(int x, int y, patch_t * patch)
 
             while(count--)
             {
-                *dest = xlatab[*dest + ((*source) << 8)];
+                *dest = pixel(xlatab[*dest + ((*source) << 8)]);
                 source++;
                 dest += SCREENWIDTH;
             }
@@ -379,7 +391,8 @@ void V_DrawAltTLPatch(int x, int y, patch_t * patch)
 {
     int count, col;
     column_t *column;
-    byte *desttop, *dest, *source;
+    pix_t *desttop, *dest;
+    byte *source;
     int w;
 
     y -= READ_LE_I16(patch->topoffset);
@@ -411,7 +424,7 @@ void V_DrawAltTLPatch(int x, int y, patch_t * patch)
 
             while (count--)
             {
-                *dest = tinttable[((*dest) << 8) + *source++];
+                *dest = pixel(tinttable[((*dest) << 8) + *source++]);
                 dest += SCREENWIDTH;
             }
             column = (column_t *) ((byte *) column + column->length + 4);
@@ -429,8 +442,9 @@ void V_DrawShadowedPatch(int x, int y, patch_t *patch)
 {
     int count, col;
     column_t *column;
-    byte *desttop, *dest, *source;
-    byte *desttop2, *dest2;
+    pix_t *desttop, *dest;
+    byte *source;
+    pix_t *desttop2, *dest2;
     int w;
 
     y -= READ_LE_I16(patch->topoffset);
@@ -466,7 +480,7 @@ void V_DrawShadowedPatch(int x, int y, patch_t *patch)
             {
                 *dest2 = tinttable[((*dest2) << 8)];
                 dest2 += SCREENWIDTH;
-                *dest = *source++;
+                *dest = pixel(*source++);
                 dest += SCREENWIDTH;
 
             }
@@ -500,9 +514,9 @@ void V_LoadXlaTable(void)
 // Draw a linear block of pixels into the view buffer.
 //
 
-void V_DrawBlock(int x, int y, int width, int height, byte *src) 
+void V_DrawBlock(int x, int y, int width, int height, pix_t *src) 
 { 
-    byte *dest; 
+    pix_t *dest; 
  
 #ifdef RANGECHECK 
     if (x < 0
@@ -520,7 +534,7 @@ void V_DrawBlock(int x, int y, int width, int height, byte *src)
 
     while (height--) 
     { 
-	memcpy (dest, src, width); 
+	memcpy(dest, src, width);
 	src += width; 
 	dest += SCREENWIDTH; 
     } 
@@ -528,7 +542,7 @@ void V_DrawBlock(int x, int y, int width, int height, byte *src)
 
 void V_DrawFilledBox(int x, int y, int w, int h, int c)
 {
-    uint8_t *buf, *buf1;
+    pix_t *buf, *buf1;
     int x1, y1;
 
     buf = I_VideoBuffer + SCREENWIDTH * y + x;
@@ -548,7 +562,7 @@ void V_DrawFilledBox(int x, int y, int w, int h, int c)
 
 void V_DrawHorizLine(int x, int y, int w, int c)
 {
-    uint8_t *buf;
+    pix_t *buf;
     int x1;
 
     buf = I_VideoBuffer + SCREENWIDTH * y + x;
@@ -561,7 +575,7 @@ void V_DrawHorizLine(int x, int y, int w, int c)
 
 void V_DrawVertLine(int x, int y, int h, int c)
 {
-    uint8_t *buf;
+    pix_t *buf;
     int y1;
 
     buf = I_VideoBuffer + SCREENWIDTH * y + x;
@@ -588,7 +602,7 @@ void V_DrawBox(int x, int y, int w, int h, int c)
  
 void V_DrawRawScreen(byte *raw)
 {
-    memcpy(dest_screen, raw, SCREENWIDTH * SCREENHEIGHT);
+    v_copy_line(dest_screen, raw, SCREENWIDTH * SCREENHEIGHT);
 }
 
 //
@@ -603,7 +617,7 @@ void V_Init (void)
 
 // Set the buffer that the code draws to.
 
-void V_UseBuffer(byte *buffer)
+void V_UseBuffer(pix_t *buffer)
 {
     dest_screen = buffer;
 }
@@ -650,7 +664,7 @@ typedef struct
 // WritePCXfile
 //
 
-void WritePCXfile(char *filename, byte *data,
+void WritePCXfile(char *filename, pix_t *data,
                   int width, int height,
                   byte *palette)
 {

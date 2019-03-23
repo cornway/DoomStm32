@@ -146,7 +146,7 @@ void P_MovePlayer (player_t* player)
 	
     cmd = &player->cmd;
 	
-    player->mo->angle += (cmd->angleturn<<16);
+    player->mo->angle += (cmd->angleturn * FRACUNIT);
 
     // Do not let the player control movement
     //  if not onground.
@@ -255,6 +255,73 @@ void P_DeathThink (player_t* player)
 //
 // P_PlayerThink
 //
+static const fixed_t wp_fired_mo[][9] =
+{
+    [wp_fist] = {0},
+    [wp_missile] = {0},
+    [wp_plasma] = {0},
+    [wp_bfg] = {0},
+    [wp_chainsaw] = {0},
+    [wp_pistol] = {
+        FRACUNIT * 0,
+        FRACUNIT * 0,
+        FRACUNIT * 1,
+        FRACUNIT * 1,
+        FRACUNIT * 1,
+        FRACUNIT * 0,
+        FRACUNIT * 0,
+        FRACUNIT * 0,
+        FRACUNIT * 3,/*Highest rise*/
+    },
+    [wp_shotgun] = {
+        FRACUNIT * 0,
+        FRACUNIT * 1,
+        FRACUNIT * 1,
+        FRACUNIT * 2,
+        FRACUNIT * 4,
+        FRACUNIT * 0,
+        FRACUNIT * 1,
+        FRACUNIT * 1,
+        FRACUNIT * 6,/*Highest rise*/
+    },
+    [wp_supershotgun] = {
+        FRACUNIT * 0,
+        FRACUNIT * 1,
+        FRACUNIT * 2,
+        FRACUNIT * 4,
+        FRACUNIT * 6,
+        FRACUNIT * 0,
+        FRACUNIT * 1,
+        FRACUNIT * 2,
+        FRACUNIT * 10,/*Highest rise*/
+    },
+    [wp_chaingun] = {
+        FRACUNIT * 0,
+        FRACUNIT * 0,
+        FRACUNIT * 0,
+        FRACUNIT * 0,
+        FRACUNIT * 1,
+        FRACUNIT * 0,
+        FRACUNIT * 0,
+        FRACUNIT * 0,
+        FRACUNIT * 1,/*Highest rise*/
+    },
+    [wp_bfg] = {
+        FRACUNIT * 0,
+        FRACUNIT * 1,
+        FRACUNIT * 2,
+        FRACUNIT * 3,
+        FRACUNIT * 4,
+        FRACUNIT * 4,
+        FRACUNIT * 3,
+        FRACUNIT * 2,
+        FRACUNIT * 1,/*Highest rise*/
+    },
+};
+
+
+int plyr_wpflash_light = 0;
+
 void P_PlayerThink (player_t* player)
 {
     ticcmd_t*		cmd;
@@ -292,6 +359,29 @@ void P_PlayerThink (player_t* player)
 	P_MovePlayer (player);
     
     P_CalcHeight (player);
+
+    if (player->wpfired_ev) {
+
+        if (game_alt_pkg == pkg_psx_final) {
+            if (player->wpfired_ev > (arrlen(wp_fired_mo[0]) - 1) / 2) {
+                player->lookdir += wp_fired_mo[player->readyweapon][player->wpfired_ev];
+            } else {
+                player->lookdir -= wp_fired_mo[player->readyweapon][player->wpfired_ev];
+            }
+        }
+        player->wpfired_ev--;
+    }
+
+    if (plyr_wpflash_light) {
+        static int plyr_wpflash_ev_delay = 2;
+
+        if (plyr_wpflash_ev_delay) {
+            plyr_wpflash_ev_delay--;
+        } else {
+            plyr_wpflash_ev_delay = 2;
+            plyr_wpflash_light -= 32;
+        }
+    }
 
     if (player->mo->subsector->sector->special)
 	P_PlayerInSpecialSector (player);

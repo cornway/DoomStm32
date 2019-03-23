@@ -54,7 +54,9 @@
 #include <CoreFoundation/CFUserNotification.h>
 #endif
 
-#define DEFAULT_RAM 15 /* MiB */
+extern volatile size_t __heap_buf_raw_size;
+
+#define DEFAULT_RAM (__heap_buf_raw_size / (1024 * 1024)) /* MiB */
 #define MIN_RAM     8  /* MiB */
 
 

@@ -33,6 +33,8 @@
 #include "doomstat.h"
 #include "r_state.h"
 
+#include "st_stuff.h"
+
 //#include "r_local.h"
 
 
@@ -231,6 +233,7 @@ void R_ClearClipSegs (void)
 // Clips the given segment
 // and adds any visible pieces to the line list.
 //
+extern boolean render_on_distance;
 static void R_AddLine (seg_t *line)
 {
   int      x1;
@@ -241,6 +244,7 @@ static void R_AddLine (seg_t *line)
   angle_t  tspan;
 
   curline = line;
+  render_on_distance = detailshift ? false : true;
 
   angle1 = R_PointToAngle (line->v1->x, line->v1->y);
   angle2 = R_PointToAngle (line->v2->x, line->v2->y);
@@ -322,13 +326,14 @@ static void R_AddLine (seg_t *line)
 
       )
     return;
-
 clippass:
   R_ClipPassWallSegment (x1, x2-1);
-  return;
+  goto end;
 
 clipsolid:
   R_ClipSolidWallSegment (x1, x2-1);
+end:
+  render_on_distance = false;
 }
 
 //
@@ -478,6 +483,8 @@ void R_Subsector (int num)
 	ceilingplane = NULL;
 		
     R_AddSprites (frontsector);	
+
+    ST_SetSectorLight(frontsector);
 
     while (count--)
     {

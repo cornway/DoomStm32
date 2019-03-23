@@ -694,7 +694,7 @@ P_KillMobj
 	// even those caused by other monsters
 	players[0].killcount++;
     }
-    
+    target->flags2 = MOBJ_KILLED_BM;
     if (target->player)
     {
 	// count environment kills against you

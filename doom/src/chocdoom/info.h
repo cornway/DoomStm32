@@ -164,6 +164,9 @@ typedef enum
     SPR_BRS1,
     SPR_TLMP,
     SPR_TLP2,
+
+    SPR_SPEC,
+
     NUMSPRITES
 
 } spritenum_t;
@@ -1137,6 +1140,35 @@ typedef enum
     S_TECH2LAMP2,
     S_TECH2LAMP3,
     S_TECH2LAMP4,
+
+    S_SPEC_STND,
+    S_SPEC_STND2,
+    S_SPEC_RUN1,
+    S_SPEC_RUN2,
+    S_SPEC_RUN3,
+    S_SPEC_RUN4,
+    S_SPEC_RUN5,
+    S_SPEC_RUN6,
+    S_SPEC_RUN7,
+    S_SPEC_RUN8,
+    S_SPEC_ATK1,
+    S_SPEC_ATK2,
+    S_SPEC_ATK3,
+    S_SPEC_PAIN,
+    S_SPEC_PAIN2,
+    S_SPEC_DIE1,
+    S_SPEC_DIE2,
+    S_SPEC_DIE3,
+    S_SPEC_DIE4,
+    S_SPEC_DIE5,
+    S_SPEC_DIE6,
+    S_SPEC_RAISE1,
+    S_SPEC_RAISE2,
+    S_SPEC_RAISE3,
+    S_SPEC_RAISE4,
+    S_SPEC_RAISE5,
+    S_SPEC_RAISE6,
+
     NUMSTATES
 } statenum_t;
 

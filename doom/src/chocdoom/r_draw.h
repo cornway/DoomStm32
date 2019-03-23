@@ -54,6 +54,9 @@ void 	R_DrawFuzzColumnLow (void);
 void	R_DrawTranslatedColumn (void);
 void	R_DrawTranslatedColumnLow (void);
 
+void R_CopyColumn (int dest, int src);
+
+
 void
 R_VideoErase
 ( unsigned	ofs,
@@ -84,6 +87,8 @@ void 	R_DrawSpan (void);
 // Low resolution mode, 160x200?
 void 	R_DrawSpanLow (void);
 
+int
+R_ProcDownscale (int start, int stop);
 
 void
 R_InitBuffer
@@ -103,6 +108,29 @@ void R_FillBackScreen (void);
 // If the view size is not full screen, draws a border around it.
 void R_DrawViewBorder (void);
 
+#define R_DISTANCE_NEAR (MELEERANGE * 4)
+#define R_DISTANCE_MID  (MELEERANGE * 8)
+#define R_DISTANCE_FAR  (MELEERANGE * 16)
+#define R_DISTANCE_INVIS (MELEERANGE * 32)
 
+
+typedef enum {
+    R_RANGE_NEAREST = 0,
+    R_RANGE_NEAR,
+    R_RANGE_MID,
+    R_RANGE_FAR,
+    R_RANGE_INVIS,
+    R_RANGE_MAX,
+} rw_render_range_t;
+
+typedef struct {
+    byte shift;
+    rw_render_range_t next;
+} rw_range_attr;
+
+void R_SetRwRange (fixed_t distance);
+
+extern rw_range_attr rw_render_downscale[R_RANGE_MAX];
+extern rw_render_range_t rw_render_range;
 
 #endif

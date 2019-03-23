@@ -4,6 +4,10 @@
 
 #define COMPRESSION 1
 #define USE_FLOAT 1
+#ifdef USE_REVERB
+//#undef USE_REVERB
+//#define USE_REVERB 1
+#endif
 
 extern void music_tickle (void);
 extern snd_sample_t *music_get_next_chunk (int32_t *size);
@@ -17,8 +21,8 @@ extern int music_init (void);
 #define MAX_2BAND_VOL ((MAX_VOL) | (MAX_VOL << 8))
 #define MAX_4BAND_VOL ((MAX_2BAND_VOL) | (MAX_2BAND_VOL << 16))
 
-#define chan_desc_head_t struct chan_desc_head
-#define chan_desc_t struct chan_desc
+typedef struct chan_desc_head chan_desc_head_t;
+typedef struct chan_desc chan_desc_t;
 
 #define DEFINE_LLIST_NEXT() \
     chan_desc_t *next
@@ -62,7 +66,8 @@ for (chan_desc_t *cur = (head)->first,\
      cur = __next,                     \
      __next = __next->next)
 
-
+#define chan_complete(chan) \
+    (chan)->inst.complete
 
 static int chan_link (chan_desc_head_t *head,
                         chan_desc_t *link,
@@ -141,18 +146,18 @@ static void clear_buf (uint8_t idx);
 
 extern uint32_t systime;
 
-static chan_desc_t channels[AUDIO_MAX_CHANS];
+static chan_desc_t channels[AUDIO_MAX_CHANS + 1/*Music channel*/];
 chan_desc_head_t chan_llist_ready;
 chan_desc_head_t chan_llist_susp;
 
-static uint16_t audio_raw_buf[2][AUDIO_OUT_BUFFER_SIZE];
+static snd_sample_t audio_raw_buf[2][AUDIO_OUT_BUFFER_SIZE];
 
 static int8_t audio_need_update = 0;
 static uint8_t audio_need_stop  = 0;
 static uint32_t timeout         = 0;
 static uint32_t play_enabled    = 0;
 static uint8_t tr_state_changed = 1;
-static uint8_t bufclr[2] = {0, 0};
+static uint8_t buf_cleared[2] = {0, 0};
 #if COMPRESSION
 uint8_t comp_weight = 0;
 #endif
@@ -161,47 +166,44 @@ static void AUDIO_InitApplication(void);
 
 #if USE_REVERB
 
-static int reverb_life_time;/*1s*/
+#define REVERB_END_BUFFER (0x800)
+#define REVERB_END_BUFFER_M (REVERB_END_BUFFER - 1)
 
-static void process_reverb (uint8_t idx, uint8_t force)
+#define REVERB2_END_BUFFER (0x100)
+#define REVERB2_END_BUFFER_M (REVERB2_END_BUFFER - 1)
+
+static snd_sample_t reverb_raw_buf[REVERB_END_BUFFER];
+static snd_sample_t reverb2_raw_buf[REVERB2_END_BUFFER];
+
+
+static uint16_t  rev_rd_idx = 0, rev_wr_idx = 0;
+static uint16_t  rev2_rd_idx = 0, rev2_wr_idx = 0;
+
+static inline void
+a_rev_push (snd_sample_t s)
 {
-    int16_t *dest, *src;
-    int16_t samples_cnt;
-    int16_t delay_start_sample = REVERB_DELAY;
-
-    if (force) {
-        reverb_life_time = 1000;
-    } else {
-        reverb_life_time -= AUDIO_BUFFER_MS;
-    }
-
-    if (reverb_life_time < 0)
-        return;
-    
-    while (delay_start_sample > AUDIO_OUT_BUFFER_SIZE) {
-        delay_start_sample -= AUDIO_OUT_BUFFER_SIZE;
-        idx ^= 1;
-    }
-    samples_cnt = AUDIO_OUT_BUFFER_SIZE - delay_start_sample;
-    src = (int16_t *)audio_raw_buf[idx];
-    dest = dest + delay_start_sample;
-
-    for (int i = 0; i < samples_cnt; i++) {
-        dest[i] += ((int32_t)src[i] * REVERB_DECAY) / REVERB_DECAY_MAX;
-    }
-    src += samples_cnt;
-    dest = (int16_t *)audio_raw_buf[idx ^ 1];
-    samples_cnt = AUDIO_OUT_BUFFER_SIZE - samples_cnt;
-
-    for (int i = 0; i < samples_cnt; i++ ) {
-        dest[i] += ((int32_t)src[i] * REVERB_DECAY) / REVERB_DECAY_MAX;
-    }
-
+    reverb_raw_buf[(rev_rd_idx++) & REVERB_END_BUFFER_M] = s;
 }
-static int reverb_done ()
+
+static inline snd_sample_t
+a_rev_pop (void)
 {
-    return 1;
+    return reverb_raw_buf[(rev_wr_idx++) & REVERB_END_BUFFER_M];
 }
+
+static inline void
+a_rev2_push (snd_sample_t s)
+{
+    reverb2_raw_buf[(rev2_rd_idx++) & REVERB2_END_BUFFER_M] = s;
+}
+
+static inline snd_sample_t
+a_rev2_pop (void)
+{
+    return reverb2_raw_buf[(rev2_wr_idx++) & REVERB2_END_BUFFER_M];
+}
+
+
 #endif
 
 static void chan_remove_helper (chan_desc_t *desc);
@@ -222,7 +224,7 @@ static void ll_stop (void)
 
 static void ll_play (void)
 {
-    BSP_AUDIO_OUT_Play(audio_raw_buf[0], AUDIO_OUT_BUFFER_SIZE * 4);
+    BSP_AUDIO_OUT_Play((uint16_t *)audio_raw_buf[0], AUDIO_OUT_BUFFER_SIZE * 4);
     play_enabled = 1;
 }
 
@@ -266,6 +268,18 @@ static void ll_init ()
     chan_llist_ready.first_link_handle = ll_ready_first_link_handle;
     chan_llist_ready.remove_handle = ll_ready_remove_handle;
     AUDIO_InitApplication();
+
+#if (USE_REVERB)
+    {
+        int i;
+        for (i = 0; i < REVERB_END_BUFFER; i++) {
+            a_rev_push(0);
+        }
+        for (i = 0; i < REVERB2_END_BUFFER; i++) {
+            a_rev2_push(0);
+        }
+    }
+#endif
 }
 
 static void
@@ -316,7 +330,7 @@ static audio_channel_t *chan_add_helper (Mix_Chunk *chunk, int channel)
     }
 
     desc->inst.chunk         = *chunk;
-    desc->inst.chunk.alen    /= 2;/*len coming in bytes*/
+    desc->inst.chunk.alen    /= sizeof(snd_sample_t);/*len coming in bytes*/
     desc->inst.id            = channel;
     
     return &desc->inst;
@@ -331,7 +345,7 @@ chan_remove_helper (chan_desc_t *desc)
 static void
 chan_move_win (chan_desc_t *desc,
                            int size,
-                           uint16_t **pbuf,
+                           snd_sample_t **pbuf,
                            int *psize)
 {
     Mix_Chunk *chunk = &desc->inst.chunk;
@@ -354,6 +368,9 @@ static inline uint8_t
 chan_try_reject (chan_desc_t *desc)
 {
     if (chan_len(desc) <= 0) {
+        if (chan_complete(desc) && !chan_complete(desc)(2)) {
+            return 0;
+        }
         chan_remove_helper(desc);
         return 1;
     }
@@ -384,7 +401,7 @@ chan_try_reject_all ()
         if (chan_is_play(cur))
             chan_try_reject(cur);
     }
-    return chan_llist_ready.size;
+    return 0;
 }
 
 
@@ -411,8 +428,9 @@ void audio_init (void)
 audio_channel_t *audio_play_channel (Mix_Chunk *chunk, int channel)
 {
     audio_channel_t *ch = NULL;
-    if (channel >= AUDIO_MAX_CHANS) {
-        return NULL;
+    if (channel >= AUDIO_MAX_CHANS &&
+       channel != AUDIO_MUS_CHAN_START) {
+       return NULL;
     }
     HAL_NVIC_DisableIRQ(AUDIO_OUT_SAIx_DMAx_IRQ);
     ch = chan_add_helper(chunk, channel);
@@ -422,13 +440,15 @@ audio_channel_t *audio_play_channel (Mix_Chunk *chunk, int channel)
 
 audio_channel_t *audio_stop_channel (int channel)
 {
+    audio_pause(channel);
     return NULL;
 }
 
 void audio_pause (int channel)
 {
-    if (channel >= AUDIO_MAX_CHANS) {
-        return;
+    if (channel >= AUDIO_MAX_CHANS &&
+       channel != AUDIO_MUS_CHAN_START) {
+       return;
     }
     HAL_NVIC_DisableIRQ(AUDIO_OUT_SAIx_DMAx_IRQ);
     if (chan_is_play(&channels[channel])) {
@@ -442,14 +462,16 @@ void audio_sdown (int dev)
 }
 int audio_is_playing (int handle)
 {
-    if (handle >= AUDIO_MAX_CHANS) {
-        return 1;
-    }
+    if (handle >= AUDIO_MAX_CHANS &&
+       handle != AUDIO_MUS_CHAN_START) {
+       return 1;
+   }
     return chan_is_play(&channels[handle]);
 }
 void audio_set_pan (int handle, int l, int r)
 {
-   if (handle >= AUDIO_MAX_CHANS) {
+   if (handle >= AUDIO_MAX_CHANS &&
+       handle != AUDIO_MUS_CHAN_START) {
        return;
    }
    if (chan_is_play(&channels[handle])) {
@@ -465,7 +487,7 @@ void audio_set_pan (int handle, int l, int r)
 
 static void AUDIO_InitApplication(void)
 {
-  BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_AUTO, 60, AUDIO_SAMPLE_RATE);
+  BSP_AUDIO_OUT_Init(OUTPUT_DEVICE_AUTO, 75, AUDIO_SAMPLE_RATE);
   BSP_AUDIO_OUT_SetAudioFrameSlot(CODEC_AUDIOFRAME_SLOT_02);
 }
 
@@ -512,8 +534,8 @@ exit:
 #define AMP_FLT(x, vol) (int16_t)((float)(x) * (float)vol)
 
 static inline void
-mix_to_master_raw1 (uint16_t *dest,
-                          uint16_t **ps,
+mix_to_master_raw1 (snd_sample_t *dest,
+                          snd_sample_t **ps,
                           uint8_t *vol,
                           int min_size)
 {
@@ -573,8 +595,8 @@ mix_to_master_raw1 (uint16_t *dest,
 #if (AUDIO_PLAY_SCHEME == 1)
 
 static inline void
-mix_to_master_raw2 (uint16_t *dest,
-                          uint16_t **ps,
+mix_to_master_raw2 (snd_sample_t *dest,
+                          snd_sample_t **ps,
                           uint8_t *vol,
                           int min_size)
 {
@@ -610,8 +632,8 @@ mix_to_master_raw2 (uint16_t *dest,
 }
 
 static inline void
-mix_to_master_raw4 (uint16_t *dest,
-                          uint16_t **ps,
+mix_to_master_raw4 (snd_sample_t *dest,
+                          snd_sample_t **ps,
                           uint8_t *vol,
                           int min_size)
 {
@@ -650,8 +672,8 @@ mix_to_master_raw4 (uint16_t *dest,
 #endif
 }
 
-static void chunk_proc_raw_all (uint16_t *dest,
-                                     uint16_t **ps,
+static void chunk_proc_raw_all (snd_sample_t *dest,
+                                     snd_sample_t **ps,
                                      uint8_t *vol,
                                      int cnt,
                                      int data_size)
@@ -728,83 +750,69 @@ chan_to_buf_arr (uint16_t **ps)
 
 #endif /*(AUDIO_PLAY_SCHEME == 1)*/
 
-static void chan_proc_raw_all_ex (uint16_t *dest)
+static void chan_proc_raw_all_ex (snd_sample_t *dest, uint8_t idx)
 {
     int32_t size;
-    uint16_t *ps;
+    snd_sample_t *ps;
     uint8_t vol;
+    uint16_t mark_to_clear = 0;
     chan_foreach(&chan_llist_ready, cur) {
+        if (chan_complete(cur) && chan_complete(cur)(1)) {
+            mark_to_clear++;
+            continue;
+        }
         chan_move_win(cur, AUDIO_OUT_BUFFER_SIZE, &ps, &size);
         vol = chan_vol(cur);
-        mix_to_master_raw1(dest, &ps, &vol, size);
+        if (size) {
+            mix_to_master_raw1(dest, &ps, &vol, size);
+            mark_to_clear++;
+        }
     }
-}
-
-static inline void
-mix_mus_to_master (uint16_t *dest,
-                          uint16_t **ps,
-                          uint8_t *vol,
-                          int min_size)
-{
-    int16_t *pdest = (int16_t *)dest;
-    int16_t *psrc = (int16_t *)ps[0];
-#if USE_FLOAT
-    float vol_flt;
+#if (USE_REVERB)
+    {
+        int i = 0;
+        snd_sample_t s;
+        for (i = 0; i < AUDIO_OUT_BUFFER_SIZE; i++) {
+            s = a_rev_pop();
+            if (s) {
+                dest[i] = dest[i] / 2 + s / 2;
+                mark_to_clear++;
+            }
+            a_rev_push(dest[i]);
+            s = a_rev2_pop();
+            if (s) {
+                dest[i] = dest[i] / 2 + s / 2;
+                mark_to_clear++;
+            }
+            a_rev2_push(dest[i]);
+        }
+    }
 #endif
-    if (vol[0] == 0)
-        return;
- 
-    if (vol[0] == MAX_VOL) {
-        for (int i = 0; i < min_size; i++) {
-            pdest[i] = psrc[i] / 2 + pdest[i] / 2;
-        }
-    } else {
-#if USE_FLOAT
-        vol_flt = (float)vol[0] / (float)MAX_VOL;
-        for (int i = 0; i < min_size; i++) {  
-            pdest[i] = AMP_FLT(psrc[i] / 2, vol_flt) + pdest[i] / 2;
-        }
-#else
-        for (int i = 0; i < min_size; i++) {  
-            pdest[i] = AMP(psrc[i] / 2, vol[0]) + pdest[i] / 2;
-        }
-#endif
+    if (mark_to_clear) {
+        buf_cleared[idx] = 0;
     }
-}
-
-
-static void mus_play (uint8_t idx)
-{
-    uint16_t *dest = audio_raw_buf[idx];
-    int32_t size = 0;
-    uint8_t vol = music_get_volume() << 1;
-    uint16_t *buf = (uint16_t *)music_get_next_chunk(&size);
-    if (buf) {
-        mix_mus_to_master(dest, &buf, &vol, size);
-    }
-    bufclr[idx] = 0;
 }
 
 static void chan_proc_all_to_buf (uint8_t idx)
 {
-    uint16_t *dest = audio_raw_buf[idx];
+    snd_sample_t *dest = audio_raw_buf[idx];
 #if COMPRESSION
     comp_weight = chan_llist_ready.size + 2;
 #endif
     /*TODO : fix this*/
 #if (AUDIO_PLAY_SCHEME == 1)
     while (chan_llist_ready.size) {
-        int32_t psize[AUDIO_MAX_CHANS];
-        uint16_t *ps[AUDIO_MAX_CHANS];
-        uint8_t  vol[AUDIO_MAX_CHANS];
+        int32_t psize[AUDIO_MUS_CHAN_START + 1];
+        uint16_t *ps[AUDIO_MUS_CHAN_START + 1];
+        uint8_t  vol[AUDIO_MUS_CHAN_START + 1];
 
-        bufclr[idx] = 0;
+        buf_cleared[idx] = 0;
         if (chan_try_reject_all() == 0) {
             break;
         }
 
         if (chan_len(chan_llist_ready.first) < AUDIO_OUT_BUFFER_SIZE) {
-            chan_proc_raw_all_ex(dest);
+            chan_proc_raw_all_ex(dest, idx);
         }
 
         chan_move_win_all(AUDIO_OUT_BUFFER_SIZE, ps, psize);
@@ -819,23 +827,21 @@ static void chan_proc_all_to_buf (uint8_t idx)
         break;
     }
 #else
-    if (chan_try_reject_all()) {
-        chan_proc_raw_all_ex(dest);
-    }
+    chan_try_reject_all();
+    chan_proc_raw_all_ex(dest, idx);
 #endif
-    mus_play(idx);
 }
 
 static void clear_buf (uint8_t idx)
 {
     uint32_t *p_buf = (uint32_t *)audio_raw_buf[idx];
-    if (bufclr[idx])
+    if (buf_cleared[idx])
         return;
 
     for (int i = 0; i < AUDIO_OUT_BUFFER_SIZE / 2; i++) {
         p_buf[i] = 0;
     }
-    bufclr[idx] = 1;
+    buf_cleared[idx] = 1;
 }
 
 
@@ -905,7 +911,7 @@ search_ext_sound (char *_name, int num)
     static FIL file;
 
     char path[64];
-    char name[SND_LUMP_NAME_LENGTH + 1] = {[SND_LUMP_NAME_LENGTH] = 0};
+    char name[SND_LUMP_NAME_LENGTH + 1] = {0};
 
     cache_num = snd_ext_get_slot(num);
     if (cache_num >= 0) {
@@ -926,7 +932,7 @@ search_ext_sound (char *_name, int num)
         error_handle();
     }
     snd_cache_set_name(cache_num, name);
-    snd_num_cache[cache_num].lumpnum = num;
+    snd_num_cache[cache_num].lumpnum = cache_num;
     snd_num_cache[cache_num].size = f_size(&file);
     f_close(&file);
     return cache_num;

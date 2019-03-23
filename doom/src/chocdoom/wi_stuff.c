@@ -1475,6 +1475,31 @@ void WI_drawStats(void)
 
 }
 
+void WI_drawStatsPSX (void)
+{
+    // line height
+    int lh;
+
+    lh = (3*READ_LE_I16(num[0]->height))/2;
+
+    WI_slamBackground();
+
+    WI_drawLF();
+
+    V_DrawPatch(SP_STATSX, SP_STATSY, kills);
+    WI_drawPercent(SCREENWIDTH - SP_STATSX, SP_STATSY, cnt_kills[0]);
+
+    V_DrawPatch(SP_STATSX, SP_STATSY+lh, items);
+    WI_drawPercent(SCREENWIDTH - SP_STATSX, SP_STATSY+lh, cnt_items[0]);
+
+    V_DrawPatch(SP_STATSX, SP_STATSY+2*lh, sp_secret);
+    WI_drawPercent(SCREENWIDTH - SP_STATSX, SP_STATSY+2*lh, cnt_secret[0]);
+
+    V_DrawPatch(SP_TIMEX, SP_TIMEY, timepatch);
+    WI_drawTime(SCREENWIDTH/2 - SP_TIMEX, SP_TIMEY, cnt_time);
+}
+
+
 void WI_checkForAccelerate(void)
 {
     int   i;
@@ -1755,7 +1780,9 @@ void WI_Drawer (void)
 	    WI_drawDeathmatchStats();
 	else if (netgame)
 	    WI_drawNetgameStats();
-	else
+	else if (game_alt_pkg == pkg_psx_final)
+        WI_drawStatsPSX();
+    else
 	    WI_drawStats();
 	break;
 	

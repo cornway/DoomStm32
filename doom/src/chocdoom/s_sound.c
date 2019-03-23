@@ -603,9 +603,6 @@ void S_StartMusic(int m_id)
 
 void S_ChangeMusic(int musicnum, int looping)
 {
-    if (mus_playing && (mus_playing_num == musicnum)) {
-        return;
-    }
     S_StopMusic();
     music_play_song_num(musicnum, looping);
     mus_playing_num = musicnum;
@@ -661,6 +658,17 @@ void S_ChangeMusic(int musicnum, int looping)
 boolean S_MusicPlaying(void)
 {
     return music_playing();
+}
+
+void S_PauseMusic (void)
+{
+    music_pause();
+}
+
+
+void S_MusicResume (void)
+{
+    music_resume();
 }
 
 void S_StopMusic(void)

@@ -36,6 +36,13 @@
 
 #include "w_wad.h"
 
+extern GameMode_t gamemode;
+
+GameAltPackage_t game_alt_pkg = pkg_none;
+
+#define GAME_3D0_PKG_MARKER "V3DO"
+#define GAME_PSX_PKG_MARKER "VPSX"
+
 typedef struct
 {
     // Should be "IWAD" or "PWAD".
@@ -137,7 +144,54 @@ static void ExtendLumpInfo(int newnumlumps)
 //  with multiple lumps.
 // Other files are single lumps with the base filename
 //  for the lump name.
-int maps_total = 0;
+int game_levels_total = 0;
+
+static inline void
+W_ExtendMaps (lumpinfo_t *lump)
+{
+    M_snprintf(lump->name, 8, "MAP%d", game_levels_total + 1);
+}
+
+static void
+W_CountMaps (lumpinfo_t *lump, boolean pwad)
+{
+    if (0 == strncmp(lump->name, "MAP", 3) &&
+        isdigit(lump->name[3])) {
+
+        if (pwad && game_alt_pkg == pkg_3d0_doom) {
+            int map = atoi(lump->name + 3);
+            int ep = map / 8;
+
+            map--;
+            map = map % 8;
+            map++;
+            M_snprintf(lump->name, 8, "E%dM%d", ep + 1, map);
+        } else {
+            if (pwad && game_levels_total) {
+                W_ExtendMaps(lump);
+            }
+        }
+        game_levels_total++;
+    } else if (((lump->name[0] == 'E') && (lump->name[2] == 'M'))) {
+        game_levels_total++;
+    }
+}
+
+static void
+W_SetAltPkgType (lumpinfo_t *lump)
+{
+    GameAltPackage_t pkg = pkg_none;
+
+    if (game_alt_pkg != pkg_none) {
+        return;
+    }
+    if (!strcmp(GAME_3D0_PKG_MARKER, lump->name)) {
+        pkg = pkg_3d0_doom;
+    } else if (!strcmp(GAME_PSX_PKG_MARKER, lump->name)) {
+        pkg = pkg_psx_final;
+    }
+    game_alt_pkg = pkg;
+}
 
 wad_file_t *W_AddFile (char *filename)
 {
@@ -222,11 +276,7 @@ wad_file_t *W_AddFile (char *filename)
 		lump_p->size = LONG(filerover->size);
 			lump_p->cache = NULL;
 		strncpy(lump_p->name, filerover->name, 8);
-        if (0 == strncmp(lump_p->name, "MAP", 3)) {
-            maps_total++;
-        } else if (((lump_p->name[0] == 'E') && (lump_p->name[2] == 'M'))) {
-            maps_total++;
-        }
+        W_CountMaps(lump_p, false);
 
         ++lump_p;
         ++filerover;
@@ -243,21 +293,13 @@ wad_file_t *W_AddFile (char *filename)
     return wad_file;
 }
 
-static void mem_cpy (char *dest, char *src, int size)
-{
-    int i = 0;
-    for (i = 0; i < size; i++) {
-        dest[i] = src[i];
-    }
-}
-
-wad_file_t *W_AddLumpFile (char *filename)
+wad_file_t *W_AddPwad (char *filename)
 {
     wadinfo_t *header;
     lumpinfo_t *lump_p;
     unsigned int i;
     wad_file_t *wad_file;
-    int newnumlumps, startlump, length;
+    int newnumlumps, startlump;
     filelump_t *filerover;
     filelump_t *fileinfo;
 
@@ -309,7 +351,6 @@ wad_file_t *W_AddLumpFile (char *filename)
 
 		header->numlumps = READ_LE_U32(header->numlumps);
 		header->infotableofs = READ_LE_U32(header->infotableofs);
-		length = header->numlumps*sizeof(filelump_t);
 		fileinfo = (filelump_t *)((uint8_t *)wad_file->mapped + header->infotableofs);
 
         newnumlumps += header->numlumps;
@@ -330,11 +371,8 @@ wad_file_t *W_AddLumpFile (char *filename)
 		lump_p->size     = READ_LE_I32(filerover->size);
         lump_p->cache = NULL;
 		strncpy(lump_p->name, filerover->name, 8);
-        if (0 == strncmp(lump_p->name, "MAP", 3)) {
-            maps_total++;
-        } else if (((lump_p->name[0] == 'E') && (lump_p->name[2] == 'M'))) {
-            maps_total++;
-        }
+        W_CountMaps(lump_p, true);
+        W_SetAltPkgType(lump_p);
 
         ++lump_p;
         ++filerover;

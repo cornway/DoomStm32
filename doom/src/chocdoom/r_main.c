@@ -35,7 +35,7 @@
 #include "r_local.h"
 #include "r_sky.h"
 
-
+#include "z_zone.h"
 
 
 
@@ -436,9 +436,11 @@ fixed_t R_ScaleFromGlobalAngle (angle_t visangle)
 //
 void R_InitTables (void)
 {
-    for (int i = 0; i < sizeof(finesine_n) / sizeof(finesine_n[0]); i++) {
+    finesine_n = (int *)Z_Malloc(10240 * sizeof(int), PU_STATIC, 0);
+    for (int i = 0; i < 10240; i++) {
         finesine_n[i] = FixedDiv(FRACUNIT, finesine[i]);
     }
+    finecosine_n = finesine_n + FINEANGLES/4;
 }
 
 
@@ -582,6 +584,8 @@ void R_ExecuteSetViewSize (void)
     int		startmap; 	
     int tempCentery;
 
+    detailshift = setdetail;
+
     setsizeneeded = false;
 
     if (setblocks == 11)
@@ -594,10 +598,7 @@ void R_ExecuteSetViewSize (void)
 	scaledviewwidth = setblocks*32;
 	viewheight = (setblocks*168/10)&~7;
     }
-    
-    detailshift = setdetail;
     viewwidth = scaledviewwidth>>detailshift;
-	
     centerx = viewwidth/2;
     centerxfrac = centerx<<FRACBITS;
     projection = centerxfrac;
@@ -606,7 +607,7 @@ void R_ExecuteSetViewSize (void)
 
     if (!detailshift)
     {
-	colfunc = basecolfunc = R_DrawColumn;
+    colfunc = basecolfunc = R_DrawColumn;
     fuzzcolfunc = R_DrawFuzzColumn;
 	transcolfunc = R_DrawTranslatedColumn;
 	spanfunc = R_DrawSpan;
@@ -664,9 +665,10 @@ void R_ExecuteSetViewSize (void)
     for (i=0 ; i< LIGHTLEVELS ; i++)
     {
 	startmap = ((LIGHTLEVELS-1-i)*2)*NUMCOLORMAPS/LIGHTLEVELS;
+    int level_mul = SCREENWIDTH/(viewwidth<<detailshift)/DISTMAP;
 	for (j=0 ; j<MAXLIGHTSCALE ; j++)
 	{
-	    level = startmap - j*SCREENWIDTH/(viewwidth<<detailshift)/DISTMAP;
+	    level = startmap - j*level_mul;
 	    
 	    if (level < 0)
 		level = 0;
@@ -745,7 +747,7 @@ void R_SetupFrame (player_t* player)
     viewx = player->mo->x;
     viewy = player->mo->y;
     viewangle = player->mo->angle + viewangleoffset;
-    extralight = player->extralight;
+    extralight = player->extralight + 3;
 
     viewz = player->viewz;
     

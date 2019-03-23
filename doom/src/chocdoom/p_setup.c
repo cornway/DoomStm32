@@ -286,6 +286,8 @@ void P_LoadSectors (int lump)
         ss->special = READ_LE_I16(ms->special);
         ss->tag = READ_LE_I16(ms->tag);
         ss->thinglist = NULL;
+        ss->extrlight = 0;
+        ss->extralightown = false;
     }
 
     W_ReleaseLumpNum(lump);
@@ -759,10 +761,6 @@ P_SetupLevel
     // Initial height of PointOfView
     // will be set by player think.
     players[consoleplayer].viewz = 1; 
-
-    // Make sure all sounds are stopped before Z_FreeTags.
-    S_Start ();			
-
     Z_FreeTags (PU_LEVEL, PU_PURGELEVEL-1);
 
     // UNUSED W_Profile ();
@@ -800,9 +798,10 @@ P_SetupLevel
     P_LoadNodes (lumpnum+ML_NODES);
     P_LoadSegs (lumpnum+ML_SEGS);
 
-    P_LoadReject (lumpnum+ML_REJECT);
     P_GroupLines ();
+    P_LoadReject (lumpnum+ML_REJECT);
 
+    ST_Setup();
     bodyqueslot = 0;
     deathmatch_p = deathmatchstarts;
     P_LoadThings (lumpnum+ML_THINGS);
@@ -834,6 +833,8 @@ P_SetupLevel
 
     //d_printf ("free memory: 0x%x\n", Z_FreeMemory());
 
+    // Make sure all sounds are stopped before Z_FreeTags.
+    S_Start();
 }
 
 

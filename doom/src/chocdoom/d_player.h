@@ -161,6 +161,8 @@ typedef struct player_s
     fixed_t lookdir;
     int centering;
 
+    unsigned wpfired_ev: 5;
+
 } player_t;
 
 

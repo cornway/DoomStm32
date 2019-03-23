@@ -85,8 +85,6 @@ int			showMessages = 1;
 // Blocky mode, has default, 0 = high, 1 = normal
 int			detailLevel = 0;
 int			screenblocks = 10;
-int cross_x = SCREENWIDTH / 2;
-int cross_y = SCREENHEIGHT / 2;
 
 // temp for screenblocks (0-9)
 int			screenSize;
@@ -535,7 +533,7 @@ menu_t  SaveDef =
 void M_DrawNewLevel (void)
 {
     char buf[64];
-    snprintf(buf, 64, "Start Level :\n %d %s",
+    M_snprintf(buf, 64, "Start Level :\n %d %s",
         level_selected, level_select_message);
     M_WriteText(NewLvlDef.x, NewLvlDef.y, buf);
 }
@@ -604,7 +602,7 @@ void M_DrawLoad(void)
         M_DrawSaveLoadBorder(LoadDef.x,LoadDef.y);
         if (game_saved_in_ram) {
             char buf[80 + 1];
-            snprintf(buf, sizeof(buf), "Map : %s", saveg_level_name);
+            M_snprintf(buf, sizeof(buf), "Map : %s", saveg_level_name);
             M_WriteText(LoadDef.x,LoadDef.y, buf);
         } else {
     	    M_WriteText(LoadDef.x,LoadDef.y, "SLOT EMPTY");
@@ -1008,13 +1006,13 @@ static void D_ForeachFileHdlr(void *_filename)
 {
     char *filename = (char *)_filename;
     W_AddFile(filename);
-    snprintf(level_select_message, sizeof(level_select_message),
+    M_snprintf(level_select_message, sizeof(level_select_message),
         "New map[%d]: %s", level_selected, filename);
     level_selected--;
     filename[0] = 0;
 }
 
-extern int maps_total;
+extern int game_levels_total;
 static void M_SetLevel(int choice)
 {
     memset(level_select_message, 0, sizeof(level_select_message));
@@ -1024,7 +1022,7 @@ static void M_SetLevel(int choice)
             level_selected--;        
     } else if (choice == 1) {
 
-        if (level_selected < maps_total) {
+        if (level_selected < game_levels_total) {
             level_selected++;
         } else {
             D_FindWADByExt(D_ForeachFileHdlr);
@@ -1315,9 +1313,6 @@ void M_SizeDisplay(int choice)
 	{
 	    screenblocks--;
 	    screenSize--;
-        if (screenSize == 7) {
-            cross_y -= 16;
-        }
 	}
 	break;
       case 1:
@@ -1325,9 +1320,6 @@ void M_SizeDisplay(int choice)
 	{
 	    screenblocks++;
 	    screenSize++;
-        if (screenSize == 8) {
-            cross_y += 16;
-        }
 	}
 	break;
     }
@@ -1856,8 +1848,9 @@ boolean M_Responder (event_t* ev)
 	    usegamma++;
 	    if (usegamma > 4)
 		usegamma = 0;
+        I_RefreshClutsButPlaypal();
 	    players[consoleplayer].message = DEH_String(gammamsg[usegamma]);
-            I_SetPalette (W_CacheLumpName (DEH_String("PLAYPAL"),PU_CACHE));
+            I_SetPalette (W_CacheLumpName (DEH_String("PLAYPAL"),PU_CACHE), 0);
 	    return true;
 	}
     }

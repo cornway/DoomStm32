@@ -38,6 +38,7 @@
 #include "lcd_main.h"
 #include "audio_main.h"
 #include "usbh_hid.h"
+#include "touch.h"
 
 int screen_res_x;
 int screen_res_y;
@@ -56,119 +57,109 @@ char SDPath[4]; /* SD card logical drive path */
 static void SystemClock_Config(void);
 static void CPU_CACHE_Enable(void);
 
+#define SCREEN_FB_X_MAX 800
+#define SCREEN_FB_Y_MAX 600
+#define SCREEN_FB_MEM_SIZE_MAX (SCREEN_FB_X_MAX * SCREEN_FB_Y_MAX * sizeof(pix_t) * 2)
+
 #define SDRAM_VOL_START 0xC0000000
 #define SDRAM_VOL_END   0xC1000000
 #define SDRAM_VOL_SIZE (SDRAM_VOL_END - SDRAM_VOL_START)
-volatile pal_t *__lcd_frame_buf_raw = (void *)SDRAM_VOL_START;
-#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
-#define RAW_LCD_FBUF_SIZE_MAX 0x00040000
-#else
-#define RAW_LCD_FBUF_SIZE_MAX 0x00200000
-#endif
 
-volatile uint8_t *__heap_buf_raw = (void *)(SDRAM_VOL_START + RAW_LCD_FBUF_SIZE_MAX);
-volatile size_t __heap_buf_raw_size = (SDRAM_VOL_SIZE - RAW_LCD_FBUF_SIZE_MAX);
-
+volatile uint8_t *__heap_buf_raw = (void *)(SDRAM_VOL_START + SCREEN_FB_MEM_SIZE_MAX);
+volatile size_t __heap_buf_raw_size = (SDRAM_VOL_SIZE - SCREEN_FB_MEM_SIZE_MAX);
+volatile pix_t *screen_fb_mem_start = (void *)SDRAM_VOL_START;
 
 extern int d_main(void);
 
 int main(void)
 {
-  CPU_CACHE_Enable();
-  HAL_Init();
-  SystemClock_Config();
-  BSP_LED_Init(LED1);
-  BSP_LED_Init(LED2);
+    CPU_CACHE_Enable();
+    HAL_Init();
+    SystemClock_Config();
+    BSP_LED_Init(LED1);
+    BSP_LED_Init(LED2);
 
-  qspi_flash_init();  
-  lcd_init();
-  gamepad_init();  
-  audio_init();
-  
-  screen_res_x = BSP_LCD_GetXSize();
-  screen_res_y = BSP_LCD_GetYSize();
+    qspi_flash_init();
+    screen_init();
+    gamepad_init();
+    audio_init();
+    touch_init();
 
-    
-  if(FATFS_LinkDriver(&SD_Driver, SDPath) == 0)
-  {
-    if(f_mount(&SDFatFs, (TCHAR const*)SDPath, 0) == FR_OK)
-    {
-        d_main();    
+    if(FATFS_LinkDriver(&SD_Driver, SDPath)) {
+        return -1;
     }
-  }
+
+    if(f_mount(&SDFatFs, (TCHAR const*)SDPath, 0) != FR_OK) {
+        return -1;
+    }
+    d_main();
 }
 
 static void SystemClock_Config(void)
 {
-  RCC_ClkInitTypeDef RCC_ClkInitStruct;
-  RCC_OscInitTypeDef RCC_OscInitStruct;
-  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct;
-  HAL_StatusTypeDef  ret = HAL_OK;
-  
-  /* Enable Power Control clock */
-  __HAL_RCC_PWR_CLK_ENABLE();
-  
-  /* The voltage scaling allows optimizing the power consumption when the device is 
+    RCC_ClkInitTypeDef RCC_ClkInitStruct;
+    RCC_OscInitTypeDef RCC_OscInitStruct;
+    RCC_PeriphCLKInitTypeDef PeriphClkInitStruct;
+    HAL_StatusTypeDef  ret = HAL_OK;
+
+    /* Enable Power Control clock */
+    __HAL_RCC_PWR_CLK_ENABLE();
+
+    /* The voltage scaling allows optimizing the power consumption when the device is
      clocked below the maximum system frequency, to update the voltage scaling value 
      regarding system frequency refer to product datasheet.  */
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
+    __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-  /* Enable HSE Oscillator and activate PLL with HSE as source */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 25;
-  RCC_OscInitStruct.PLL.PLLN = 400;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 8;
-  RCC_OscInitStruct.PLL.PLLR = 7;
-  
-  ret = HAL_RCC_OscConfig(&RCC_OscInitStruct);
-  if(ret != HAL_OK)
-  {
-    while(1) { ; }
-  }
-  
-  /* Activate the OverDrive to reach the 200 MHz Frequency */  
-  ret = HAL_PWREx_EnableOverDrive();
-  if(ret != HAL_OK)
-  {
-    while(1) { ; }
-  }
+    /* Enable HSE Oscillator and activate PLL with HSE as source */
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+    RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+    RCC_OscInitStruct.PLL.PLLM = 25;
+    RCC_OscInitStruct.PLL.PLLN = 400;
+    RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+    RCC_OscInitStruct.PLL.PLLQ = 8;
+    RCC_OscInitStruct.PLL.PLLR = 7;
 
-  /* Select PLLSAI output as USB clock source */
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_CLK48;
-  PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48SOURCE_PLLSAIP;
-  PeriphClkInitStruct.PLLSAI.PLLSAIN = 192;
-  PeriphClkInitStruct.PLLSAI.PLLSAIQ = 4;
-  PeriphClkInitStruct.PLLSAI.PLLSAIP = RCC_PLLSAIP_DIV4;
-  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
-  {
+    ret = HAL_RCC_OscConfig(&RCC_OscInitStruct);
+    if(ret != HAL_OK)
+    {
     while(1) { ; }
-  }
-  
-  /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 clocks dividers */
-  RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;  
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2; 
-  
-  ret = HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_6);
-  if(ret != HAL_OK)
-  {
-    while(1) { ; }
-  }  
+    }
+
+    /* Activate the OverDrive to reach the 200 MHz Frequency */
+    ret = HAL_PWREx_EnableOverDrive();
+    if(ret != HAL_OK)
+        fatal_error("");
+
+    /* Select PLLSAI output as USB clock source */
+    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_CLK48;
+    PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48SOURCE_PLLSAIP;
+    PeriphClkInitStruct.PLLSAI.PLLSAIN = 192;
+    PeriphClkInitStruct.PLLSAI.PLLSAIQ = 4;
+    PeriphClkInitStruct.PLLSAI.PLLSAIP = RCC_PLLSAIP_DIV4;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+        fatal_error("");
+
+    /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 clocks dividers */
+    RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
+    RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+    RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+
+    ret = HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_6);
+    if(ret != HAL_OK)
+        fatal_error("");
 }
 
 static void CPU_CACHE_Enable(void)
 {
-  /* Enable I-Cache */
-  SCB_EnableICache();
+    /* Enable I-Cache */
+    SCB_EnableICache();
 
-  /* Enable D-Cache */
-  SCB_EnableDCache();
+    /* Enable D-Cache */
+    SCB_EnableDCache();
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

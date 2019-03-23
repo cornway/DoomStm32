@@ -31,6 +31,8 @@
 
 #include "r_local.h"
 #include "r_sky.h"
+#include "st_stuff.h"
+#include "p_local.h"
 
 
 
@@ -85,7 +87,7 @@ extern fixed_t			cacheddistance[SCREENHEIGHT];
 extern fixed_t			cachedxstep[SCREENHEIGHT];
 extern fixed_t			cachedystep[SCREENHEIGHT];
 
-
+extern int plyr_wpflash_light;
 
 //
 // R_InitPlanes
@@ -144,7 +146,12 @@ R_MapPlane
 	ds_xstep = cachedxstep[y];
 	ds_ystep = cachedystep[y];
     }
-	
+
+    if (plyr_wpflash_light) {
+        ST_StartLight(distance, 2, plyr_wpflash_light, LT_WPN);
+    }
+    ST_StartLight(distance, 0, -1, LT_FOG);
+
     length = FixedMul (distance,distscale[x1]);
     angle = (viewangle + xtoviewangle[x1])>>ANGLETOFINESHIFT;
     ds_xfrac = viewx + FixedMul(finecosine[angle], length);
@@ -168,6 +175,8 @@ R_MapPlane
 
     // high or low detail
     spanfunc ();	
+
+    ST_StopLight();
 }
 
 
@@ -268,17 +277,27 @@ R_MakeSpans
   int		t2,
   int		b2 )
 {
-    while (t1 < t2 && t1<=b1)
-    {
-	R_MapPlane (t1,spanstart[t1],x-1);
-	t1++;
+    fixed_t distance = FixedMul (planeheight, yslope[b1]);
+
+    if (distance >= R_DISTANCE_MID) {
+        while (t1 < t2 && t1<=b1) {
+            V_DrawHorizLine(spanstart[t1], t1, x - 1 - spanstart[t1], 0);
+            t1++;
+        }
+        while (b1 > b2 && b1>=t1) {
+            V_DrawHorizLine(spanstart[b1], b1, x - 1 - spanstart[b1], 0);
+            b1--;
+        }
+    } else {
+        while (t1 < t2 && t1<=b1) {
+            R_MapPlane (t1,spanstart[t1],x-1);
+            t1++;
+        }
+        while (b1 > b2 && b1>=t1) {
+            R_MapPlane (b1,spanstart[b1],x-1);
+            b1--;
+        }
     }
-    while (b1 > b2 && b1>=t1)
-    {
-	R_MapPlane (b1,spanstart[b1],x-1);
-	b1--;
-    }
-	
     while (t2 < t1 && t2<=b2)
     {
 	spanstart[t2] = x;
@@ -305,7 +324,8 @@ void R_DrawPlanes (void)
     int			stop;
     int			angle;
     int                 lumpnum;
-				
+
+    render_on_distance = false;
 #ifdef RANGECHECK
     if (ds_p - drawsegs > MAXDRAWSEGS)
 	I_Error ("R_DrawPlanes: drawsegs overflow (%i)",

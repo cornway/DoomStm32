@@ -31,6 +31,7 @@
 
 #include "r_local.h"
 #include "r_sky.h"
+#include "st_stuff.h"
 
 
 // OPTIMIZE: closed two sided lines as single sided
@@ -86,7 +87,7 @@ extern short*		maskedtexturecol;
 
 extern lighttable_t**	walllights;
 
-
+extern boolean render_on_distance;
 //
 // R_RenderMaskedSegRange
 //
@@ -194,6 +195,78 @@ R_RenderMaskedSegRange
 #define HEIGHTBITS		12
 #define HEIGHTUNIT		(1<<HEIGHTBITS)
 
+extern pix_t*		ylookup[MAXHEIGHT];
+extern int		columnofs[MAXWIDTH];
+extern int plyr_wpflash_light;
+
+int rw_scale_var = 0;
+
+void (*render_col) (void);
+
+
+
+static fixed_t rw_scalestep_lut[R_RANGE_MAX];
+static fixed_t topstep_lut[R_RANGE_MAX];
+static fixed_t bottomstep_lut[R_RANGE_MAX];
+static fixed_t pixlowstep_lut[R_RANGE_MAX];
+static fixed_t pixhighstep_lut[R_RANGE_MAX];
+static byte dscale_lut[R_RANGE_MAX];
+
+static void R_SetStepLut (void)
+{
+    int i;
+    byte shift, downscale;
+    for (i = 0; i < R_RANGE_MAX; i++) {
+
+        shift = rw_render_downscale[i].shift;
+        downscale = (1 << shift) - 1;
+
+        dscale_lut[i]       = downscale;
+        rw_scalestep_lut[i] = rw_scalestep * downscale;
+        topstep_lut[i]      = topstep * downscale;
+        bottomstep_lut[i]   = bottomstep * downscale;
+        pixlowstep_lut[i]   = pixlowstep * downscale;
+        pixhighstep_lut[i]  = pixhighstep * downscale;
+    }
+}
+static void R_CopySegClip (
+    int dest,
+    int src)
+{
+    floorclip[dest] = floorclip[src];
+    ceilingclip[dest] = ceilingclip[src];
+
+    if (markfloor) {
+        floorplane->top[dest] = floorplane->top[src];
+        floorplane->bottom[dest] = floorplane->bottom[src];
+    }
+    if (markceiling) {
+        ceilingplane->top[dest] = ceilingplane->top[src];
+        ceilingplane->bottom[dest] = ceilingplane->bottom[src];
+    }
+    if (maskedtexture) {
+        maskedtexturecol[dest] = maskedtexturecol[src];
+    }
+}
+
+static void R_CopySegRange (void)
+{
+    byte downscale = dscale_lut[rw_render_range];
+
+    if (downscale && render_on_distance && segtextured) {
+
+        rw_scale    += rw_scalestep_lut[rw_render_range];
+        topfrac     += topstep_lut[rw_render_range];
+        bottomfrac  += bottomstep_lut[rw_render_range];
+        pixlow      += pixlowstep_lut[rw_render_range];
+        pixhigh     += pixhighstep_lut[rw_render_range];
+        while (downscale--) {
+            rw_x++;
+            R_CopySegClip(rw_x, rw_x - 1);
+        }
+    }
+}
+
 void R_RenderSegLoop (void)
 {
     angle_t		angle;
@@ -204,14 +277,27 @@ void R_RenderSegLoop (void)
     fixed_t		texturecolumn;
     int			top;
     int			bottom;
+    fixed_t     hyp = 0;
+
+    rw_render_range = R_RANGE_NEAREST;
+    R_SetStepLut();
+
+    if (frontsector) {
+        ST_StartLight(-1, 1, frontsector->extrlight, LT_SECT);
+    } else if (backsector) {
+        ST_StartLight(-1, 1, backsector->extrlight, LT_SECT);
+    }
+
+    if (plyr_wpflash_light) {
+        ST_StartLight(rw_distance, 2, plyr_wpflash_light, LT_WPN);
+    }
 
     for ( ; rw_x < rw_stopx ; rw_x++) {
         short temp_ceil = ceilingclip[rw_x]+1;
         short temp_floor = floorclip[rw_x]-1;
-    
+
         // mark floor / ceiling areas
         yl = (topfrac+HEIGHTUNIT-1)>>HEIGHTBITS;
-
         // no space above wall?
         if (yl < temp_ceil)
             yl = temp_ceil;
@@ -244,13 +330,45 @@ void R_RenderSegLoop (void)
                 floorplane->bottom[rw_x] = bottom;
             }
         }
-
         // texturecolumn and lighting are independent of wall tiers
+
+        // calculate texture offset
+        angle = (rw_centerangle + xtoviewangle[rw_x])>>ANGLETOFINESHIFT;
+        hyp = FixedMul(finesine_n[angle], rw_distance);
+
+        R_SetRwRange(hyp);
+        R_ProcDownscale(rw_x, rw_stopx);
+
         if (segtextured)
         {
-            // calculate texture offset
-            angle = (rw_centerangle + xtoviewangle[rw_x])>>ANGLETOFINESHIFT;
             texturecolumn = rw_offset-FixedMul(finetangent[angle],rw_distance);
+
+            if (rw_render_range == R_RANGE_MID && bottomtexture) {
+                if (rw_x < rw_stopx - 4) {
+                    rw_render_range = R_RANGE_MID;
+                }
+            }
+#ifdef NOT_YET
+            if (0 && frontsector) {
+                mobj_t *t = frontsector->thinglist;
+                fixed_t m_dist;
+                while (t)
+                {
+                    if (t->flags2 & MOBJ_LIGHT_SRC_BM && t->data) {
+                        m_dist = P_AproxDistance
+                                    (curline->v1->x - t->x,
+                                     curline->v1->y - t->y);
+                        if (m_dist < R_DISTANCE_MID) {
+                            extra = true;
+                            break;
+                        }
+                    }
+                    t = t->snext;
+                }
+            }
+#endif
+            ST_StartLight(hyp, 0, -1, LT_FOG);
+
             texturecolumn >>= FRACBITS;
             // calculate lighting
             index = rw_scale>>LIGHTSCALESHIFT;
@@ -337,6 +455,7 @@ void R_RenderSegLoop (void)
                 maskedtexturecol[rw_x] = texturecolumn;
             }
         }
+        R_CopySegRange();
         rw_scale += rw_scalestep;
         topfrac += topstep;
         bottomfrac += bottomstep;
@@ -410,6 +529,7 @@ R_CheckPlane
 }
 
 
+extern int st_palette;
 //
 // R_StoreWallRange
 // A wall segment will be drawn
@@ -451,7 +571,7 @@ R_StoreWallRange
     distangle = ANG90 - offsetangle;
     hyp = R_PointToDist (curline->v1->x, curline->v1->y);
     sineval = finesine[distangle>>ANGLETOFINESHIFT];
-    rw_distance = FixedMul (hyp, sineval);
+    rw_distance = FixedMul (hyp, sineval);//
     project_rw_dist = FixedDiv(projection, rw_distance);
 		
 	
@@ -769,5 +889,6 @@ R_StoreWallRange
 	ds_p->bsilheight = INT_MAX;
     }
     ds_p++;
+    ST_StopLight();
 }
 

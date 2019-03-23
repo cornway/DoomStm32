@@ -53,12 +53,12 @@
 
 /* Exported variables --------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
-#define LCD_FRAME_BUFFER         0xC0000000
-#define JPEG_OUTPUT_DATA_BUFFER  0xC0200000 
 
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
 void OnError_Handler(void);
+void fatal_error (const char* message);
+
 
 #endif /* __MAIN_H */
 

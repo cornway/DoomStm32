@@ -343,17 +343,13 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
     // use two stage accelerative turning
     // on the keyboard and joystick
     if (gamekeydown[key_right] || gamekeydown[key_left]) {
-        turnheld += ticdup;
+        if (turnheld + angleturn[0] > angleturn[1]) {
+            turnheld = angleturn[1] - angleturn[0];
+        }
+        turnheld += 25;
+        t_angleturn = angleturn[0] + turnheld;
         if (gamekeydown[key_right]) {
-            t_angleturn = -angleturn[0] - (turnheld << 4);
-            if (t_angleturn < -angleturn[1]) {
-                t_angleturn = angleturn[1];
-            }
-        } else {
-            t_angleturn = angleturn[0] + (turnheld << 4);
-            if (t_angleturn > angleturn[1]) {
-                t_angleturn = angleturn[1];
-            }
+            t_angleturn = -t_angleturn;
         }
     } else { 
         turnheld = 0;
@@ -665,17 +661,22 @@ void G_Ticker (void)
     { 
 	switch (gameaction) 
 	{ 
+	  case ga_cachelevel:
+        gameaction = ga_nothing;
+        DD_SetGameAct(ga_cachelevel);
+        break;
 	  case ga_loadlevel: 
-	    G_DoLoadLevel (); 
+	    G_DoLoadLevel ();
 	    break; 
 	  case ga_newgame: 
-	    G_DoNewGame (); 
-	    break; 
+	    G_DoNewGame ();
+        S_Start ();
 	  case ga_loadgame: 
-	    G_DoLoadGame (); 
+	    G_DoLoadGame ();
+        S_Start ();
 	    break; 
 	  case ga_savegame: 
-	    G_DoSaveGame (); 
+	    G_DoSaveGame ();
 	    break; 
 	  case ga_playdemo: 
 	    G_DoPlayDemo (); 
@@ -698,7 +699,13 @@ void G_Ticker (void)
 	    break; 
 	} 
     }
-    
+
+    if (gameaction_next != ga_nothing &&
+        gameaction == ga_nothing) {
+
+        gameaction = gameaction_next;
+        gameaction_next = ga_nothing;
+    }
     // get commands, check consistancy,
     // and build new consistancy check
     buf = (gametic/ticdup)%BACKUPTICS; 
@@ -1051,9 +1058,10 @@ void G_DoReborn (int playernum)
 { 
     int                             i; 
 	 
-    if (!netgame) {
+    if (!netgame && gameaction != ga_loadlevel) {
 	    // reload the level from scratch
-	    gameaction = ga_loadlevel;
+	    gameaction = ga_cachelevel;
+        gameaction_next = ga_loadlevel;
     }
     else 
     {
@@ -1338,7 +1346,8 @@ char	savename[256];
 void G_LoadGame (char* name) 
 { 
     M_StringCopy(savename, name, sizeof(savename));
-    gameaction = ga_loadgame; 
+    gameaction = ga_cachelevel;
+    gameaction_next = ga_loadgame;
 } 
  
 #define VERSIONSIZE		16 
@@ -1575,7 +1584,8 @@ G_DeferedInitNew
     d_skill = skill; 
     d_episode = episode; 
     d_map = map; 
-    gameaction = ga_newgame; 
+    gameaction = ga_cachelevel;
+    gameaction_next = ga_newgame;
 } 
 
 

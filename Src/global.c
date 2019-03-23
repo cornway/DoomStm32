@@ -17,7 +17,7 @@ int		scaledviewwidth;
 int		viewheight;
 int		viewwindowx;
 int		viewwindowy; 
-byte*		ylookup[MAXHEIGHT]; 
+pix_t*		ylookup[MAXHEIGHT]; 
 int		columnofs[MAXWIDTH]; 
 
 
@@ -58,6 +58,8 @@ int			viewangleoffset;
 // increment every time a check is made
 int			validcount = 1;		
 
+
+boolean render_on_distance = false;
 
 lighttable_t*		fixedcolormap;
 lighttable_t**	walllights;
@@ -148,6 +150,8 @@ int		rw_angle1;
 //
 // regular wall
 //
+rw_render_range_t rw_render_range = R_RANGE_NEAR;
+
 int		rw_x;
 int		rw_stopx;
 angle_t		rw_centerangle;
@@ -428,7 +432,8 @@ int		ptflags;
 
 gamestate_t     oldgamestate; 
  
-gameaction_t    gameaction; 
+gameaction_t    gameaction;
+gameaction_t    gameaction_next;
 gamestate_t     gamestate; 
 skill_t         gameskill; 
 boolean		respawnmonsters;
@@ -487,7 +492,7 @@ byte		consistancy[MAXPLAYERS][BACKUPTICS];
 
 fixed_t         forwardmove[2] = {0x19, 0x32};
 fixed_t         sidemove[2] = {0x18, 0x28}; 
-fixed_t         angleturn[3] = {300, 1280, 320};    // + slow turn
+fixed_t         angleturn[3] = {160, 1280, 320};    // + slow turn
 fixed_t         angleturn_prev[3] = {320, 320, 320};
 
 

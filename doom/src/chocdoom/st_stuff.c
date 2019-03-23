@@ -101,8 +101,10 @@
 
 #define ST_NUMEXTRAFACES		2
 
+#define ST_NUMEXPFACES 6
+
 #define ST_NUMFACES \
-          (ST_FACESTRIDE*ST_NUMPAINFACES+ST_NUMEXTRAFACES)
+          (ST_FACESTRIDE*ST_NUMPAINFACES+ST_NUMEXTRAFACES + ST_NUMEXPFACES)
 
 #define ST_TURNOFFSET		(ST_NUMSTRAIGHTFACES)
 #define ST_OUCHOFFSET		(ST_TURNOFFSET + ST_NUMTURNFACES)
@@ -110,6 +112,8 @@
 #define ST_RAMPAGEOFFSET		(ST_EVILGRINOFFSET + 1)
 #define ST_GODFACE			(ST_NUMPAINFACES*ST_FACESTRIDE)
 #define ST_DEADFACE			(ST_GODFACE+1)
+#define ST_EXPFACE0         (ST_NUMFACES - ST_NUMEXPFACES)
+#define ST_EXPFACEDELAY     (7)
 
 #define ST_FACESX			143
 #define ST_FACESY			168
@@ -260,7 +264,7 @@
 #define ST_MAPHEIGHT		1
 
 // graphics are drawn to a backing screen and blitted to the real screen
-byte                   *st_backing_screen;
+pix_t                   *st_backing_screen;
 	    
 // main player in game
 static player_t*	plyr; 
@@ -331,6 +335,8 @@ static st_multicon_t	w_arms[6];
 
 // face status widget
 static st_multicon_t	w_faces; 
+int                     w_expfacecnt;
+int                     w_expfacedelay;
 
 // keycard widgets
 static st_multicon_t	w_keyboxes[3];
@@ -676,13 +682,30 @@ void ST_updateFaceWidget(void)
 
     if (priority < 10)
     {
-	// dead
-	if (!plyr->health)
-	{
-	    priority = 9;
-	    st_faceindex = ST_DEADFACE;
-	    st_facecount = 1;
-	}
+    // dead
+    if (!plyr->health)
+    {
+        priority = 9;
+        if (st_faceindex < ST_EXPFACE0) {
+            st_faceindex = ST_DEADFACE;
+        }
+        if (game_alt_pkg == pkg_psx_final) {
+            if (st_oldhealth > ST_MUCHPAIN) {
+                st_faceindex = ST_EXPFACE0;
+                w_expfacecnt = ST_NUMEXPFACES - 1;
+                w_expfacedelay = ST_EXPFACEDELAY;
+            } else if (w_expfacecnt) {
+                if (!w_expfacedelay) {
+                    st_faceindex++;
+                    w_expfacecnt--;
+                    w_expfacedelay = ST_EXPFACEDELAY;
+                } else {
+                    w_expfacedelay--;
+                }
+            }
+        }
+        st_facecount = 1;
+    }
     }
 
     if (priority < 9)
@@ -906,7 +929,7 @@ void ST_Ticker (void)
 
 }
 
-static int st_palette = 0;
+int st_palette = 0;
 
 void ST_doPaletteStuff(void)
 {
@@ -968,7 +991,7 @@ void ST_doPaletteStuff(void)
     {
 	st_palette = palette;
 	pal = (byte *) W_CacheLumpNum (lu_palette, PU_CACHE)+palette*768;
-	I_SetPalette (pal);
+	I_SetPalette (pal, palette);
     }
 
 }
@@ -1008,6 +1031,193 @@ void ST_drawWidgets(boolean refresh)
 
 }
 
+#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
+
+#else
+
+/*TODO : Move palettes into IRAM*/
+int ST_setPaletteNum (int num)
+{
+    byte *pal;
+    if (num > RADIATIONPAL) {
+        return -1;
+    }
+    pal = (byte *) W_CacheLumpNum (lu_palette, PU_CACHE)+num*768;
+    I_SetPalette (pal, num);
+    return 0;
+}
+
+static int prev_palette = -1;
+
+#define STARTFOGPALS STARTBONUSPALS
+#define NUMFOGPALS   NUMBONUSPALS
+
+#define STARTFIREPALS STARTBONUSPALS
+#define NUMFIREPALS   NUMBONUSPALS
+
+
+static const fixed_t wp_fire_radius[] =
+{
+    R_DISTANCE_NEAR / 3,
+    R_DISTANCE_NEAR / 3 + R_DISTANCE_NEAR / 3,
+    R_DISTANCE_NEAR / 2 + R_DISTANCE_NEAR / 3,
+    R_DISTANCE_NEAR,
+};
+static int ST_GetWpFirePal (fixed_t distance, int palette)
+{
+    int i;
+
+    if (distance < MELEERANGE) {
+        return -1;
+    }
+    for (i = 0; i < arrlen(wp_fire_radius); i++) {
+        if (distance < wp_fire_radius[i]) {
+            break;
+        }
+    }
+    if (i == arrlen(wp_fire_radius)) {
+        return -1;
+    }
+    if (i >= palette) {
+        i = palette - 1;
+    }
+    return palette - i - 1;
+}
+
+static int light_prio = -1;
+
+static int __ST_StartWpFireLight (fixed_t distance, int light)
+{
+    int n = -1;
+
+    int palette = howmany(light, howmany(255, NUMFIREPALS));
+
+    if (palette >= NUMFIREPALS) {
+        palette = NUMFIREPALS;
+    }
+    n = ST_GetWpFirePal(distance, palette);
+
+    if (n >= 0) {
+        n += STARTFIREPALS;
+    }
+    return n;
+}
+
+static int __ST_StartFogLight (fixed_t distance)
+{
+    int n;
+    n  = distance / R_DISTANCE_NEAR - 1;
+    if (n >= NUMFOGPALS) {
+        n = NUMFOGPALS - 1;
+    }
+    if (n >= 0) {
+        n += STARTFOGPALS;
+    }
+    return n;
+}
+
+static int __ST_StartLight (fixed_t distance, light_t type, int light)
+{
+    int n = -1;
+    switch (type) {
+        case LT_FOG:
+            n = __ST_StartFogLight(distance);
+            break;
+        case LT_SECT:
+            n = light;
+            break;
+        case LT_WPN:
+            n = __ST_StartWpFireLight(distance, light);
+            break;
+        default:
+            n = -1;
+            break;
+    }
+
+    if (n < 0) {
+        return n;
+    }
+
+    if (prev_palette == n) {
+        return -1;
+    }
+    prev_palette = n;
+    return ST_setPaletteNum(n);
+}
+
+int ST_StartLight (fixed_t distance, int prio, int light, light_t type)
+{
+    if (light_prio > 0) {
+        if (prio < light_prio) {
+            return -1;
+        }
+    }
+
+    if (__ST_StartLight(distance, type, light) >= 0) {
+        light_prio = prio;
+        return 0;
+    }
+    return -1;
+}
+
+void ST_StopLight (void)
+{
+    ST_setPaletteNum(st_palette);
+    prev_palette = st_palette;
+    light_prio = 0;
+}
+
+static const char *flat_name[] =
+{
+    "NUKAGE1", "NUKAGE3",
+    "LAVA1", "LAVA4",
+    "SLIME01", "SLIME08"
+};
+
+static const int floor_light_map[] =
+{
+    RADIATIONPAL,
+    STARTREDPALS + 2,
+    STARTBONUSPALS + NUMBONUSPALS - 3,
+};
+
+struct floor_lump_s {
+    int start, num;
+};
+
+struct floor_lump_s floor_lump[arrlen(floor_light_map) + 1] = {0};
+
+void ST_Setup (void)
+{
+    int i;
+    int n;
+    for (i = 0; i < arrlen(flat_name); i += 2) {
+        n = i / 2;
+        floor_lump[n].start = R_FlatNumForName((char *)flat_name[i]);
+        floor_lump[n].num = R_FlatNumForName((char *)flat_name[i + 1]) - floor_lump[n].start;
+    }
+}
+
+void ST_SetSectorLight (void *_sector)
+{
+    sector_t *sector = _sector;
+    int i = 0, floorpic;
+    if (sector->extrlight) {
+        return;
+    }
+    while (floor_lump[i].start && floor_lump[i].num) {
+        floorpic = sector->floorpic - floor_lump[i].start;
+        if ((floorpic > 0) && (floorpic <= floor_lump[i].num)) {
+            sector->extrlight = floor_light_map[i];
+            sector->extralightown = true;
+            break;
+        }
+        i++;
+    }
+}
+
+#endif
+
 void ST_doRefresh(void)
 {
 
@@ -1029,18 +1239,20 @@ void ST_diffDraw(void)
 
 void ST_Drawer (boolean fullscreen, boolean refresh)
 {
-  
     st_statusbaron = (!fullscreen) || automapactive;
     st_firsttime = st_firsttime || refresh;
 
     // Do red-/gold-shifts from damage/items
     ST_doPaletteStuff();
 
+    I_SetPlayPal();
+
     // If just after ST_Start(), refresh all
     if (st_firsttime) ST_doRefresh();
     // Otherwise, update as little as possible
     else ST_diffDraw();
 
+    I_RestorePal();
 }
 
 typedef void (*load_callback_t)(char *lumpname, patch_t **variable); 
@@ -1132,6 +1344,14 @@ static void ST_loadUnloadGraphics(load_callback_t callback)
     ++facenum;
     callback(DEH_String("STFDEAD0"), &faces[facenum]);
     ++facenum;
+
+    if (game_alt_pkg == pkg_psx_final) {
+        for (j=0; j<ST_NUMEXPFACES; j++) {
+            DEH_snprintf(namebuf, 9, "STFEXP%d", j);
+                callback(namebuf, &faces[facenum]);
+                ++facenum;
+        }
+    }
 }
 
 static void ST_loadCallback(char *lumpname, patch_t **variable)
@@ -1249,13 +1469,18 @@ void ST_createWidgets(void)
 		  ST_FRAGSWIDTH);
 
     // faces
-    STlib_initMultIcon(&w_faces,
-		       ST_FACESX,
-		       ST_FACESY,
-		       faces,
-		       &st_faceindex,
-		       &st_statusbaron);
-
+    {
+        int offx = ST_FACESX;
+        if (game_alt_pkg == pkg_psx_final) {
+            offx += 7;
+        }
+        STlib_initMultIcon(&w_faces,
+                   offx,
+                   ST_FACESY,
+                   faces,
+                   &st_faceindex,
+                   &st_statusbaron);
+    }
     // armor percentage - should be colored later
     STlib_initPercent(&w_armor,
 		      ST_ARMORX,
@@ -1374,7 +1599,7 @@ void ST_Stop (void)
     if (st_stopped)
 	return;
 
-    I_SetPalette (W_CacheLumpNum (lu_palette, PU_CACHE));
+    I_SetPalette (W_CacheLumpNum (lu_palette, PU_CACHE), 0);
 
     st_stopped = true;
 }
@@ -1382,6 +1607,6 @@ void ST_Stop (void)
 void ST_Init (void)
 {
     ST_loadData();
-    st_backing_screen = (byte *) Z_Malloc(ST_WIDTH * ST_HEIGHT, PU_STATIC, 0);
+    st_backing_screen = (pix_t *) Z_Malloc(ST_WIDTH * ST_HEIGHT * sizeof(pix_t), PU_STATIC, 0);
 }
 

@@ -22,8 +22,10 @@
 #define __STSTUFF_H__
 
 #include "doomtype.h"
+#include "m_fixed.h"
 #include "d_event.h"
 #include "m_cheat.h"
+#include "gfx.h"
 
 // Size of statusbar.
 // Now sensitive for scaling.
@@ -51,7 +53,27 @@ void ST_Start (void);
 // Called by startup code.
 void ST_Init (void);
 
+typedef enum {
+    LT_NONE,
+    LT_FOG,
+    LT_SECT,
+    LT_WPN,
+    LT_MAX,
+} light_t;
 
+#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
+static inline int ST_setPaletteNum (int num);
+static inline int ST_StartLight (fixed_t distance, int prio, int light, light_t type) {return -1;};
+static inline void ST_StopLight (void) {};
+static inline void ST_SetSectorLight (sector_t *sector) {};
+static inline void ST_Setup (void) {};
+#else
+int ST_setPaletteNum (int num);
+int ST_StartLight (fixed_t distance, int prio, int light, light_t type);
+void ST_StopLight (void);
+void ST_SetSectorLight (void *sector);
+void ST_Setup (void);
+#endif
 
 // States for status bar code.
 typedef enum
@@ -73,7 +95,7 @@ typedef enum
 
 
 
-extern byte *st_backing_screen;
+extern pix_t *st_backing_screen;
 extern cheatseq_t cheat_mus;
 extern cheatseq_t cheat_god;
 extern cheatseq_t cheat_ammo;
@@ -84,6 +106,8 @@ extern cheatseq_t cheat_powerup[7];
 extern cheatseq_t cheat_choppers;
 extern cheatseq_t cheat_clev;
 extern cheatseq_t cheat_mypos;
+
+extern int w_expfacecnt;
 
 
 #endif

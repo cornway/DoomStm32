@@ -46,6 +46,14 @@ slidename_t	slideFrameNames[MAXSLIDEDOORS] =
 };
 #endif
 
+static void T_StartSoundNoKey (void)
+{
+    int sfx = sfx_oof;
+    if (game_alt_pkg == pkg_psx_final) {
+        sfx = sfx_nokey;
+    }
+    S_StartSound(NULL, sfx);
+}
 
 //
 // VERTICAL DOORS
@@ -213,7 +221,7 @@ EV_DoLockedDoor
 	if (!p->cards[it_bluecard] && !p->cards[it_blueskull])
 	{
 	    p->message = DEH_String(PD_BLUEO);
-	    S_StartSound(NULL,sfx_oof);
+	    T_StartSoundNoKey();
 	    return 0;
 	}
 	break;
@@ -225,7 +233,7 @@ EV_DoLockedDoor
 	if (!p->cards[it_redcard] && !p->cards[it_redskull])
 	{
 	    p->message = DEH_String(PD_REDO);
-	    S_StartSound(NULL,sfx_oof);
+	    T_StartSoundNoKey();
 	    return 0;
 	}
 	break;
@@ -238,7 +246,7 @@ EV_DoLockedDoor
 	    !p->cards[it_yellowskull])
 	{
 	    p->message = DEH_String(PD_YELLOWO);
-	    S_StartSound(NULL,sfx_oof);
+	    T_StartSoundNoKey();
 	    return 0;
 	}
 	break;	
@@ -358,7 +366,7 @@ EV_VerticalDoor
 	if (!player->cards[it_bluecard] && !player->cards[it_blueskull])
 	{
 	    player->message = DEH_String(PD_BLUEK);
-	    S_StartSound(NULL,sfx_oof);
+	    T_StartSoundNoKey();
 	    return;
 	}
 	break;
@@ -372,7 +380,7 @@ EV_VerticalDoor
 	    !player->cards[it_yellowskull])
 	{
 	    player->message = DEH_String(PD_YELLOWK);
-	    S_StartSound(NULL,sfx_oof);
+	    T_StartSoundNoKey();
 	    return;
 	}
 	break;
@@ -385,7 +393,7 @@ EV_VerticalDoor
 	if (!player->cards[it_redcard] && !player->cards[it_redskull])
 	{
 	    player->message = DEH_String(PD_REDK);
-	    S_StartSound(NULL,sfx_oof);
+	    T_StartSoundNoKey();
 	    return;
 	}
 	break;

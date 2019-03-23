@@ -235,6 +235,8 @@ boolean P_CheckAmmo (player_t* player)
 //
 // P_FireWeapon.
 //
+extern int plyr_wpflash_light;
+
 void P_FireWeapon (player_t* player)
 {
     statenum_t	newstate;
@@ -246,6 +248,11 @@ void P_FireWeapon (player_t* player)
     newstate = (statenum_t)weaponinfo[player->readyweapon].atkstate;
     P_SetPsprite (player, ps_weapon, newstate);
     P_NoiseAlert (player->mo, player->mo);
+    player->wpfired_ev = 8;
+    if ((player->readyweapon != wp_fist) &&
+        (player->readyweapon != wp_chainsaw)) {
+        plyr_wpflash_light = 255;
+    }
 }
 
 

@@ -334,7 +334,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls> </MiscControls>
-              <Define>STM32F769xx,USE_HAL_DRIVER,USE_STM32F769I_DISCO,DATA_IN_ExtSDRAM,USE_LCD_HDMI,USE_USB_HS</Define>
+              <Define>STM32F769xx,USE_HAL_DRIVER,USE_STM32F769I_DISCO,DATA_IN_ExtSDRAM,USE_LCD_HDMI,USE_USB_HS,SDL_DOOM</Define>
               <Undefine></Undefine>
               <IncludePath>../Inc;..\STM32F7xx_Driver\Inc;..\Utilities\JPEG;..\FatFs\src;..\STM32F7xx_Driver\BSP\Components\Common;..\STM32F7xx_Driver\BSP\STM32F769I-Discovery;..\STM32F7xx_Driver\CMSIS\Device\ST\STM32F7xx\Include;..\doom\src;..\doom\src\chocdoom</IncludePath>
             </VariousControls>
@@ -616,11 +616,6 @@
               <FilePath>..\Src\audio_main.c</FilePath>
             </File>
             <File>
-              <FileName>gfx_main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Src\gfx_main.c</FilePath>
-            </File>
-            <File>
               <FileName>input_main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\input_main.c</FilePath>
@@ -636,34 +631,9 @@
               <FilePath>..\doom\src\dd_main.c</FilePath>
             </File>
             <File>
-              <FileName>button.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\doom\src\button.c</FilePath>
-            </File>
-            <File>
               <FileName>debug.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\doom\src\debug.c</FilePath>
-            </File>
-            <File>
-              <FileName>font.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\doom\src\font.c</FilePath>
-            </File>
-            <File>
-              <FileName>gfx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\doom\src\gfx.c</FilePath>
-            </File>
-            <File>
-              <FileName>images.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\doom\src\images.c</FilePath>
-            </File>
-            <File>
-              <FileName>jpeg.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\doom\src\jpeg.c</FilePath>
             </File>
             <File>
               <FileName>i_sdlsound.c</FileName>
@@ -689,6 +659,16 @@
               <FileName>usb_hid_gamepad.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\usb_hid_gamepad.c</FilePath>
+            </File>
+            <File>
+              <FileName>mach_stub.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\mach_stub.c</FilePath>
+            </File>
+            <File>
+              <FileName>gfx.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Inc\gfx.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -779,13 +759,6 @@
         </Group>
         <Group>
           <GroupName>Utilities</GroupName>
-          <Files>
-            <File>
-              <FileName>jpeg_utils.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Utilities\JPEG\jpeg_utils.c</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>doom</GroupName>
@@ -1194,6 +1167,11 @@
               <FileName>global.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\global.c</FilePath>
+            </File>
+            <File>
+              <FileName>w_merge.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\doom\src\chocdoom\w_merge.c</FilePath>
             </File>
           </Files>
         </Group>

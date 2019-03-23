@@ -4,45 +4,17 @@
 
 #define USE_QSPI 0
 
-extern void audio_resume (void);
 extern int32_t systime;
 
 static void error_handle (void)
 {
-
+    for (;;) {}
 }
 
 #define N(x) (sizeof(x) / sizeof(x[0]))
 
 static const char mus_dir_path[] =
 "/doom/music";
-
-#if 0
-static const char *mus_names[] = 
-{
-    "song_1.wav",
-    "song_2.wav",
-    "song_3.wav",
-    "song_4.wav",
-    "song_5.wav",
-    "song_6.wav",
-    "song_7.wav",
-    "song_8.wav",
-    "song_9.wav",
-    "song_10.wav",
-    "song_11.wav",
-    "song_12.wav",
-    "song_13.wav",
-    "song_14.wav",
-    "song_15.wav",
-    "song_16.wav",
-    "song_17.wav",
-    "song_18.wav",
-};
-
-#define MUS_SONGS_MAX (N(mus_names))
-
-#endif
 
 #define MUS_BUF_GUARD_MS (AUDIO_MS_TO_SIZE(AUDIO_SAMPLE_RATE, AUDIO_OUT_BUFFER_SIZE) / 2)
 #define MUS_CHK_GUARD(mus) ((systime - (mus)->last_upd_tsf) > MUS_BUF_GUARD_MS)
@@ -57,12 +29,13 @@ struct song {
     int16_t num;
     char path[64];
     FIL *file;
-    int32_t rem;
+    int32_t track_rem;
     int32_t rem_buf;
     snd_sample_t *buf;
     wave_t info;
     uint8_t ready;
     uint32_t mem_offset;
+    audio_channel_t *channel;
 };
 
 typedef enum {
@@ -81,7 +54,7 @@ typedef enum {
 
 struct mus {
     uint8_t volume;
-    int8_t buf_in_use_idx;
+    int8_t rd_idx;
     mus_repeat_t repeat;
     mus_state_t state;
     int32_t last_upd_tsf;
@@ -92,7 +65,7 @@ struct mus {
 
 
 #if !USE_QSPI
-static void song_fill_next_buf (struct song *song, struct mus *mus);
+static void song_update_next_buf (struct song *song, struct mus *mus);
 #endif
 
 FIL song_file;
@@ -104,10 +77,9 @@ static void song_reset (struct song *song)
     song->num       = -1;
     song->file      = NULL;
     song->buf       = NULL;
-    song->rem       = 0;
+    song->track_rem       = 0;
     song->rem_buf   = 0;
     song->ready     = 0;
-    song->mem_offset = 0;
     memset(&song->info, 0, sizeof(song->info));
     memset(song->path, 0, sizeof(song->path));
 }
@@ -115,7 +87,7 @@ static void song_reset (struct song *song)
 static void mus_reset (struct mus *mus)
 {
     mus->volume = 0;
-    mus->buf_in_use_idx = 0;
+    mus->rd_idx = 0;
     mus->repeat = SINGLE_LOOP;
     mus->state = MUS_IDLE;
 }
@@ -135,12 +107,12 @@ extern void qspi_erase_all (void);
 
 static void mus_qspi_load_file (struct mus *mus, struct song *song)
 {
-    int32_t cnt = song->rem / sizeof(mus_ram_buf) + 1;
+    int32_t cnt = song->track_rem / sizeof(mus_ram_buf) + 1;
     FRESULT res = FR_OK;
     uint32_t btr;
     uint32_t addr = mus->qspi_mem;
 #if 0
-    qspi_erase(addr, song->rem);
+    qspi_erase(addr, song->track_rem);
 #else
     qspi_erase_all();
 #endif
@@ -158,9 +130,9 @@ static void mus_qspi_load_file (struct mus *mus, struct song *song)
 static void mus_qspi_read (struct song *song, struct mus *mus)
 {
     snd_sample_t *dest;
-    int32_t rem = song->rem;
+    int32_t rem = song->track_rem;
 
-    dest = mus_ram_buf[mus->buf_in_use_idx ^ 1];
+    dest = mus_ram_buf[mus->rd_idx ^ 1];
 
     if (rem > MUS_RAM_BUF_SIZE)
         rem = MUS_RAM_BUF_SIZE;
@@ -171,6 +143,15 @@ static void mus_qspi_read (struct song *song, struct mus *mus)
 }
 
 #endif /*USE_QSPI*/
+
+static void song_setup (struct mus *mus, struct song *song);
+
+static int
+chunk_setup (
+    struct mus *mus,
+    struct song *song,
+    Mix_Chunk *chunk
+    );
 
 static int music_scan_dir_for_num (int _num, char *name)
 {
@@ -218,6 +199,35 @@ static int music_scan_dir_for_num (int _num, char *name)
     return 0;
 }
 
+static int mus_cplt_hdlr (int complete)
+{
+    if (complete == 2) {
+        if (song_cur.track_rem <=  0) {
+            if (mus.repeat) {
+                mus.state = MUS_REPEAT;
+            }
+            return 1;
+        }
+        if (mus.state == MUS_PAUSE ||
+            mus.state == MUS_STOP ||
+            mus.state == MUS_REPEAT ||
+            !mus.volume) {
+            /*This will cause 'fake channel' - it will won't play, but still in 'ready'*/
+            return 0;
+        }
+        song_setup(&mus, &song_cur);
+    } else if (complete == 1) {
+        if (mus.state == MUS_PAUSE ||
+            mus.state == MUS_STOP ||
+            mus.state == MUS_REPEAT ||
+            !mus.volume) {
+            /*Skip this*/
+            return 1;
+        }
+    }
+    return 0;
+}
+
 static void mus_open_wav (struct song *song, const char *name)
 {
     uint32_t btr;
@@ -242,9 +252,8 @@ static void mus_open_wav (struct song *song, const char *name)
     if (song->info.SampleRate != AUDIO_SAMPLE_RATE) {
         error_handle();
     }
-    song->rem = song->info.FileSize / sizeof(snd_sample_t);
+    song->track_rem = song->info.FileSize / sizeof(snd_sample_t);
     song->ready = 1;
-    song->mem_offset = sizeof(song->info);
 #if USE_QSPI
     mus_qspi_load_file(&mus, song);
 #endif
@@ -259,6 +268,7 @@ static void mus_close_wav (struct song *song)
 static int music_play_helper (struct song *song, int num, int repeat)
 {
     char name[64];
+    Mix_Chunk mixchunk;
     if (music_scan_dir_for_num(num, name) < 0) {
         mus.state = MUS_STOP;
         return -1;
@@ -283,30 +293,127 @@ static int music_play_helper (struct song *song, int num, int repeat)
 #if USE_QSPI
     mus_qspi_read(song, &mus);
 #else
-    song_fill_next_buf(song, &mus);
+    song_update_next_buf(song, &mus);
 #endif
+    /*Little hack - force channel reject to update it through callback*/
+    mixchunk.alen = 0;
+    if (audio_is_playing(AUDIO_MUS_CHAN_START)) {
+        audio_stop_channel(AUDIO_MUS_CHAN_START);
+    }
+    song->channel = audio_play_channel(&mixchunk, AUDIO_MUS_CHAN_START);
+    if (!song->channel) {
+        error_handle();
+    }
+    song->channel->complete = mus_cplt_hdlr;
     return 0;
+}
+
+uint8_t music_get_volume (void)
+{
+    return mus.volume;
+}
+
+static int
+chunk_setup (
+    struct mus *mus,
+    struct song *song,
+    Mix_Chunk *chunk
+    )
+{
+    snd_sample_t *ram;
+    int32_t rem = song->track_rem;
+
+    ram = mus_ram_buf[mus->rd_idx];
+
+    if (rem > MUS_RAM_BUF_SIZE) {
+        rem = MUS_RAM_BUF_SIZE;
+    }
+    chunk->abuf = ram;
+    chunk->alen = rem;
+    chunk->volume = mus->volume;
+    return rem;
+}
+
+static void song_setup (struct mus *mus, struct song *song)
+{
+    int32_t rem = song->track_rem;
+
+    if (song->channel) {
+        mus->rd_idx ^= 1;
+        rem = chunk_setup(mus, song, &song->channel->chunk);
+        song->track_rem -= rem;
+        mus->state = MUS_UPDATING;
+    }
+}
+
+static void song_repeat (struct mus *mus, struct song *song)
+{
+    music_play_helper(song, song->num, mus->repeat);
+}
+
+void music_tickle (void)
+{
+    if (mus.state == MUS_PLAYING) {
+
+    } else if (mus.state == MUS_UPDATING) {
+#if USE_QSPI
+        mus_qspi_read(&song_cur, &mus);
+#else
+        song_update_next_buf(&song_cur, &mus);
+#endif
+        mus.state = MUS_PLAYING;
+    } else if (mus.state == MUS_STOP) {
+
+        audio_stop_channel(AUDIO_MUS_CHAN_START);
+        mus_close_wav(&song_cur);
+        mus_reset(&mus);
+    } else if (mus.state == MUS_REPEAT) {
+
+        song_repeat(&mus, &song_cur);
+    }
+}
+
+#if USE_QSPI
+#else
+static void song_update_next_buf (struct song *song, struct mus *mus)
+{
+    snd_sample_t *dest;
+    uint32_t btr = 0;
+    FRESULT res;
+    int32_t rem = song->track_rem;
+
+    dest = mus_ram_buf[mus->rd_idx ^ 1];
+
+    if (rem > MUS_RAM_BUF_SIZE)
+        rem = MUS_RAM_BUF_SIZE;
+
+    res = f_read(song->file, dest, rem * sizeof(snd_sample_t), &btr);
+    if (res != FR_OK) {
+        error_handle();
+    }
+}
+#endif /*USE_QSPI*/
+
+int music_playing (void)
+{
+    return (    (mus.state == MUS_PLAYING) || 
+                (mus.state == MUS_UPDATING)
+            ) && mus.volume ? 1 : 0;
 }
 
 int music_play_song_num (int num, int repeat)
 {
-    audio_resume();   
     return music_play_helper(&song_cur, num - 1, repeat);
 }
 
 int music_play_song_name (const char *name)
 {
-    audio_resume();
     return music_play_helper(&song_cur, 0, 1);
 }
 
 int music_pause (void)
 {
-    if (mus.state == MUS_PLAYING ||
-        mus.state == MUS_UPDATING) {
-        mus.state = MUS_PAUSE;
-        return 0;
-    }
+    mus.state = MUS_PAUSE;
     return 1;
 }
 
@@ -340,125 +447,5 @@ int music_init (void)
     mus.volume = MAX_VOL / 2;
     return 0;
 }
-
-uint8_t music_get_volume (void)
-{
-    return mus.volume;
-}
-
-static void song_next_ram (struct mus *mus, struct song *song)
-{
-    snd_sample_t *ram;
-    int32_t rem = song->rem;
-
-    mus->buf_in_use_idx ^= 1;
-    ram = mus_ram_buf[mus->buf_in_use_idx];
-
-    if (rem > MUS_RAM_BUF_SIZE) {
-        rem = MUS_RAM_BUF_SIZE;
-    }
-    song->buf = ram;
-    song->rem -= rem;
-    song->rem_buf = rem;
-    mus->state = MUS_UPDATING;
-}
-
-static inline snd_sample_t *
-song_advance_to_next (struct mus *mus, struct song *song, int32_t *size)
-{
-    snd_sample_t *buf = NULL;
-
-    if (song->rem_buf <= 0) {
-        song_next_ram(mus, song);
-    }
-
-    buf = song->buf;
-    *size = song->rem_buf;
-
-    if (*size > AUDIO_OUT_BUFFER_SIZE)
-        *size = AUDIO_OUT_BUFFER_SIZE;
-
-    song->buf += *size;
-    song->rem_buf -= *size;
-    return buf;
-}
-
-snd_sample_t *music_get_next_chunk (int32_t *size)
-{
-    if (!mus.volume) {
-        return NULL;
-    }
-
-    if ((mus.state != MUS_PLAYING) &&
-        (mus.state != MUS_UPDATING)) {
-        return NULL;
-    }
-    if (song_cur.rem <= 0) {
-        if (mus.repeat != SINGLE_LOOP) {
-            mus.state = MUS_STOP;
-            return NULL;
-        }
-        mus.state = MUS_REPEAT;
-        return NULL;
-    }
-    mus.last_upd_tsf = systime;
-    return song_advance_to_next(&mus, &song_cur, size);
-}
-
-static void song_repeat (struct mus *mus, struct song *song)
-{
-    music_play_helper(song, song->num, mus->repeat);
-}
-
-void music_tickle (void)
-{
-    if (mus.state == MUS_PLAYING) {
-
-    } else if (mus.state == MUS_UPDATING) {
-#if USE_QSPI
-        mus_qspi_read(&song_cur, &mus);
-#else
-        song_fill_next_buf(&song_cur, &mus);
-#endif
-        mus.state = MUS_PLAYING;
-    } else if (mus.state == MUS_STOP) {
-
-        mus_close_wav(&song_cur);
-        mus_reset(&mus);
-    } else if (mus.state == MUS_REPEAT) {
-
-        song_repeat(&mus, &song_cur);
-    }
-}
-
-#if USE_QSPI
-#else
-static void song_fill_next_buf (struct song *song, struct mus *mus)
-{
-    snd_sample_t *dest;
-    uint32_t btr = 0;
-    FRESULT res;
-    int32_t rem = song->rem;
-
-    dest = mus_ram_buf[mus->buf_in_use_idx ^ 1];
-
-    if (rem > MUS_RAM_BUF_SIZE)
-        rem = MUS_RAM_BUF_SIZE;
-
-    res = f_read(song->file, dest, rem * sizeof(snd_sample_t), &btr);
-    if (res != FR_OK) {
-        error_handle();
-    }
-    song->mem_offset += btr / sizeof(snd_sample_t);
-}
-#endif /*USE_QSPI*/
-
-int music_playing (void)
-{
-    return (    (mus.state == MUS_PLAYING) || 
-                (mus.state == MUS_UPDATING)
-            ) && mus.volume ? 1 : 0;
-}
-
 
 
