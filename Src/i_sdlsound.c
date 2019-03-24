@@ -1081,8 +1081,6 @@ static void I_SDL_ShutdownSound(void)
         return;
     }
 
-    audio_sdown(0);
-
     sound_initialized = false;
 }
 

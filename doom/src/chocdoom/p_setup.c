@@ -801,7 +801,9 @@ P_SetupLevel
     P_GroupLines ();
     P_LoadReject (lumpnum+ML_REJECT);
 
+#if (GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)
     ST_Setup();
+#endif
     bodyqueslot = 0;
     deathmatch_p = deathmatchstarts;
     P_LoadThings (lumpnum+ML_THINGS);

@@ -22,6 +22,7 @@
 
 
 // Screenwidth.
+#include "gfx.h"
 #include "doomdef.h"
 
 // Some more or less basic data types

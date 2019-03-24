@@ -38,6 +38,7 @@
 #include "lcd_main.h"
 #include "g_game.h"
 #include "D_player.h"
+#include "input_main.h"
 
 #if (GFX_COLOR_MODE == GFX_COLOR_MODE_RGBA8888)
 #error "ARGB rendering broken!"
@@ -224,8 +225,9 @@ static pal_t *prev_clut = NULL;
 static byte *aclut = NULL;
 static byte *aclut_map = NULL;
 
-#if (GFX_COLOR_MODE == GFX_COLOR_MODE_RGB565)
 static const uint16_t aclut_entry_cnt = 0xffff;
+
+#if (GFX_COLOR_MODE == GFX_COLOR_MODE_RGB565)
 
 pix_t I_BlendPix (pix_t fg, pix_t bg, byte a)
 {
@@ -257,9 +259,6 @@ byte I_BlendPalEntry (byte _fg, byte _bg, byte a)
 
     return I_GetPaletteIndex(GFX_ARGB_R(pix), GFX_ARGB_G(pix), GFX_ARGB_B(pix));
 }
-
-
-#endif
 
 static void I_GenAclut (void)
 {
@@ -293,6 +292,8 @@ void I_CacheAclut (void)
 
     I_GenAclut();
 }
+
+#endif /*(GFX_COLOR_MODE == GFX_COLOR_MODE_RGB565)*/
 
 pix_t I_BlendPixMap (pix_t fg, pix_t bg)
 {
@@ -494,4 +495,24 @@ void I_DisplayFPSDots (boolean dots_on)
 
 void I_CheckIsScreensaver (void)
 {
+}
+
+
+float mouse_acceleration = 1.0f;
+int usemouse = 0;
+int mouse_threshold;
+
+void input_post_key (i_event_t e)
+{
+    event_t event =
+        {
+            e.state == keyup ? ev_keyup : ev_keydown,
+            e.sym, -1, -1, -1
+        };
+    D_PostEvent(&event);
+}
+
+void I_GetEvent (void)
+{
+    input_proc_keys();
 }

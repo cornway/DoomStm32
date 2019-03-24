@@ -13,7 +13,7 @@ static void error_handle (void)
 
 #define N(x) (sizeof(x) / sizeof(x[0]))
 
-static const char mus_dir_path[] =
+static const char *mus_dir_path =
 "/doom/music";
 
 #define MUS_BUF_GUARD_MS (AUDIO_MS_TO_SIZE(AUDIO_SAMPLE_RATE, AUDIO_OUT_BUFFER_SIZE) / 2)

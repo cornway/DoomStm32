@@ -56,7 +56,6 @@
 
 extern volatile size_t __heap_buf_raw_size;
 
-#define DEFAULT_RAM (__heap_buf_raw_size / (1024 * 1024)) /* MiB */
 #define MIN_RAM     8  /* MiB */
 
 
@@ -120,7 +119,7 @@ static byte *AutoAllocMemory(int *size, int default_ram, int min_ram)
         *size = default_ram * 1024 * 1024;
 
         //zonemem = (byte *)malloc(*size);
-        zonemem = (byte *)__heap_buf_raw;
+        zonemem = (byte *)Sys_AllocShared(size);
         // Failed to allocate?  Reduce zone size until we reach a size
         // that is acceptable.
 
@@ -154,7 +153,7 @@ byte *I_ZoneBase (int *size)
     }
     else
     {
-        default_ram = DEFAULT_RAM;
+        default_ram = Sys_AllocBytesLeft();
         min_ram = MIN_RAM;
     }
 

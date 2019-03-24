@@ -66,15 +66,6 @@ void frame_end ()
     msec_per_frame = systime - msec_per_frame_start;
 }
 
-
-/*
- * Show fatal error message and stop in endless loop
- */
-void fatal_error (const char* message)
-{
-    while (1) {}
-}
-
 extern gamestate_t gamestate;
 
 
