@@ -618,12 +618,12 @@
             <File>
               <FileName>i_sdlsound.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\i_sdlsound.c</FilePath>
+              <FilePath>..\doom\src\i_sdlsound.c</FilePath>
             </File>
             <File>
               <FileName>mach_stub.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\mach_stub.c</FilePath>
+              <FilePath>..\common\mach_stub.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1118,7 +1118,7 @@
             <File>
               <FileName>global.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\Src\global.c</FilePath>
+              <FilePath>..\doom\src\global.c</FilePath>
             </File>
             <File>
               <FileName>w_merge.c</FileName>

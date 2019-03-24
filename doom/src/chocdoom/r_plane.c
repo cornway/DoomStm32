@@ -33,7 +33,7 @@
 #include "r_sky.h"
 #include "st_stuff.h"
 #include "p_local.h"
-
+#include "v_video.h"
 
 
 extern planefunction_t		floorfunc;

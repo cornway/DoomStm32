@@ -116,7 +116,7 @@ static byte *AutoAllocMemory(int *size, int default_ram, int min_ram)
 
         // Try to allocate the zone memory.
 
-        *size = default_ram * 1024 * 1024;
+        *size = default_ram;
 
         //zonemem = (byte *)malloc(*size);
         zonemem = (byte *)Sys_AllocShared(size);

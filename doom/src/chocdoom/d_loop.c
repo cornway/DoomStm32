@@ -42,6 +42,8 @@
 #include "net_sdl.h"
 #include "net_loop.h"
 
+extern void I_GetEvent (void);
+
 // The complete set of data for a particular tic.
 
 typedef struct

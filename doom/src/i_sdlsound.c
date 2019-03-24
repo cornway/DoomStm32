@@ -967,6 +967,7 @@ static void I_SDL_UpdateSoundParams(int handle, int vol, int sep)
 static int I_SDL_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep, int pitch)
 {
     allocated_sound_t *snd;
+    audio_channel_t *a;
 
     if (!sound_initialized || channel < 0 || channel >= NUM_CHANNELS)
     {
@@ -1016,7 +1017,12 @@ static int I_SDL_StartSound(sfxinfo_t *sfxinfo, int channel, int vol, int sep, i
     }
 
     // play sound
-    audio_play_channel(&snd->chunk, channel);
+    snd->chunk.cache = (void **)&snd->chunk.abuf;
+    snd->chunk.loopstart = 0;
+    a = audio_play_channel(&snd->chunk, channel);
+    if (a) {
+        a->complete = NULL;
+    }
     //Mix_PlayChannel(channel, &snd->chunk, 0);
 
     channels_playing[channel] = snd;

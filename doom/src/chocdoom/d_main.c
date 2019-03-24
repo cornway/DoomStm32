@@ -75,6 +75,7 @@
 
 #include "d_main.h"
 #include "w_merge.h"
+#include "input_main.h"
 
 //
 // D-DoomLoop()

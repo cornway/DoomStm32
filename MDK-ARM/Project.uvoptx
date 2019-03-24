@@ -123,7 +123,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>DLGTARM</Key>
-          <Name>(1010=-1,-1,-1,-1,0)(6017=-1,-1,-1,-1,0)(1008=-1,-1,-1,-1,0)(6016=882,22,1140,674,0)(1012=-1,-1,-1,-1,0)</Name>
+          <Name>(1010=-1,-1,-1,-1,0)(6017=-1,-1,-1,-1,0)(1008=-1,-1,-1,-1,0)(6016=990,277,1330,1080,0)(1012=-1,-1,-1,-1,0)</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -150,66 +150,34 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>842</LineNumber>
+          <LineNumber>98</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134349150</Address>
+          <Address>134431990</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\doom\src\chocdoom\r_things.c</Filename>
+          <Filename>..\common\audio_ext.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\Project\../doom/src/chocdoom/r_things.c\842</Expression>
+          <Expression>\\Project\../common/audio_ext.c\98</Expression>
         </Bp>
         <Bp>
           <Number>1</Number>
           <Type>0</Type>
-          <LineNumber>493</LineNumber>
+          <LineNumber>119</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134366140</Address>
+          <Address>134426652</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\doom\src\chocdoom\r_bsp.c</Filename>
+          <Filename>..\common\FatFs\src\diskio.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\Project\../doom/src/chocdoom/r_bsp.c\493</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>496</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134366170</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\doom\src\chocdoom\r_bsp.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\Project\../doom/src/chocdoom/r_bsp.c\496</Expression>
-        </Bp>
-        <Bp>
-          <Number>3</Number>
-          <Type>0</Type>
-          <LineNumber>491</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134366114</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\doom\src\chocdoom\r_bsp.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\Project\../doom/src/chocdoom/r_bsp.c\491</Expression>
+          <Expression>\\Project\../common/FatFs/src/diskio.c\119</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
@@ -267,6 +235,11 @@
           <count>10</count>
           <WinNumber>1</WinNumber>
           <ItemText>prevsect</ItemText>
+        </Ww>
+        <Ww>
+          <count>11</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>snd_num_cache</ItemText>
         </Ww>
       </WatchWindow1>
       <WatchWindow2>
@@ -809,7 +782,7 @@
 
   <Group>
     <GroupName>Example/MDK-ARM</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -888,7 +861,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Src\i_sdlsound.c</PathWithFileName>
+      <PathWithFileName>..\doom\src\i_sdlsound.c</PathWithFileName>
       <FilenameWithoutPath>i_sdlsound.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -900,7 +873,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Src\mach_stub.c</PathWithFileName>
+      <PathWithFileName>..\common\mach_stub.c</PathWithFileName>
       <FilenameWithoutPath>mach_stub.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
@@ -2072,7 +2045,7 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\Src\global.c</PathWithFileName>
+      <PathWithFileName>..\doom\src\global.c</PathWithFileName>
       <FilenameWithoutPath>global.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>

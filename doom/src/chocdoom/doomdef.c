@@ -26,3 +26,19 @@
 // None.
 
 
+void D_memcpy (void *dest, void *src, int count)
+{
+    int             i;
+
+    if (( ( (long)dest | (long)src | count) & 3) == 0 )
+    {
+        count>>=2;
+        for (i=0 ; i<count ; i++)
+            ((int *)dest)[i] = ((int *)src)[i];
+    }
+    else
+        for (i=0 ; i<count ; i++)
+            ((byte *)dest)[i] = ((byte *)src)[i];
+}
+
+
