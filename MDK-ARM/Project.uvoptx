@@ -152,7 +152,7 @@
           <Type>0</Type>
           <LineNumber>98</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134431990</Address>
+          <Address>134432330</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -162,22 +162,6 @@
           <Filename>..\common\audio_ext.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression>\\Project\../common/audio_ext.c\98</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>119</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134426652</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\common\FatFs\src\diskio.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\Project\../common/FatFs/src/diskio.c\119</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
