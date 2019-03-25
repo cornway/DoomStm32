@@ -38,6 +38,7 @@
 #include "lcd_main.h"
 #include "g_game.h"
 #include "D_player.h"
+#include "input_main.h"
 
 #if (GFX_COLOR_MODE == GFX_COLOR_MODE_RGBA8888)
 #error "ARGB rendering broken!"
@@ -101,30 +102,6 @@ static inline void
 I_FlushCache (void)
 {
     SCB_CleanDCache();
-}
-
-void I_InitGraphics (void)
-{
-    screen_t screen;
-#if !IVID_IRAM
-    I_VideoBuffer = (pix_t*)Z_Malloc (D_SCREEN_BYTE_CNT, PU_STATIC, NULL);
-#else
-    I_VideoBuffer = I_VideoBuffer_static;
-#endif
-	screenvisible = true;
-    p_palette = rgb_palette;
-    screen.buf = NULL;
-    screen.width = SCREENWIDTH;
-    screen.height = SCREENHEIGHT;
-    screen_win_cfg(&screen);
-}
-
-void I_ShutdownGraphics (void)
-{
-#if !IVID_IRAM
-	Z_Free (I_VideoBuffer);
-#endif
-    I_VideoBuffer = NULL;
 }
 
 void I_StartFrame (void)
@@ -225,6 +202,7 @@ static byte *aclut = NULL;
 static byte *aclut_map = NULL;
 
 #if (GFX_COLOR_MODE == GFX_COLOR_MODE_RGB565)
+
 static const uint16_t aclut_entry_cnt = 0xffff;
 
 pix_t I_BlendPix (pix_t fg, pix_t bg, byte a)
@@ -258,9 +236,6 @@ byte I_BlendPalEntry (byte _fg, byte _bg, byte a)
     return I_GetPaletteIndex(GFX_ARGB_R(pix), GFX_ARGB_G(pix), GFX_ARGB_B(pix));
 }
 
-
-#endif
-
 static void I_GenAclut (void)
 {
     int i, j;
@@ -293,6 +268,8 @@ void I_CacheAclut (void)
 
     I_GenAclut();
 }
+
+#endif /*(GFX_COLOR_MODE == GFX_COLOR_MODE_RGB565)*/
 
 pix_t I_BlendPixMap (pix_t fg, pix_t bg)
 {
@@ -340,10 +317,10 @@ void I_SetPalette (byte* palette, int idx)
     for (i = 0; i < clut_num_entries; i++)
     {
         color = (rgb_t*)palette;
-        pal[i] = GFX_RGB(GFX_OPAQUE,
-                        gammatable[usegamma][color->r],
+        pal[i] = GFX_RGB(gammatable[usegamma][color->r],
                         gammatable[usegamma][color->g],
-                        gammatable[usegamma][color->b]);
+                        gammatable[usegamma][color->b],
+                        GFX_OPAQUE);
         palette += 3;
     }
 sw_done:
@@ -495,3 +472,71 @@ void I_DisplayFPSDots (boolean dots_on)
 void I_CheckIsScreensaver (void)
 {
 }
+
+
+float mouse_acceleration = 1.0f;
+int usemouse = 0;
+int mouse_threshold;
+
+const kbdmap_t gamepad_to_kbd_map[JOY_STD_MAX] =
+{
+    [JOY_UPARROW]       = {KEY_UPARROW, 0},
+    [JOY_DOWNARROW]     = {KEY_DOWNARROW, 0},
+    [JOY_LEFTARROW]     = {KEY_LEFTARROW ,0},
+    [JOY_RIGHTARROW]    = {KEY_RIGHTARROW, 0},
+    [JOY_K1]            = {KEY_USE, PAD_FREQ_LOW},
+    [JOY_K4]            = {KEY_END,  0},
+    [JOY_K3]            = {KEY_FIRE, 0},
+    [JOY_K2]            = {KEY_TAB,    PAD_FREQ_LOW},
+    [JOY_K5]            = {KEY_STRAFE_L,    0},
+    [JOY_K6]            = {KEY_STRAFE_R,    0},
+    [JOY_K7]            = {KEY_DEL,  0},
+    [JOY_K8]            = {KEY_PGDN, 0},
+    [JOY_K9]            = {KEY_ENTER, 0},
+    [JOY_K10]           = {KEY_ESCAPE, PAD_FREQ_LOW},
+};
+
+void input_post_key (i_event_t e)
+{
+    event_t event =
+        {
+            e.state == keyup ? ev_keyup : ev_keydown,
+            e.sym, -1, -1, -1
+        };
+    D_PostEvent(&event);
+}
+
+void I_GetEvent (void)
+{
+    input_proc_keys();
+}
+
+void I_InitGraphics (void)
+{
+    screen_t screen;
+#if !IVID_IRAM
+    I_VideoBuffer = (pix_t*)Z_Malloc (D_SCREEN_BYTE_CNT, PU_STATIC, NULL);
+#else
+    I_VideoBuffer = I_VideoBuffer_static;
+#endif
+	screenvisible = true;
+    p_palette = rgb_palette;
+    screen.buf = NULL;
+    screen.width = SCREENWIDTH;
+    screen.height = SCREENHEIGHT;
+    screen_win_cfg(&screen);
+
+    input_soft_init(gamepad_to_kbd_map);
+    input_bind_extra(K_EX_LOOKUP, KEY_HOME);
+    input_bind_extra(K_EX_LOOKUP, KEY_DEL);
+    input_bind_extra(K_EX_LOOKUP, KEY_INS);
+}
+
+void I_ShutdownGraphics (void)
+{
+#if !IVID_IRAM
+	Z_Free (I_VideoBuffer);
+#endif
+    I_VideoBuffer = NULL;
+}
+

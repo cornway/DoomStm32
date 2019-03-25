@@ -43,9 +43,6 @@ FIL save_stream;
 int savegamelength;
 boolean savegame_error;
 
-extern int music_pause (void);
-extern int music_resume (void);
-
 // Get the filename of a temporary file to write the savegame to.  After
 // the file has been successfully saved, it will be renamed to the 
 // real file.
@@ -167,7 +164,6 @@ void P_SaveBegin ()
     write8_handle = saveg_write8_buf;
     if (NULL == save_buf)
         save_buf = (uint8_t *)Z_Malloc(SAVEGAME_BUF_LIMIT, PU_STATIC, NULL);
-    music_pause();
 }
 
 static void P_SaveEnd ()
@@ -180,7 +176,6 @@ static void P_SaveEnd ()
     write8_handle = saveg_write8_file;
     M_snprintf(saveg_level_name, sizeof(saveg_level_name), "%s", w_title.l);
     game_saved_in_ram = true;
-    music_resume();
 }
 
 uint32_t P_SaveWriteFile (char *name)
@@ -237,7 +232,6 @@ int P_LoadBegin (char *name)
     load_pos = 0;
     load_begin = 1;
     read8_handle = saveg_read8_buf;
-    music_pause();
     return load_size;
 }
 
@@ -253,7 +247,6 @@ void P_LoadEnd ()
     load_size = 0;
     Z_Free(load_buf);
 #endif
-    music_resume();
 }
 
 #define saveg_write8(value) (*write8_handle)(value)

@@ -451,7 +451,6 @@ void R_DrawFuzzColumn (void)
 #if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
     int         clut_idx;
 #endif
-    pix_t       pix;
 
     // Adjust borders. Low... 
     if (!dc_yl) 
@@ -523,7 +522,6 @@ void R_DrawFuzzColumnLow (void)
     int         count;
     pix_t       *dest;
     pix_t       *dest2;
-    pix_t       pix;
     float       frac;
     float       fracstep;
 #if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)

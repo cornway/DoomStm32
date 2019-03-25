@@ -69,6 +69,9 @@ void DMA2D_IRQHandler(void);
 void SDMMC2_IRQHandler (void);
 void BSP_SDMMC_DMA_Tx_IRQHandler (void);
 void BSP_SDMMC_DMA_Rx_IRQHandler (void);
+void DMA2_Stream7_IRQHandler (void);
+void USART1_IRQHandler (void);
+void TIM3_IRQHandler (void);
 
 
 #ifdef USE_USB_FS

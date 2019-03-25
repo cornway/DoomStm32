@@ -1216,7 +1216,7 @@ void ST_SetSectorLight (void *_sector)
     }
 }
 
-#endif
+#endif /*(GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)*/
 
 void ST_doRefresh(void)
 {

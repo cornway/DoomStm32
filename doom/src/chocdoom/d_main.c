@@ -74,8 +74,8 @@
 
 
 #include "d_main.h"
-#include "main.h"
 #include "w_merge.h"
+#include "input_main.h"
 
 //
 // D-DoomLoop()
@@ -402,7 +402,6 @@ extern void audio_update (void);
 extern void fps_update (void);
 extern void frame_start (void);
 extern void frame_end (void);
-extern void gamepad_process (void);
 
 void D_DoomLoop (void)
 {
@@ -443,7 +442,7 @@ void D_DoomLoop (void)
     while (1)
     {
         // frame syncronous IO operations
-        gamepad_process();
+        input_tickle();
         frame_start();
         I_StartFrame ();
 

@@ -21,9 +21,6 @@
 #endif
 
 #include "m_random.h"
-
-#include "main.h"
-
 //
 // M_Random
 // Returns a 0-255 number

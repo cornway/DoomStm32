@@ -168,4 +168,6 @@ typedef enum
     
 } powerduration_t;
 
+void D_memcpy (void *dest, void *src, int count);
+
 #endif          // __DOOMDEF__

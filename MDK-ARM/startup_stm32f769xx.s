@@ -54,7 +54,7 @@ __initial_sp
 ;   <o>  Heap Size (in Bytes) <0x0-0xFFFFFFFF:8>
 ; </h>
 
-Heap_Size      EQU     0x04000
+Heap_Size      EQU     0x1000000
 
                 AREA    HEAP, NOINIT, READWRITE, ALIGN=3
 __heap_base
@@ -608,9 +608,9 @@ MDIOS_IRQHandler
                  
 __user_initial_stackheap
 
-                 LDR     R0, =  Heap_Mem
+                 LDR     R0, = __heap_base
                  LDR     R1, =(Stack_Mem + Stack_Size)
-                 LDR     R2, = (Heap_Mem +  Heap_Size)
+                 LDR     R2, = __heap_limit
                  LDR     R3, = Stack_Mem
                  BX      LR
 

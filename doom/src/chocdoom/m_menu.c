@@ -2230,5 +2230,7 @@ void M_Init (void)
     }
 
     opldev = M_CheckParm("-opldev") > 0;
+
+    joy_extrafreeze = (int *)&menuactive;
 }
 

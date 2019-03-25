@@ -23,8 +23,6 @@
 #include "memio.h"
 
 #include "z_zone.h"
-#include "main.h"
-
 typedef enum {
 	MODE_READ,
 	MODE_WRITE,

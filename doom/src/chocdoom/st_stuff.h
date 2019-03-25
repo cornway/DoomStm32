@@ -25,6 +25,7 @@
 #include "m_fixed.h"
 #include "d_event.h"
 #include "m_cheat.h"
+#include "r_defs.h"
 #include "gfx.h"
 
 // Size of statusbar.

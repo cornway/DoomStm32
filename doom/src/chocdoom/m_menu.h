@@ -56,6 +56,6 @@ void M_StartControlPanel (void);
 extern int detailLevel;
 extern int screenblocks;
 
-
+extern int *joy_extrafreeze;
 
 #endif    

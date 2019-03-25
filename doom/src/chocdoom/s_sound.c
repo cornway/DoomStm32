@@ -38,6 +38,7 @@
 #include "w_wad.h"
 #include "z_zone.h"
 #include "audio_main.h"
+#include "dev_io.h"
 
 // when to clip out sounds
 // Does not fit the large outdoor areas.
@@ -75,6 +76,8 @@ typedef struct
     int handle;
     
 } channel_t;
+
+static cd_track_t cd;
 
 // The set of channels available
 
@@ -485,7 +488,7 @@ void S_PauseSound(void)
 {
     if (mus_playing && !mus_paused)
     {
-        music_pause();
+        cd_pause(&cd);
         mus_paused = true;
     }
 }
@@ -494,7 +497,7 @@ void S_ResumeSound(void)
 {
     if (mus_playing && mus_paused)
     {
-        music_resume();
+        cd_resume(&cd);
         mus_paused = false;
     }
 }
@@ -577,7 +580,7 @@ void S_SetMusicVolume(int volume)
         I_Error("Attempt to set music volume at %d",
                 volume);
     }    
-    music_set_vol(volume);
+    cd_volume(&cd, volume);
 }
 
 void S_SetSfxVolume(int volume)
@@ -601,10 +604,49 @@ void S_StartMusic(int m_id)
 
 }
 
+#define CD_NAME_MAX 20
+#define CD_TRACK_MAX 40
+
+extern const char *mus_dir_path;
+
+static int track_cnt = 0;
+static int track_cnt_enlist_done = 0;
+
+static char cdfiles[CD_TRACK_MAX][CD_NAME_MAX];
+
+int cd_file_hdlr (char *name, ftype_t type)
+{
+    if (type == FTYPE_FILE) {
+        if (!track_cnt_enlist_done) {
+            if (track_cnt < CD_TRACK_MAX) {
+                strncpy(cdfiles[track_cnt], name, sizeof(cdfiles[0]));
+                track_cnt++;
+            }
+            return 0;
+        }
+    }
+
+    return 0;
+}
+void S_PlayNum (int num)
+{
+    flist_t flist = {cd_file_hdlr};
+    char path[128];
+
+    if (!track_cnt_enlist_done) {
+        track_cnt = 0;
+        d_dirlist((char *)mus_dir_path, &flist);
+        track_cnt_enlist_done = 1;
+    }
+    num = num % track_cnt;
+    snprintf(path, sizeof(path), "%s/%s", mus_dir_path, cdfiles[num]);
+    cd_play_name(&cd, path);
+}
+
 void S_ChangeMusic(int musicnum, int looping)
 {
     S_StopMusic();
-    music_play_song_num(musicnum, looping);
+    S_PlayNum(musicnum);
     mus_playing_num = musicnum;
     mus_playing = 1;
 #if 0
@@ -657,18 +699,17 @@ void S_ChangeMusic(int musicnum, int looping)
 
 boolean S_MusicPlaying(void)
 {
-    return music_playing();
+    return cd_playing();
 }
 
 void S_PauseMusic (void)
 {
-    music_pause();
+    cd_pause(&cd);
 }
-
 
 void S_MusicResume (void)
 {
-    music_resume();
+    cd_resume(&cd);
 }
 
 void S_StopMusic(void)
@@ -677,10 +718,10 @@ void S_StopMusic(void)
     {
         if (mus_paused)
         {
-            music_resume();
+            cd_resume(&cd);
         }
 
-        music_stop();
+        cd_stop(&cd);
 #if 0
         I_UnRegisterSong(mus_playing->handle);
         W_ReleaseLumpNum(mus_playing->lumpnum);
