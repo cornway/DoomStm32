@@ -94,15 +94,7 @@ typedef struct
 // Palette converted to RGB565
 
 static pal_t *rgb_palette;
-
 pal_t *p_palette;
-
-
-static inline void
-I_FlushCache (void)
-{
-    SCB_CleanDCache();
-}
 
 void I_StartFrame (void)
 {
@@ -113,72 +105,13 @@ void I_UpdateNoBlit (void)
     DD_UpdateNoBlit();
 }
 
-
-typedef struct {
-    pix_t a[4];
-} scanline_t;
-
-typedef union {
-#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
-    uint32_t w;
-#elif (GFX_COLOR_MODE == GFX_COLOR_MODE_RGB565)
-    uint64_t w;
-#endif
-    scanline_t sl;
-} scanline_u;
-
-#define DST_NEXT_LINE(x) (((uint32_t)(x) + SCREENWIDTH * 2 * sizeof(pix_t)))
-#define W_STEP (sizeof(scanline_t) / sizeof(pix_t))
-
 void I_FinishUpdate (void)
 {
-    uint64_t *d_y0;
-    uint64_t *d_y1;
-    uint64_t pix;
-    int s_y, i;
-    scanline_t *scanline;
-    scanline_u d_yt0, d_yt1;
     screen_t screen;
-
-    screen_sync (0);
-    I_FlushCache();
-    screen_get_invis_screen(&screen);
-
-    d_y0 = (uint64_t *)screen.buf;
-    d_y1 = (uint64_t *)DST_NEXT_LINE(d_y0);
-
-    for (s_y = 0; s_y < D_SCREEN_PIX_CNT; s_y += SCREENWIDTH) {
-
-        scanline = (scanline_t *)&I_VideoBuffer[s_y];
-
-        for (i = 0; i < SCREENWIDTH; i += W_STEP) {
-
-            d_yt0.sl = *scanline++;
-            d_yt1    = d_yt0;
-
-            d_yt0.sl.a[3] = d_yt0.sl.a[1];
-            d_yt0.sl.a[2] = d_yt0.sl.a[1];
-            d_yt0.sl.a[1] = d_yt0.sl.a[0];
-
-            d_yt1.sl.a[0] = d_yt1.sl.a[2];
-            d_yt1.sl.a[1] = d_yt1.sl.a[2];
-            d_yt1.sl.a[2] = d_yt1.sl.a[3];
-
-#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
-            pix = (uint64_t)(((uint64_t)d_yt1.w << 32) | d_yt0.w);
-#elif (GFX_COLOR_MODE == GFX_COLOR_MODE_RGB565)
-            pix = d_yt0.w;
-            *d_y0++     = pix;
-            *d_y1++     = pix;
-
-            pix = d_yt1.w;
-#endif
-            *d_y0++     = pix;
-            *d_y1++     = pix;
-        }
-        d_y0 = d_y1;
-        d_y1 = (uint64_t *)DST_NEXT_LINE(d_y0);
-    }
+    screen.height = SCREENHEIGHT;
+    screen.width = SCREENWIDTH;
+    screen.buf = I_VideoBuffer;
+    screen_update(&screen);
 }
 
 
@@ -325,7 +258,6 @@ void I_SetPalette (byte* palette, int idx)
     }
 sw_done:
 #if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
-    screen_sync(1);
     screen_set_clut(p_palette, clut_num_entries);
 #endif
     //I_CacheAclut();
@@ -496,7 +428,7 @@ const kbdmap_t gamepad_to_kbd_map[JOY_STD_MAX] =
     [JOY_K10]           = {KEY_ESCAPE, PAD_FREQ_LOW},
 };
 
-void input_post_key (i_event_t e)
+i_event_t *input_post_key (i_event_t *events, i_event_t e)
 {
     event_t event =
         {
@@ -504,11 +436,12 @@ void input_post_key (i_event_t e)
             e.sym, -1, -1, -1
         };
     D_PostEvent(&event);
+    return events;
 }
 
 void I_GetEvent (void)
 {
-    input_proc_keys();
+    input_proc_keys(NULL);
 }
 
 void I_InitGraphics (void)

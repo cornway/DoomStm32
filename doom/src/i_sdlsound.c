@@ -37,6 +37,7 @@
 
 #include "doomtype.h"
 #include "audio_main.h"
+#include <misc_utils.h>
 
 #ifndef INT16_MAX
 #define INT16_MAX 0x7FFF

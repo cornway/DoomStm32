@@ -605,6 +605,11 @@ MDIOS_IRQHandler
                 
                  IMPORT  __use_two_region_memory
                  EXPORT  __user_initial_stackheap
+
+                 EXPORT  Stack_Mem
+                 EXPORT  Stack_Size
+                 EXPORT  Heap_Mem
+                 EXPORT  Heap_Size
                  
 __user_initial_stackheap
 

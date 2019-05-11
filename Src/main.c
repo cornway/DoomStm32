@@ -61,5 +61,6 @@ void VID_PreConfig (void)
 int mainloop (int argc, const char *argv[])
 {
     d_main();
+    return 0;
 }
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
