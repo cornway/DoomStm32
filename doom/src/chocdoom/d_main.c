@@ -76,6 +76,7 @@
 #include "d_main.h"
 #include "w_merge.h"
 #include "input_main.h"
+#include <debug.h>
 
 //
 // D-DoomLoop()
@@ -398,10 +399,10 @@ boolean D_GrabMouseCallback(void)
 //
 //  D_DoomLoop
 //
-extern void audio_update (void);
 extern void fps_update (void);
 extern void frame_start (void);
 extern void frame_end (void);
+extern void dev_tickle (void);
 
 void D_DoomLoop (void)
 {
@@ -442,12 +443,11 @@ void D_DoomLoop (void)
     while (1)
     {
         // frame syncronous IO operations
-        input_tickle();
+        dev_tickle();
         frame_start();
         I_StartFrame ();
 
         TryRunTics (); // will run at least one tic
-        audio_update();
         S_UpdateSounds (players[consoleplayer].mo);// move positional sounds
 
         // Update display, next frame, with current state.
@@ -1119,7 +1119,7 @@ static void LoadIwadDeh(void)
         if (sep != NULL)
         {
             size_t chex_deh_len = strlen(iwadfile) + 9;
-            chex_deh = malloc(chex_deh_len);
+            chex_deh = Sys_Malloc(chex_deh_len);
             M_StringCopy(chex_deh, iwadfile, chex_deh_len);
             chex_deh[sep - iwadfile + 1] = '\0';
             M_StringConcat(chex_deh, "chex.deh", chex_deh_len);

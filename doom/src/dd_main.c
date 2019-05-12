@@ -15,7 +15,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "debug.h"
-#include "ff.h"
 #include "main.h"
 #include "touch.h"
 #include "doom.h"

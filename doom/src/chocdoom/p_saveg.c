@@ -33,13 +33,12 @@
 #include "m_misc.h"
 #include "r_state.h"
 #include "hu_lib.h"
-
-#include "ff.h"
+#include "dev_io.h"
 
 #define SAVEGAME_EOF 0x1d
 #define VERSIONSIZE 16 
 
-FIL save_stream;
+int save_stream;
 int savegamelength;
 boolean savegame_error;
 
@@ -70,11 +69,11 @@ char *P_SaveGameFile(int slot)
     if (filename == NULL)
     {
         filename_size = strlen(savegamedir) + 32;
-        filename = malloc(filename_size);
+        filename = Sys_Malloc(filename_size);
     }
 
     DEH_snprintf(basename, 32, SAVEGAMENAME "%d.dsg", slot);
-    M_snprintf(filename, filename_size, "%s%s", savegamedir, basename);
+    snprintf(filename, filename_size, "%s%s", savegamedir, basename);
 
     return filename;
 }
@@ -100,11 +99,10 @@ int8_t p_saveg_use_ram = 0;
 static byte saveg_read8_file (void)
 {
     byte result;
-    UINT count;
 #if LOAD_SAVE_USE_RAM
     I_Error("!");
 #endif
-    if (f_read (&save_stream, &result, 1, &count) != FR_OK)
+    if (d_read (save_stream, &result, 1) < 0)
     {
         if (!savegame_error)
         {
@@ -130,11 +128,10 @@ static byte saveg_read8_buf (void)
 
 static void saveg_write8_file(byte value)
 {
-	UINT count;
 #if LOAD_SAVE_USE_RAM
     I_Error("!");
 #endif
-	if (f_write (&save_stream, &value, 1, &count) != FR_OK)
+	if (d_write (save_stream, &value, 1) < 0)
     {
         if (!savegame_error)
         {
@@ -182,22 +179,22 @@ uint32_t P_SaveWriteFile (char *name)
 {
     uint32_t btw = save_size;
 #if !LOAD_SAVE_USE_RAM
-    FRESULT res = FR_OK;
-    
-
     if (M_FileExists (name))
     {
-        res = f_unlink (name);
+        d_unlink(name);
     }
 
-    res = f_open(&save_stream, name, FA_WRITE | FA_CREATE_ALWAYS);
-    res = f_write(&save_stream, save_buf, btw, &btw);
-    f_close(&save_stream);
-
-    if (res != FR_OK || (btw != save_size))
+    d_open(name, &save_stream, "+w");
+    if (save_stream < 0)
     {
-        I_Error ("Savegame not renamed, res = %i", res);
+        I_Error ("Savegame not renamed");
     }
+
+    if (d_write(save_stream, save_buf, btw) < 0)
+    {
+        I_Error ("Savegame not renamed");
+    }
+    d_close(save_stream);
 #endif
     P_SaveEnd();
     return btw;
@@ -206,14 +203,17 @@ uint32_t P_SaveWriteFile (char *name)
 int P_LoadBegin (char *name)
 {
 #if !LOAD_SAVE_USE_RAM
-    uint32_t btr = 0;
-    if (f_open (&save_stream, name, FA_OPEN_EXISTING | FA_READ) != FR_OK)
+    int btr;
+
+    d_open (name, &save_stream, "r");
+    if (save_stream < 0)
     {
-        return;
+        return -1;
     }
-    load_size = f_size(&save_stream);
+    load_size = d_size(save_stream);
     load_buf = (uint8_t *)Z_Malloc(load_size, PU_STATIC, NULL);
-    if (f_read(&save_stream, load_buf, load_size, &btr) != FR_OK)
+    btr = d_read(save_stream, load_buf, load_size);
+    if (btr < 0)
     {
         I_Error ("f_read != FR_OK");
     }

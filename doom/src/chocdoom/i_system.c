@@ -21,7 +21,7 @@
 #include <string.h>
 
 #include <stdarg.h>
-
+#include "debug.h"
 
 
 #ifdef _WIN32

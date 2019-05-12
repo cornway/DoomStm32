@@ -346,7 +346,7 @@ Z_DumpHeap
 //
 // Z_FileDumpHeap
 //
-void Z_FileDumpHeap (FILE* f)
+void Z_FileDumpHeap (int f)
 {
 
 }

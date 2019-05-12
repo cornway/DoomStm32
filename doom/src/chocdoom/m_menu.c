@@ -59,6 +59,7 @@
 #include "m_menu.h"
 #include "d_iwad.h"
 #include "p_saveg.h"
+#include <dev_io.h>
 
 
 extern patch_t*		hu_font[HU_FONTSIZE];
@@ -554,8 +555,7 @@ void M_ReadSaveStrings(void)
 #if ORIGCODE
     FILE   *handle;
 #else
-    FIL		handle;
-    UINT count;
+    int handle;
 #endif
     int     i;
     char    name[256];
@@ -568,7 +568,8 @@ void M_ReadSaveStrings(void)
 
         if (handle == NULL)
 #else
-        if (f_open (&handle, name, FA_OPEN_EXISTING | FA_READ) != FR_OK)
+        d_open(name, &handle, "r");
+        if (handle < 0)
 #endif
         {
             M_StringCopy(savegamestrings[i], EMPTYSTRING, SAVESTRINGSIZE);
@@ -580,8 +581,8 @@ void M_ReadSaveStrings(void)
 		fread(&savegamestrings[i], 1, SAVESTRINGSIZE, handle);
 		fclose(handle);
 #else
-		f_read (&handle, &savegamestrings[i], SAVESTRINGSIZE, &count);
-		f_close (&handle);
+        d_read (handle, &savegamestrings[i], SAVESTRINGSIZE);
+        d_close (handle);
 #endif
 		LoadMenu[i].status = 1;
     }

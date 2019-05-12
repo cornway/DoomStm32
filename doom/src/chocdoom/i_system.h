@@ -22,6 +22,7 @@
 
 #include "d_ticcmd.h"
 #include "d_event.h"
+#include "misc_utils.h"
 
 typedef void (*atexit_func_t)(void);
 
@@ -87,7 +88,8 @@ extern void Sys_Free (void *p);
 extern void *Sys_AllocVideo (int *size);
 extern int Sys_AllocBytesLeft (void);
 
-
+extern void H_memcpy (void *dest, void *src, int count);
+extern int H_strcmp (const char *s1, const char *s2);
 
 #endif
 

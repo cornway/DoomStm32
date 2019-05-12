@@ -83,8 +83,8 @@ void M_MakeDirectory(char *path)
     	I_Error ("M_MakeDirectory: path = '%s', path_mod = '%s'", path, path_mod);
     }
 
-    Sys_Free(path_mod);
-	#endif
+    Sys_Free (path_mod);
+#endif
 #endif
 }
 
@@ -110,14 +110,15 @@ boolean M_FileExists(char *filename)
         return errno == EISDIR;
     }
 #else
-	FILINFO fno;
+    int h;
 
-	if (f_stat (filename, &fno) != FR_OK)
-	{
-		return false;
-	}
-	
-	return true;
+    d_open(filename, &h, "r");
+
+    if (h < 0) {
+        return false;
+    }
+    d_close(h);
+    return true;
 #endif
 }
 
@@ -143,9 +144,9 @@ long M_FileLength(FILE *handle)
     return length;
 }
 #else
-long M_FileLength(FIL *handle)
+long M_FileLength(int handle)
 {
-    return f_size (handle);
+    return d_size(handle);
 }
 #endif
 
@@ -175,25 +176,20 @@ boolean M_WriteFile(char *name, void *source, int length)
 #else
 boolean M_WriteFile(char *name, void *source, int length)
 {
-	FIL file;
-	UINT c;
+	int file;
 
-	if (f_open (&file, name, FA_CREATE_ALWAYS | FA_WRITE) != FR_OK)
+    d_open(name, &file, "+w");
+	if (file < 0)
 	{
 		return false;
 	}
 
-	if (f_write (&file, source, length, &c) != FR_OK)
+	if (d_write (file, source, length) < 0)
 	{
 		return false;
 	}
 
-	f_close (&file);
-
-	if (c != length)
-	{
-		return false;
-	}
+	d_close (file);
 
 	return true;
 }
@@ -231,23 +227,22 @@ int M_ReadFile(char *name, byte **buffer)
 #else
 int M_ReadFile(char *name, byte **buffer)
 {
-	FIL file;
-	int length;
-	byte		*buf;
-	UINT read;
+    int file;
+    int length;
+    byte    *buf;
 
-	if (f_open (&file, name, FA_OPEN_EXISTING | FA_READ) != FR_OK)
-	{
-		I_Error ("Couldn't read file %s", name);
-	}
+    length = d_open(name, &file, "r");
+    if (file < 0)
+    {
+        I_Error ("Couldn't read file %s", name);
+    }
 
-	length = f_size (&file);
-	buf = Z_Malloc (length, PU_STATIC, NULL);
-	f_read (&file, buf, length, &read);
-	f_close (&file);
+    buf = Z_Malloc (length, PU_STATIC, NULL);
+    d_read (file, buf, length);
+    d_close (file);
 
-	*buffer = buf;
-	return length;
+    *buffer = buf;
+    return length;
 }
 #endif
 // Returns the path to a temporary file of the given name, stored
@@ -581,11 +576,11 @@ char *M_OEMToUTF8(const char *oem)
     wchar_t *tmp;
     char *result;
 
-    tmp = malloc(len * sizeof(wchar_t));
+    tmp = Sys_Malloc(len * sizeof(wchar_t));
     MultiByteToWideChar(CP_OEMCP, 0, oem, len, tmp, len);
-    result = malloc(len * 4);
+    result = Sys_Malloc(len * 4);
     WideCharToMultiByte(CP_UTF8, 0, tmp, len, result, len * 4, NULL, NULL);
-    free(tmp);
+    Sys_Free(tmp);
 
     return result;
 }

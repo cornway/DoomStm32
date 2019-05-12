@@ -44,5 +44,12 @@ extern boolean deh_allow_long_strings;
 extern boolean deh_allow_long_cheats;
 extern boolean deh_apply_cheats;
 
+#define DEH_String(x) (x)
+#define DEH_printf(args ...) dprintf(args)
+#define DEH_fprintf(args ...) dprintf(args)
+#define DEH_snprintf snprintf
+#define DEH_AddStringReplacement(x, y)
+
+
 #endif /* #ifndef DEH_MAIN_H */
 

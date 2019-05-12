@@ -44,9 +44,6 @@
 #error "ARGB rendering broken!"
 #endif
 
-#define D_SCREEN_PIX_CNT (SCREENHEIGHT * SCREENWIDTH)
-#define D_SCREEN_BYTE_CNT (D_SCREEN_PIX_CNT * sizeof(pix_t))
-
 #ifndef MAX
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #endif
@@ -60,7 +57,7 @@
 // The screen buffer; this is modified to draw things to the screen
 
 #if IVID_IRAM
-pix_t I_VideoBuffer_static[D_SCREEN_PIX_CNT];
+pix_t I_VideoBuffer_static[SCREENHEIGHT * SCREENWIDTH * sizeof(pix_t)];
 #endif
 pix_t *I_VideoBuffer = NULL;
 
@@ -94,6 +91,7 @@ typedef struct
 // Palette converted to RGB565
 
 static pal_t *rgb_palette;
+
 pal_t *p_palette;
 
 void I_StartFrame (void)
@@ -107,11 +105,11 @@ void I_UpdateNoBlit (void)
 
 void I_FinishUpdate (void)
 {
-    screen_t screen;
-    screen.height = SCREENHEIGHT;
-    screen.width = SCREENWIDTH;
-    screen.buf = I_VideoBuffer;
-    screen_update(&screen);
+    screen_t scr;
+    scr.buf = &I_VideoBuffer[0];
+    scr.width = SCREENWIDTH;
+    scr.height = SCREENHEIGHT;
+    screen_update(&scr);
 }
 
 
@@ -120,7 +118,7 @@ void I_FinishUpdate (void)
 //
 void I_ReadScreen (pix_t* scr)
 {
-    memcpy (scr, I_VideoBuffer, D_SCREEN_BYTE_CNT);
+    memcpy (scr, I_VideoBuffer, SCREENHEIGHT * SCREENWIDTH * sizeof(pix_t));
 }
 
 //
