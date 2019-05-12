@@ -45,9 +45,7 @@
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
-
-#include "ff.h"
-
+#include <dev_io.h>
 //
 // Create a directory
 //
@@ -57,33 +55,35 @@ void M_MakeDirectory(char *path)
 #ifdef _WIN32
     mkdir(path);
 #else
-	#if ORIGCODE
+#if ORIGCODE
     mkdir(path, 0755);
-	#else
-    FRESULT res;
+#else
     char* path_mod;
-    int len;
+    int len, dir;
 
     // remove trailing slash
     len = strlen (path);
 
-    path_mod = (char*)malloc (len + 1);
+    path_mod = (char*)Sys_Malloc (len + 1);
 
-    strncpy (path_mod, path, len);
+    if (path_mod ==  NULL) {
+        return;
+    }
+    snprintf(path_mod, len + 1, "%s", path);
 
     if (path_mod[len - 1] == '/')
     {
     	path_mod[len - 1] = 0;
     }
 
-    res = f_mkdir (path_mod);
+    dir = d_mkdir(path_mod);
 
-    if ((res != FR_OK) && (res != FR_EXIST))
+    if (dir < 0)
     {
-    	I_Error ("M_MakeDirectory: path = '%s', path_mod = '%s', res = %i", path, path_mod, res);
+    	I_Error ("M_MakeDirectory: path = '%s', path_mod = '%s'", path, path_mod);
     }
 
-    free (path_mod);
+    Sys_Free(path_mod);
 	#endif
 #endif
 }
@@ -503,7 +503,7 @@ char *M_StringJoin(const char *s, ...)
     }
     va_end(args);
 
-    result = malloc(result_len);
+    result = Sys_Malloc(result_len);
 
     if (result == NULL)
     {

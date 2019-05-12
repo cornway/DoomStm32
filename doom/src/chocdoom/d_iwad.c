@@ -443,7 +443,7 @@ static char *CheckDirectoryHasIWAD(char *dir, char *iwadname)
         return filename;
     }
 
-    free(filename);
+    Sys_Free(filename);
 
     return NULL;
 }
@@ -665,7 +665,7 @@ char *D_FindWADByName(char *name)
         }
     }
 
-    free(path);
+    Sys_Free(path);
     // File not found
 
     return NULL;
@@ -767,7 +767,7 @@ const iwad_t **D_FindAllIWADs(int mask)
     char *filename;
     int i;
 
-    result = (const iwad_t **)malloc(sizeof(iwad_t *) * (arrlen(iwads) + 1));
+    result = (const iwad_t **)Sys_Malloc(sizeof(iwad_t *) * (arrlen(iwads) + 1));
     result_len = 0;
 
     // Try to find all IWADs

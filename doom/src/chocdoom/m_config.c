@@ -2037,7 +2037,9 @@ float M_GetFloatVariable(char *name)
 
 static char *GetDefaultConfigDir(void)
 {
-#if !defined(_WIN32) || defined(_WIN32_WCE)
+#ifdef STM32_SDK
+    return FILES_DIR;
+#elif !defined(_WIN32) || defined(_WIN32_WCE)
 
     // Configuration settings are stored in ~/.chocolate-doom/,
     // except on Windows, where we behave like Vanilla Doom and
@@ -2129,9 +2131,8 @@ char *M_GetSaveGameDir(char *iwadname)
         M_MakeDirectory(savegamedir);
 
         free(topdir);
-#else
-        savegamedir = M_StringJoin(configdir, "savegame/", NULL);
-
+#elif defined(STM32_SDL)
+        savegamedir = M_StringJoin(configdir, "", NULL);
         M_MakeDirectory(savegamedir);
 
 #endif

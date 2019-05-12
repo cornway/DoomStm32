@@ -1133,7 +1133,7 @@ static void LoadIwadDeh(void)
         // search path instead.  We might find it...
         if (!M_FileExists(chex_deh))
         {
-            free(chex_deh);
+            Sys_Free(chex_deh);
             chex_deh = D_FindWADByName("chex.deh");
         }
 

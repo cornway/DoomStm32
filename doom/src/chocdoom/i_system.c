@@ -153,7 +153,8 @@ byte *I_ZoneBase (int *size)
     }
     else
     {
-        default_ram = Sys_AllocBytesLeft();
+        default_ram = Sys_AllocBytesLeft() - (1024 * 64);
+        default_ram = default_ram - (default_ram & ((1024 * 64) - 1));
         min_ram = MIN_RAM;
     }
 
