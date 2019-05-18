@@ -2131,7 +2131,7 @@ char *M_GetSaveGameDir(char *iwadname)
         M_MakeDirectory(savegamedir);
 
         free(topdir);
-#elif defined(STM32_SDL)
+#elif defined(STM32_SDK)
         savegamedir = M_StringJoin(configdir, "", NULL);
         M_MakeDirectory(savegamedir);
 

@@ -279,24 +279,13 @@ R_MakeSpans
 {
     fixed_t distance = FixedMul (planeheight, yslope[b1]);
 
-    if (distance >= R_DISTANCE_MID) {
-        while (t1 < t2 && t1<=b1) {
-            V_DrawHorizLine(spanstart[t1], t1, x - 1 - spanstart[t1], 0);
-            t1++;
-        }
-        while (b1 > b2 && b1>=t1) {
-            V_DrawHorizLine(spanstart[b1], b1, x - 1 - spanstart[b1], 0);
-            b1--;
-        }
-    } else {
-        while (t1 < t2 && t1<=b1) {
-            R_MapPlane (t1,spanstart[t1],x-1);
-            t1++;
-        }
-        while (b1 > b2 && b1>=t1) {
-            R_MapPlane (b1,spanstart[b1],x-1);
-            b1--;
-        }
+    while (t1 < t2 && t1<=b1) {
+        R_MapPlane (t1,spanstart[t1],x-1);
+        t1++;
+    }
+    while (b1 > b2 && b1>=t1) {
+        R_MapPlane (b1,spanstart[b1],x-1);
+        b1--;
     }
     while (t2 < t1 && t2<=b2)
     {

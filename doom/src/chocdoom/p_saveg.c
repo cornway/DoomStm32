@@ -35,8 +35,7 @@
 #include "hu_lib.h"
 #include "dev_io.h"
 
-#define SAVEGAME_EOF 0x1d
-#define VERSIONSIZE 16 
+#define VERSIONSIZE		16 
 
 int save_stream;
 int savegamelength;
@@ -73,183 +72,43 @@ char *P_SaveGameFile(int slot)
     }
 
     DEH_snprintf(basename, 32, SAVEGAMENAME "%d.dsg", slot);
-    snprintf(filename, filename_size, "%s%s", savegamedir, basename);
+    snprintf(filename, filename_size, "%s/%s", savegamedir, basename);
 
     return filename;
 }
 
 // Endian-safe integer read/write functions
-#define SAVEGAME_BUF_LIMIT (1024 * 128) /**/
-static uint8_t load_begin = 0;
-static uint8_t *save_buf = NULL;
-static uint8_t *load_buf = NULL;
-static uint32_t save_size = 0;
-static uint32_t load_pos = 0;
-static uint32_t load_size = 0;
-boolean game_saved_in_ram = false;
-char saveg_level_name[80 + 1];
-extern hu_textline_t	w_title;
 
-#if LOAD_SAVE_USE_RAM
-int8_t p_saveg_use_ram = 1;
-#else
-int8_t p_saveg_use_ram = 0;    
-#endif
-
-static byte saveg_read8_file (void)
+static byte saveg_read8(void)
 {
-    byte result;
-#if LOAD_SAVE_USE_RAM
-    I_Error("!");
-#endif
-    if (d_read (save_stream, &result, 1) < 0)
+    byte result = -1;
+
+    if (d_read(save_stream, &result, 1) < 1)
     {
         if (!savegame_error)
         {
+            dprintf("saveg_read8: Unexpected end of file while "
+                            "reading save game\n");
 
             savegame_error = true;
         }
-    } else {
-        load_pos++;
     }
 
     return result;
 }
 
-static byte saveg_read8_buf (void)
+static void saveg_write8(byte value)
 {
-    if (load_pos > load_size) {
-        I_Error ("load_pos > load_size\n");
-    }
-    return load_buf[load_pos++];
-}
-
-#define saveg_read8() (*read8_handle)()
-
-static void saveg_write8_file(byte value)
-{
-#if LOAD_SAVE_USE_RAM
-    I_Error("!");
-#endif
-	if (d_write (save_stream, &value, 1) < 0)
+    if (d_write(save_stream, &value, 1) < 1)
     {
         if (!savegame_error)
         {
+            dprintf("saveg_write8: Error while writing save game\n");
 
             savegame_error = true;
         }
-    } else {
-        save_size++;
     }
 }
-
-static void saveg_write8_buf(byte value)
-{
-    if (save_size >= SAVEGAME_BUF_LIMIT) {
-        I_Error ("save_size >= SAVEGAME_BUF_LIMIT\n");
-    }
-    save_buf[save_size++] = value;
-}
-
-static void (*write8_handle) (byte) = saveg_write8_file;
-static byte (*read8_handle) (void) = saveg_read8_file;
-
-
-void P_SaveBegin ()
-{
-    save_size = 0;
-    write8_handle = saveg_write8_buf;
-    if (NULL == save_buf)
-        save_buf = (uint8_t *)Z_Malloc(SAVEGAME_BUF_LIMIT, PU_STATIC, NULL);
-}
-
-static void P_SaveEnd ()
-{
-#if !LOAD_SAVE_USE_RAM
-    save_size = 0;
-    Z_Free(save_buf);
-    save_buf = NULL;
-#endif
-    write8_handle = saveg_write8_file;
-    M_snprintf(saveg_level_name, sizeof(saveg_level_name), "%s", w_title.l);
-    game_saved_in_ram = true;
-}
-
-uint32_t P_SaveWriteFile (char *name)
-{
-    uint32_t btw = save_size;
-#if !LOAD_SAVE_USE_RAM
-    if (M_FileExists (name))
-    {
-        d_unlink(name);
-    }
-
-    d_open(name, &save_stream, "+w");
-    if (save_stream < 0)
-    {
-        I_Error ("Savegame not renamed");
-    }
-
-    if (d_write(save_stream, save_buf, btw) < 0)
-    {
-        I_Error ("Savegame not renamed");
-    }
-    d_close(save_stream);
-#endif
-    P_SaveEnd();
-    return btw;
-}
-
-int P_LoadBegin (char *name)
-{
-#if !LOAD_SAVE_USE_RAM
-    int btr;
-
-    d_open (name, &save_stream, "r");
-    if (save_stream < 0)
-    {
-        return -1;
-    }
-    load_size = d_size(save_stream);
-    load_buf = (uint8_t *)Z_Malloc(load_size, PU_STATIC, NULL);
-    btr = d_read(save_stream, load_buf, load_size);
-    if (btr < 0)
-    {
-        I_Error ("f_read != FR_OK");
-    }
-    if (btr != load_size)
-    {
-        I_Error ("btr != load_size");
-    }
-#else
-    if (NULL == save_buf) {
-        return 0;
-    }
-    load_buf = save_buf;
-    load_size = save_size;
-#endif
-    
-    load_pos = 0;
-    load_begin = 1;
-    read8_handle = saveg_read8_buf;
-    return load_size;
-}
-
-void P_LoadEnd ()
-{
-    if (!load_begin) {
-        return;
-    }
-    load_begin = 0;
-    read8_handle = saveg_read8_file;
-    load_pos = 0;
-#if !LOAD_SAVE_USE_RAM
-    load_size = 0;
-    Z_Free(load_buf);
-#endif
-}
-
-#define saveg_write8(value) (*write8_handle)(value)
 
 static short saveg_read16(void)
 {
@@ -291,10 +150,13 @@ static void saveg_write32(int value)
 
 static void saveg_read_pad(void)
 {
+    unsigned long pos;
     int padding;
     int i;
 
-    padding = (4 - (load_pos & 3)) & 3;
+    pos = d_tell(save_stream);
+
+    padding = (4 - (pos & 3)) & 3;
 
     for (i=0; i<padding; ++i)
     {
@@ -304,10 +166,13 @@ static void saveg_read_pad(void)
 
 static void saveg_write_pad(void)
 {
+    unsigned long pos;
     int padding;
     int i;
 
-    padding = (4 - (save_size & 3)) & 3;
+    pos = d_tell(save_stream);
+
+    padding = (4 - (pos & 3)) & 3;
 
     for (i=0; i<padding; ++i)
     {
@@ -320,12 +185,12 @@ static void saveg_write_pad(void)
 
 static void *saveg_readp(void)
 {
-    return (void *) saveg_read32();
+    return (void *) (intptr_t) saveg_read32();
 }
 
-static void saveg_writep(void *p)
+static void saveg_writep(const void *p)
 {
-    saveg_write32((int) p);
+    saveg_write32((intptr_t) p);
 }
 
 // Enum values are 32-bit integers.
@@ -1548,6 +1413,8 @@ boolean P_ReadSaveGameHeader(void)
     return true;
 }
 
+#define SAVEGAME_EOF (0xff)
+
 //
 // Read the end of file marker.  Returns true if read successfully.
 // 
@@ -1579,10 +1446,10 @@ void P_ArchivePlayers (void)
 		
     for (i=0 ; i<MAXPLAYERS ; i++)
     {
-    	if (!playeringame[i])
-    		continue;
+	if (!playeringame[i])
+	    continue;
 	
-    	saveg_write_pad();
+	saveg_write_pad();
 
         saveg_write_player_t(&players[i]);
     }
@@ -1599,17 +1466,17 @@ void P_UnArchivePlayers (void)
 	
     for (i=0 ; i<MAXPLAYERS ; i++)
     {
-		if (!playeringame[i])
-			continue;
-
-		saveg_read_pad();
+	if (!playeringame[i])
+	    continue;
 	
-		saveg_read_player_t(&players[i]);
+	saveg_read_pad();
 
-		// will be set when unarc thinker
-		players[i].mo = NULL;
-		players[i].message = NULL;
-		players[i].attacker = NULL;
+        saveg_read_player_t(&players[i]);
+	
+	// will be set when unarc thinker
+	players[i].mo = NULL;	
+	players[i].message = NULL;
+	players[i].attacker = NULL;
     }
 }
 
@@ -1628,35 +1495,35 @@ void P_ArchiveWorld (void)
     // do sectors
     for (i=0, sec = sectors ; i<numsectors ; i++,sec++)
     {
-		saveg_write16(sec->floorheight >> FRACBITS);
-		saveg_write16(sec->ceilingheight >> FRACBITS);
-		saveg_write16(sec->floorpic);
-		saveg_write16(sec->ceilingpic);
-		saveg_write16(sec->lightlevel);
-		saveg_write16(sec->special);		// needed?
-		saveg_write16(sec->tag);		// needed?
+	saveg_write16(sec->floorheight >> FRACBITS);
+	saveg_write16(sec->ceilingheight >> FRACBITS);
+	saveg_write16(sec->floorpic);
+	saveg_write16(sec->ceilingpic);
+	saveg_write16(sec->lightlevel);
+	saveg_write16(sec->special);		// needed?
+	saveg_write16(sec->tag);		// needed?
     }
 
     
     // do lines
     for (i=0, li = lines ; i<numlines ; i++,li++)
     {
-		saveg_write16(li->flags);
-		saveg_write16(li->special);
-		saveg_write16(li->tag);
-		for (j=0 ; j<2 ; j++)
-		{
-			if (li->sidenum[j] == -1)
-			continue;
+	saveg_write16(li->flags);
+	saveg_write16(li->special);
+	saveg_write16(li->tag);
+	for (j=0 ; j<2 ; j++)
+	{
+	    if (li->sidenum[j] == -1)
+		continue;
+	    
+	    si = &sides[li->sidenum[j]];
 
-			si = &sides[li->sidenum[j]];
-
-			saveg_write16(si->textureoffset >> FRACBITS);
-			saveg_write16(si->rowoffset >> FRACBITS);
-			saveg_write16(si->toptexture);
-			saveg_write16(si->bottomtexture);
-			saveg_write16(si->midtexture);
-		}
+	    saveg_write16(si->textureoffset >> FRACBITS);
+	    saveg_write16(si->rowoffset >> FRACBITS);
+	    saveg_write16(si->toptexture);
+	    saveg_write16(si->bottomtexture);
+	    saveg_write16(si->midtexture);	
+	}
     }
 }
 
@@ -1676,34 +1543,34 @@ void P_UnArchiveWorld (void)
     // do sectors
     for (i=0, sec = sectors ; i<numsectors ; i++,sec++)
     {
-		sec->floorheight = saveg_read16() << FRACBITS;
-		sec->ceilingheight = saveg_read16() << FRACBITS;
-		sec->floorpic = saveg_read16();
-		sec->ceilingpic = saveg_read16();
-		sec->lightlevel = saveg_read16();
-		sec->special = saveg_read16();		// needed?
-		sec->tag = saveg_read16();		// needed?
-		sec->specialdata = 0;
-		sec->soundtarget = 0;
+	sec->floorheight = saveg_read16() << FRACBITS;
+	sec->ceilingheight = saveg_read16() << FRACBITS;
+	sec->floorpic = saveg_read16();
+	sec->ceilingpic = saveg_read16();
+	sec->lightlevel = saveg_read16();
+	sec->special = saveg_read16();		// needed?
+	sec->tag = saveg_read16();		// needed?
+	sec->specialdata = 0;
+	sec->soundtarget = 0;
     }
     
     // do lines
     for (i=0, li = lines ; i<numlines ; i++,li++)
     {
-		li->flags = saveg_read16();
-		li->special = saveg_read16();
-		li->tag = saveg_read16();
-		for (j=0 ; j<2 ; j++)
-		{
-			if (li->sidenum[j] == -1)
-			continue;
-			si = &sides[li->sidenum[j]];
-			si->textureoffset = saveg_read16() << FRACBITS;
-			si->rowoffset = saveg_read16() << FRACBITS;
-			si->toptexture = saveg_read16();
-			si->bottomtexture = saveg_read16();
-			si->midtexture = saveg_read16();
-		}
+	li->flags = saveg_read16();
+	li->special = saveg_read16();
+	li->tag = saveg_read16();
+	for (j=0 ; j<2 ; j++)
+	{
+	    if (li->sidenum[j] == -1)
+		continue;
+	    si = &sides[li->sidenum[j]];
+	    si->textureoffset = saveg_read16() << FRACBITS;
+	    si->rowoffset = saveg_read16() << FRACBITS;
+	    si->toptexture = saveg_read16();
+	    si->bottomtexture = saveg_read16();
+	    si->midtexture = saveg_read16();
+	}
     }
 }
 
@@ -1732,16 +1599,16 @@ void P_ArchiveThinkers (void)
     // save off the current thinkers
     for (th = thinkercap.next ; th != &thinkercap ; th=th->next)
     {
-		if (th->function.acp1 == (actionf_p1)P_MobjThinker)
-		{
-			saveg_write8(tc_mobj);
-			saveg_write_pad();
-			saveg_write_mobj_t((mobj_t *) th);
+	if (th->function.acp1 == (actionf_p1)P_MobjThinker)
+	{
+            saveg_write8(tc_mobj);
+	    saveg_write_pad();
+            saveg_write_mobj_t((mobj_t *) th);
 
-			continue;
-		}
-
-		// I_Error ("P_ArchiveThinkers: Unknown thinker function");
+	    continue;
+	}
+		
+	// I_Error ("P_ArchiveThinkers: Unknown thinker function");
     }
 
     // add a terminating marker

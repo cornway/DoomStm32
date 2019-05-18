@@ -67,9 +67,6 @@ extern boolean		message_dontfuckwithme;
 
 extern boolean		chat_on;		// in heads-up code
 
-extern int8_t p_saveg_use_ram;
-
-
 static uint16_t level_selected = 1;
 static char level_select_message[64] = {0};
 //
@@ -544,12 +541,6 @@ void M_DrawNewLevel (void)
 // M_ReadSaveStrings
 //  read the strings from the savegame files
 //
-#if LOAD_SAVE_USE_RAM
-void M_ReadSaveStrings(void)
-{
-    LoadMenu[0].status = 1;
-}
-#else
 void M_ReadSaveStrings(void)
 {
 #if ORIGCODE
@@ -587,33 +578,19 @@ void M_ReadSaveStrings(void)
 		LoadMenu[i].status = 1;
     }
 }
-#endif /*LOAD_SAVE_USE_RAM*/
 
 //
 // M_LoadGame & Cie.
 //
-extern boolean game_saved_in_ram;
-extern char saveg_level_name[80 + 1];
 void M_DrawLoad(void)
 {
     int             i;
     V_DrawPatchDirect(72, 28, 
                           (patch_t *)W_CacheLumpName(DEH_String("M_LOADG"), PU_CACHE));
-	if (p_saveg_use_ram) {
-        M_DrawSaveLoadBorder(LoadDef.x,LoadDef.y);
-        if (game_saved_in_ram) {
-            char buf[80 + 1];
-            M_snprintf(buf, sizeof(buf), "Map : %s", saveg_level_name);
-            M_WriteText(LoadDef.x,LoadDef.y, buf);
-        } else {
-    	    M_WriteText(LoadDef.x,LoadDef.y, "SLOT EMPTY");
-        }
-    } else {
-        for (i = 0;i < load_end; i++)
-        {
-    	M_DrawSaveLoadBorder(LoadDef.x,LoadDef.y+LINEHEIGHT*i);
-    	M_WriteText(LoadDef.x,LoadDef.y+LINEHEIGHT*i,savegamestrings[i]);
-        }
+    for (i = 0;i < load_end; i++)
+    {
+        M_DrawSaveLoadBorder(LoadDef.x,LoadDef.y+LINEHEIGHT*i);
+        M_WriteText(LoadDef.x,LoadDef.y+LINEHEIGHT*i,savegamestrings[i]);
     }
 }
 
@@ -677,22 +654,17 @@ void M_LoadGame (int choice)
 void M_DrawSave(void)
 {
     int             i;
-    if (p_saveg_use_ram) {
-        M_DrawSaveLoadBorder(LoadDef.x,LoadDef.y);
-        M_WriteText(LoadDef.x,LoadDef.y,"QUICK SAVE");
-    } else {
-        V_DrawPatchDirect(72, 28, (patch_t *)W_CacheLumpName(DEH_String("M_SAVEG"), PU_CACHE));
-        for (i = 0;i < load_end; i++)
-        {
-    	M_DrawSaveLoadBorder(LoadDef.x,LoadDef.y+LINEHEIGHT*i);
-    	M_WriteText(LoadDef.x,LoadDef.y+LINEHEIGHT*i,savegamestrings[i]);
-        }
-    	
-        if (saveStringEnter)
-        {
-    	i = M_StringWidth(savegamestrings[saveSlot]);
-    	M_WriteText(LoadDef.x + i,LoadDef.y+LINEHEIGHT*saveSlot,"_");
-        }
+    V_DrawPatchDirect(72, 28, (patch_t *)W_CacheLumpName(DEH_String("M_SAVEG"), PU_CACHE));
+    for (i = 0;i < load_end; i++)
+    {
+	M_DrawSaveLoadBorder(LoadDef.x,LoadDef.y+LINEHEIGHT*i);
+	M_WriteText(LoadDef.x,LoadDef.y+LINEHEIGHT*i,savegamestrings[i]);
+    }
+	
+    if (saveStringEnter)
+    {
+	i = M_StringWidth(savegamestrings[saveSlot]);
+	M_WriteText(LoadDef.x + i,LoadDef.y+LINEHEIGHT*saveSlot,"_");
     }
 }
 
@@ -721,8 +693,8 @@ void M_SaveSelect(int choice)
     M_StringCopy(saveOldString,savegamestrings[choice], SAVESTRINGSIZE);
     if (!strcmp(savegamestrings[choice], EMPTYSTRING))
     {
-    	savegamestrings[choice][0] = 0x31 + choice;
-    	savegamestrings[choice][1] = 0;
+        savegamestrings[choice][1] = 0;
+        savegamestrings[choice][0] = choice + '1';
     }
     saveCharIndex = strlen(savegamestrings[choice]);
 }
@@ -742,9 +714,7 @@ void M_SaveGame (int choice)
 	return;
 	
     M_SetupNextMenu(&SaveDef);
-    if (!p_saveg_use_ram) {
-        M_ReadSaveStrings();
-    }
+    M_ReadSaveStrings();
 }
 
 
@@ -2192,10 +2162,6 @@ void M_Init (void)
     messageString = NULL;
     messageLastMenuActive = menuactive;
     quickSaveSlot = -1;
-    if (p_saveg_use_ram) {
-        SaveDef.numitems = 1;
-        LoadDef.numitems = 1;
-    }
 
     // Here we could catch other version dependencies,
     //  like HELP1/2, and four episodes.
