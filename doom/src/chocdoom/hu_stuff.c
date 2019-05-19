@@ -392,11 +392,11 @@ void HU_Drawer(void)
 
 void HU_Erase(void)
 {
-
+    profiler_enter();
     HUlib_eraseSText(&w_message);
     HUlib_eraseIText(&w_chat);
     HUlib_eraseTextLine(&w_title);
-
+    profiler_exit();
 }
 
 extern uint32_t fps_prev;

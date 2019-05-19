@@ -721,6 +721,7 @@ void TryRunTics (void)
     int	availabletics;
     int	counts;
 
+    profiler_enter();
     // get real tics
     entertic = I_GetTime() / ticdup;
     realtics = entertic - oldentertics;
@@ -826,6 +827,7 @@ void TryRunTics (void)
 
 	NetUpdate ();	// check for new console commands
     }
+    profiler_exit();
 }
 
 void D_RegisterLoopCallbacks(loop_interface_t *i)

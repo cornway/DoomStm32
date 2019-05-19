@@ -314,6 +314,7 @@ void R_DrawPlanes (void)
     int			angle;
     int                 lumpnum;
 
+    profiler_enter();
     render_on_distance = false;
 #ifdef RANGECHECK
     if (ds_p - drawsegs > MAXDRAWSEGS)
@@ -392,4 +393,5 @@ void R_DrawPlanes (void)
 	
     W_ReleaseLumpNum(lumpnum);
     }
+    profiler_exit();
 }

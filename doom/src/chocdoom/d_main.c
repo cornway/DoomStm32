@@ -183,10 +183,11 @@ void D_Display (void)
     boolean			done;
     boolean			wipe;
     boolean			redrawsbar;
-
-    if (nodrawers)
+    profiler_enter();
+    if (nodrawers) {
+        profiler_exit();
     	return;                    // for comparative timing / profiling
-		
+    }
     redrawsbar = false;
     
     // change the view size if needed
@@ -304,8 +305,9 @@ void D_Display (void)
     // normal update
     if (!wipe)
     {
-	I_FinishUpdate ();              // page flip or blit buffer
-	return;
+        I_FinishUpdate ();              // page flip or blit buffer
+        profiler_exit();
+        return;
     }
     
     // wipe update
@@ -319,6 +321,7 @@ void D_Display (void)
 	M_Drawer ();                            // menu is drawn even on top of wipes
 	I_FinishUpdate ();                      // page flip or blit buffer
     } while (!done);
+    profiler_exit();
 }
 
 //

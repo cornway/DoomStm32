@@ -514,7 +514,7 @@ void S_UpdateSounds(mobj_t *listener)
     int                sep;
     sfxinfo_t*        sfx;
     channel_t*        c;
-
+    profiler_enter();
     I_UpdateSound();
 
     for (cnum=0; cnum<snd_channels; cnum++)
@@ -571,6 +571,7 @@ void S_UpdateSounds(mobj_t *listener)
             }
         }
     }
+    profiler_exit();
 }
 
 void S_SetMusicVolume(int volume)

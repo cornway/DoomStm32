@@ -585,6 +585,7 @@ void M_ReadSaveStrings(void)
 void M_DrawLoad(void)
 {
     int             i;
+    profiler_enter();
     V_DrawPatchDirect(72, 28, 
                           (patch_t *)W_CacheLumpName(DEH_String("M_LOADG"), PU_CACHE));
     for (i = 0;i < load_end; i++)
@@ -592,6 +593,7 @@ void M_DrawLoad(void)
         M_DrawSaveLoadBorder(LoadDef.x,LoadDef.y+LINEHEIGHT*i);
         M_WriteText(LoadDef.x,LoadDef.y+LINEHEIGHT*i,savegamestrings[i]);
     }
+    profiler_exit();
 }
 
 
@@ -601,20 +603,21 @@ void M_DrawLoad(void)
 //
 void M_DrawSaveLoadBorder(int x,int y)
 {
+#ifndef STM32_SDK
     int             i;
-	
+	profiler_enter();
     V_DrawPatchDirect(x - 8, y + 7,
                       (patch_t *)W_CacheLumpName(DEH_String("M_LSLEFT"), PU_CACHE));
-	
     for (i = 0;i < 24;i++)
     {
 	V_DrawPatchDirect(x, y + 7,
                           (patch_t *)W_CacheLumpName(DEH_String("M_LSCNTR"), PU_CACHE));
 	x += 8;
     }
-
     V_DrawPatchDirect(x, y + 7, 
                       (patch_t *)W_CacheLumpName(DEH_String("M_LSRGHT"), PU_CACHE));
+    profiler_exit();
+#endif
 }
 
 
@@ -1434,7 +1437,7 @@ M_WriteText
     ch = string;
     cx = x;
     cy = y;
-	
+	profiler_enter();
     while(1)
     {
 	c = *ch++;
@@ -1460,6 +1463,7 @@ M_WriteText
 	V_DrawPatchDirect(cx, cy, hu_font[c]);
 	cx+=w;
     }
+    profiler_exit();
 }
 
 // These keys evaluate to a "null" key in Vanilla Doom that allows weird
@@ -2034,6 +2038,8 @@ void M_Drawer (void)
     char               *name;
     int			start;
 
+    profiler_enter();
+
     inhelpscreens = false;
     
     // Horiz. & Vertically center string and print it.
@@ -2073,7 +2079,8 @@ void M_Drawer (void)
 	    y += READ_LE_I16(hu_font[0]->height);
 	}
 
-	return;
+    profiler_exit();
+    return;
     }
 
     if (opldev)
@@ -2081,12 +2088,13 @@ void M_Drawer (void)
         M_DrawOPLDev();
     }
 
-    if (!menuactive)
-	return;
+    if (!menuactive) {
+        profiler_exit();
+        return;
+    }
 
     if (currentMenu->routine)
 	currentMenu->routine();         // call Draw routine
-    
     // DRAW MENU
     x = currentMenu->x;
     y = currentMenu->y;
@@ -2108,6 +2116,7 @@ void M_Drawer (void)
     V_DrawPatchDirect(x + SKULLXOFF, currentMenu->y - 5 + itemOn*LINEHEIGHT,
 		      (patch_t *)W_CacheLumpName(DEH_String(skullName[whichSkull]),
 				      PU_CACHE));
+    profiler_exit();
 }
 
 

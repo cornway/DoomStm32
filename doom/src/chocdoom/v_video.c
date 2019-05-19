@@ -277,7 +277,9 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
 
 void V_DrawPatchDirect(int x, int y, patch_t *patch)
 {
+    profiler_enter();
     V_DrawPatch(x, y, patch); 
+    profiler_exit();
 } 
 
 //

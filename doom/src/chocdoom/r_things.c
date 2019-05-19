@@ -1121,7 +1121,7 @@ void R_DrawMasked (void)
     vissprite_t*	spr;
     drawseg_t*		ds;
 	
-    
+    profiler_enter();
 #if vis_hack
     if (vissprite_p > vissprites)
     {
@@ -1159,6 +1159,7 @@ void R_DrawMasked (void)
     if (!viewangleoffset)		{
 	    R_DrawPlayerSprites ();
     }
+    profiler_exit();
 }
 
 
