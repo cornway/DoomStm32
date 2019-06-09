@@ -38,8 +38,11 @@
 #include "lcd_main.h"
 #include "i_video.h"
 
-const char *mus_dir_path = "/doom/music";
-const char *snd_dir_path = "doom/sound/";
+const char *mus_dir_path_psx = "/doom/music/psx";
+const char *mus_dir_path_3do = "/doom/music/3do";
+const char *snd_dir_path = "/doom/sound";
+const char *game_dir_path = "/doom";
+
 
 extern int d_main(void);
 extern int dev_main (void);
@@ -55,7 +58,7 @@ void VID_PreConfig (void)
     screen.buf = NULL;
     screen.width = SCREENWIDTH;
     screen.height = SCREENHEIGHT;
-    screen_win_cfg(&screen);
+    screen_win_cfg(NULL, &screen, GFX_COLOR_MODE, 2);
 }
 
 int mainloop (int argc, const char *argv[])

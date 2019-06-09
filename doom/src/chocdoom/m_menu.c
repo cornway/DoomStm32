@@ -1028,12 +1028,13 @@ void M_VerifyNightmare(int key)
 
 void M_ChooseSkill(int choice)
 {
+#ifndef STM32_SDK
     if (choice == nightmare)
     {
 	M_StartMessage(DEH_String(NIGHTMARE),M_VerifyNightmare,true);
 	return;
     }
-	
+#endif
     G_DeferedInitNew((skill_t)choice,epi+1,level_selected);
     M_ClearMenus ();
 }

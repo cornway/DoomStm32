@@ -444,7 +444,6 @@ void I_GetEvent (void)
 
 void I_InitGraphics (void)
 {
-    screen_t screen;
 #if !IVID_IRAM
     I_VideoBuffer = (pix_t*)Z_Malloc (D_SCREEN_BYTE_CNT, PU_STATIC, NULL);
 #else
@@ -452,15 +451,8 @@ void I_InitGraphics (void)
 #endif
 	screenvisible = true;
     p_palette = rgb_palette;
-    screen.buf = NULL;
-    screen.width = SCREENWIDTH;
-    screen.height = SCREENHEIGHT;
-    screen_win_cfg(&screen);
 
     input_soft_init(gamepad_to_kbd_map);
-    input_bind_extra(K_EX_LOOKUP, KEY_HOME);
-    input_bind_extra(K_EX_LOOKUP, KEY_DEL);
-    input_bind_extra(K_EX_LOOKUP, KEY_INS);
 }
 
 void I_ShutdownGraphics (void)

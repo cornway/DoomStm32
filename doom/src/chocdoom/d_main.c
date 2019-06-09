@@ -77,6 +77,7 @@
 #include "w_merge.h"
 #include "input_main.h"
 #include <debug.h>
+#include <dev_io.h>
 
 //
 // D-DoomLoop()
@@ -541,7 +542,7 @@ void D_DoAdvanceDemo (void)
 	gamestate = GS_DEMOSCREEN;
 	pagename = DEH_String("TITLEPIC");
 	if ( gamemode == commercial )
-	  S_StartMusic(mus_dm2ttl);
+	  S_StartMusic(mus_dm2int);
 	else
 	  S_StartMusic (mus_intro);
 	break;
@@ -881,8 +882,56 @@ static void D_ForeachFileHdlr(void *_filename)
     //W_AddFile(filename);
 }
 
+extern const char *game_dir_path;
+
+static int D_ChangeConf (void *p1, void *p2)
+{
+    char path[128] = {0}, version[32] = {0};
+    char *p = (char *)p1;
+    const char *confname = "conf.txt";
+    int f, len = *(int *)p2;
+
+    if (!sscanf(p, "%16s", version)) {
+        version[0] = 0;
+    }
+    snprintf(path, sizeof(path), "%s/%s", game_dir_path, confname);
+
+    if (version[0] == 0) {
+        d_open(path, &f, "r");
+        if (f < 0) {
+            return len;
+        }
+        d_gets(f, version, sizeof(version));
+        dprintf("Current version \'%s\'\n", version);
+        d_close(f);
+        return len;
+    }
+    if (strncmp(version, "psx", 3) &&
+        strncmp(version, "3do", 3)) {
+        dprintf("%s() : fail, unknown version \'%s\'\n", __func__, version);
+        return len;
+    }
+    d_open(path, &f, "+w");
+    if (f < 0) {
+        dprintf("%s() : fail to open\n", __func__);
+        return len;
+    }
+    d_printf(f, "version=%s", version);
+    d_close(f);
+
+    dprintf("Version changed : \'%s\'\n", version);
+    return len;
+}
+
 void D_AddPwads()
 {
+    dvar_t dvar;
+
+    dvar.ptr = D_ChangeConf;
+    dvar.ptrsize = sizeof(&D_ChangeConf);
+    dvar.type = DVAR_FUNC;
+
+    d_dvar_reg(&dvar, "doomver");
     D_FindWADByExt(D_ForeachFileHdlr);
 
     return;

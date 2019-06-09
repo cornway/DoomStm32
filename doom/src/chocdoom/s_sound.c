@@ -608,45 +608,84 @@ void S_StartMusic(int m_id)
 #define CD_NAME_MAX 20
 #define CD_TRACK_MAX 40
 
-extern const char *mus_dir_path;
+extern const char *mus_dir_path_psx;
+extern const char *mus_dir_path_3do;
 
-static int track_cnt = 0;
-static int track_cnt_enlist_done = 0;
-
-static char cdfiles[CD_TRACK_MAX][CD_NAME_MAX];
-
-int cd_file_hdlr (char *name, ftype_t type)
+const char *cdnames_psx[] =
 {
-    if (type == FTYPE_FILE) {
-        if (!track_cnt_enlist_done) {
-            if (track_cnt < CD_TRACK_MAX) {
-                strncpy(cdfiles[track_cnt], name, sizeof(cdfiles[0]));
-                track_cnt++;
-            }
-            return 0;
-        }
-    }
+    "mus_None", "mus_e1m1", "mus_e1m2", "mus_e1m3", "mus_e1m4",
+    "mus_e1m5", "mus_e1m6", "mus_e1m7", "mus_e1m8", "mus_e1m9",
+    "mus_e2m1", "mus_e2m2", "mus_e2m3", "mus_e2m4", "mus_e2m5",
+    "mus_e2m6", "mus_e2m7", "mus_e2m8", "mus_e2m9", "mus_e3m1",
+    "mus_e1m1", "mus_e1m2", "mus_e1m3", "mus_e1m4", "mus_e1m5",
+    "mus_e1m6", "mus_e1m7", "mus_e1m8", "musinter",
+    "mus_e1m5", "mus_e1m6", "mus_e1m7", "mus_e1m8", "mus_e2m1",
+    "mus_e2m2", "mus_e2m3", "mus_e2m3", "mus_e2m4", "mus_e2m5",
+    "mus_e2m6", "mus_e2m7", "mus_e2m8", "mus_e2m9", "mus_e3m1",
+    "mus_e1m1", "mus_e1m2", "mus_e1m3", "mus_e1m4", "mus_e1m5",
+    "mus_e1m6", "mus_e1m7", "mus_e1m8", "mus_e1m9", "mus_e2m1",
+    "mus_e2m1", "mus_e2m2", "mus_e2m3", "mus_e2m4", "mus_e2m5",
+    "mus_e2m6", "mus_e2m7", "mus_e2m8", "mus_e2m9", "mus_e2m1",
+    "mus_e2m1", "mus_e2m2", "mus_e2m3", "mus_e2m4", "mus_e2m5"
+    "mus_e1m6", "mus_e1m7", "mus_e1m8", "musinter",
+    "mus_e1m5", "mus_e1m6", "mus_e1m7", "mus_e1m8", "mus_e2m1",
+    "mus_e2m2", "mus_e2m3", "mus_e2m3", "mus_e2m4", "mus_e2m5",
+    "mus_e2m6", "mus_e2m7", "mus_e2m8", "mus_e2m9", "mus_e3m1",
+    "mus_e1m1", "mus_e1m2", "mus_e1m3", "mus_e1m4", "mus_e1m5",
+    "mus_e1m6", "mus_e1m7", "mus_e1m8", "mus_e1m9", "mus_e2m1",
+    "mus_e2m1", "mus_e2m2", "mus_e2m3", "mus_e2m4", "mus_e2m5",
+    "mus_e2m6", "mus_e2m7", "mus_e2m8", "mus_e2m9", "mus_e2m1",
+    "mus_e2m1", "mus_e2m2", "mus_e2m3", "mus_e2m4", "mus_e2m5",
+    [mus_dm2ttl] = "mus_ttl",
+    [mus_dm2int] = "mus_int",
+};
 
-    return 0;
-}
+const char *cdnames_3do[] =
+{
+    "mus_None", "mus_e1m1", "mus_e1m2", "mus_e1m3", "mus_e1m4",
+    "mus_e1m5", "mus_e1m6", "mus_e1m7", "mus_e1m8", "mus_e1m9",
+    "mus_e2m1", "mus_e2m2", "mus_e2m3","mus_e1m1", "mus_e1m2", 
+    "mus_e1m3", "mus_e1m4", "mus_e1m5", "mus_e1m6", "mus_e1m7",
+    "mus_e1m8", "mus_e1m9", "mus_e2m1", "mus_e2m2", "mus_e2m3",
+    "mus_e1m1", "mus_e1m2", "mus_e1m3", "mus_e1m4", "mus_e2m3"
+    "mus_e1m5", "mus_e1m6", "mus_e1m7", "mus_e1m8", "mus_e1m9",
+    "mus_e2m1", "mus_e2m2", "mus_e2m3","mus_e1m1", "mus_e1m2", 
+    "mus_e1m3", "mus_e1m4", "mus_e1m5", "mus_e1m6", "mus_e1m7",
+    "mus_e1m8", "mus_e1m9", "mus_e2m1", "mus_e2m2", "mus_e2m3",
+    [mus_dm2ttl] = "mus_e1m7",
+    [mus_dm2int] = "mus_e1m1",
+    [mus_intro] = "mus_e1m7",
+};
+
+
 void S_PlayNum (int num)
 {
-    flist_t flist = {cd_file_hdlr};
-    char path[128];
-
-    if (!track_cnt_enlist_done) {
-        track_cnt = 0;
-        d_dirlist((char *)mus_dir_path, &flist);
-        track_cnt_enlist_done = 1;
+    char *name, buf[256];
+    char *cdpath = NULL;
+    if (game_alt_pkg == pkg_psx_final) {
+        if (num >= arrlen(cdnames_psx)) {
+            return;
+        }
+        cdpath = (char *)mus_dir_path_psx;
+        name = (char *)cdnames_psx[num];
+    } else if (game_alt_pkg == pkg_3d0_doom) {
+        cdpath = (char *)mus_dir_path_3do;
+        name = (char *)cdnames_3do[num];   
     }
-    num = num % track_cnt;
-    snprintf(path, sizeof(path), "%s/%s", mus_dir_path, cdfiles[num]);
-    cd_play_name(&cd, path);
+    snprintf(buf, sizeof(buf), "%s/%s.WAV", cdpath, name);
+
+    cd_play_name(&cd, buf);
+    cd_volume(&cd, musicVolume << 3);
 }
 
 void S_ChangeMusic(int musicnum, int looping)
 {
     S_StopMusic();
+    if (mus_playing_num == musicnum) {
+        if(S_MusicPlaying()) {
+            return;
+        }
+    }
     S_PlayNum(musicnum);
     mus_playing_num = musicnum;
     mus_playing = 1;

@@ -79,12 +79,12 @@ typedef struct {
     int start;
     int end;
     int frame;
-    int elapse;
-    int delay;
+    uint32_t delay;
+    uint32_t tsf;
     anim_state_t state;
 } anim_t;
 
-static anim_t fire_anim = {-1, -1, -1, -1, -1, anim_none};
+static anim_t fire_anim = {-1, -1, -1, 0, 0, anim_none};
 
 static void DD_LoadAnim (anim_t *anim, char *start, char *end, int delay)
 {
@@ -93,23 +93,22 @@ static void DD_LoadAnim (anim_t *anim, char *start, char *end, int delay)
     anim->frame = anim->start;
     anim->state = anim_proc;
     anim->delay = delay;
-    anim->elapse = delay;
 }
 
 static void DD_ProcAnim (anim_t *anim)
 {
     switch (anim->state) {
         case anim_none:
+            anim->tsf = HAL_GetTick();
             break;
         case anim_start:
+            anim->tsf = HAL_GetTick();
             break;
         case anim_proc:
-            if (anim->elapse> 0) {
-                anim->elapse--;
-                break;
+            if (anim->tsf + anim->delay < HAL_GetTick()) {
+                anim->tsf = HAL_GetTick();
+                anim->frame++;
             }
-            anim->elapse = anim->delay;
-            anim->frame++;
             if (anim->frame > anim->end) {
                 anim->state = anim_end;
             }
@@ -169,20 +168,22 @@ void DD_LoadAltPkgGame (void)
         info->flags         &= ~MF_SHADOW;
         info->raisestate    = S_SPEC_RAISE1;
 
-        DD_LoadAnim(&fire_anim, "FIRE001", "FIRE317", -1);
+        DD_LoadAnim(&fire_anim, "FIRE001", "FIRE317", 20);
     }
 }
 
 void DD_UpdateNoBlit (void)
 {
-    if (alt_gameaction == ga_cachelevel) {
-        patch_t *ld = W_CacheLumpName("LOADING", PU_CACHE);
-        V_DrawPatchC(ld, 0);
-        goto done;
-    }
-    if (gamestate == GS_DEMOSCREEN) {
-        DD_ProcAnim(&fire_anim);
-        DD_DrawAnimTileW(&fire_anim);
+    if (game_alt_pkg == pkg_psx_final) {
+        if (alt_gameaction == ga_cachelevel) {
+            patch_t *ld = W_CacheLumpName("LOADING", PU_CACHE);
+            V_DrawPatchC(ld, 0);
+            goto done;
+        }
+        if (gamestate == GS_DEMOSCREEN) {
+            DD_ProcAnim(&fire_anim);
+            DD_DrawAnimTileW(&fire_anim);
+        }
     }
 done:
     return;

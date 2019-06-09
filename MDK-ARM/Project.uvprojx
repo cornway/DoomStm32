@@ -1275,6 +1275,31 @@
               <FileType>1</FileType>
               <FilePath>..\common\profiler.c</FilePath>
             </File>
+            <File>
+              <FileName>term.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\term.c</FilePath>
+            </File>
+            <File>
+              <FileName>tim.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\tim.c</FilePath>
+            </File>
+            <File>
+              <FileName>tim_int.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\common\inc\tim_int.h</FilePath>
+            </File>
+            <File>
+              <FileName>jpeg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\jpeg.c</FilePath>
+            </File>
+            <File>
+              <FileName>jpeg_hal.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\jpeg_hal.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
