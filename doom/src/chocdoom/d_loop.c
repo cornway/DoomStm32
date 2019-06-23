@@ -41,6 +41,7 @@
 #include "net_server.h"
 #include "net_sdl.h"
 #include "net_loop.h"
+#include <misc_utils.h>
 
 extern void I_GetEvent (void);
 

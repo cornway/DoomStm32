@@ -1402,14 +1402,15 @@ void D_DoomMain (void)
 
     // Load configuration files before initialising other subsystems.
     DEH_printf("M_LoadDefaults: Load system defaults.\n");
-    M_SetConfigFilenames("default.cfg", PROGRAM_PREFIX "doom.cfg");
-    D_BindVariables();
-    M_LoadDefaults();
+    //M_SetConfigFilenames("default.cfg", PROGRAM_PREFIX "doom.cfg");
+    //D_BindVariables();
+    //M_LoadDefaults();
 
     // Save configuration at exit.
     I_AtExit(M_SaveDefaults, false);
 
     // Find main IWAD file and load it.
+    dprintf("D_FindIWAD :\n");
     iwadfile = D_FindIWAD(    IWAD_MASK_DOOM    |
                                 IWAD_MASK_HERETIC |
                                 IWAD_MASK_HEXEN,

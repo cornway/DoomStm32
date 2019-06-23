@@ -75,9 +75,12 @@ void M_MakeDirectory(char *path)
     {
     	path_mod[len - 1] = 0;
     }
-
-    dir = d_mkdir(path_mod);
-
+    dir = d_opendir(path_mod);
+    if (dir >= 0) {
+        d_closedir(dir);
+    } else {
+        dir = d_mkdir(path_mod);
+    }
     if (dir < 0)
     {
     	I_Error ("M_MakeDirectory: path = '%s', path_mod = '%s'", path, path_mod);
@@ -498,7 +501,7 @@ char *M_StringJoin(const char *s, ...)
     }
     va_end(args);
 
-    result = Sys_Malloc(result_len);
+    result = (char *)Sys_Malloc(result_len);
 
     if (result == NULL)
     {

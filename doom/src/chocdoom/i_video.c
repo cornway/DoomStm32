@@ -251,7 +251,7 @@ void I_SetPalette (byte* palette, int idx)
         pal[i] = GFX_RGB(gammatable[usegamma][color->r],
                         gammatable[usegamma][color->g],
                         gammatable[usegamma][color->b],
-                        GFX_OPAQUE);
+                        0xff);
         palette += 3;
     }
 sw_done:
@@ -281,10 +281,10 @@ static void I_RefreshPalette (int pal_idx)
         g = GFX_ARGB_G(pal[i]);
         b = GFX_ARGB_B(pal[i]);
 
-        pal[i] = GFX_RGB(GFX_OPAQUE,
-                        gammatable[usegamma][r],
+        pal[i] = GFX_RGB(gammatable[usegamma][r],
                         gammatable[usegamma][g],
-                        gammatable[usegamma][b]);
+                        gammatable[usegamma][b],
+                        0xff);
     }
 }
 
@@ -426,12 +426,14 @@ const kbdmap_t gamepad_to_kbd_map[JOY_STD_MAX] =
     [JOY_K10]           = {KEY_ESCAPE, PAD_FREQ_LOW},
 };
 
-i_event_t *input_post_key (i_event_t *events, i_event_t e)
+extern int *joy_extrafreeze;
+
+static i_event_t *__post_key (i_event_t *events, i_event_t *e)
 {
     event_t event =
         {
-            e.state == keyup ? ev_keyup : ev_keydown,
-            e.sym, -1, -1, -1
+            e->state == keyup ? ev_keyup : ev_keydown,
+            e->sym, -1, -1, -1
         };
     D_PostEvent(&event);
     return events;
@@ -452,7 +454,7 @@ void I_InitGraphics (void)
 	screenvisible = true;
     p_palette = rgb_palette;
 
-    input_soft_init(gamepad_to_kbd_map);
+    input_soft_init(__post_key, (void *)gamepad_to_kbd_map);
 }
 
 void I_ShutdownGraphics (void)

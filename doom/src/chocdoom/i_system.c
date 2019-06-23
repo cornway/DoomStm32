@@ -289,18 +289,16 @@ static int ZenityErrorBox(char *message)
 
 void I_Error (char *error, ...)
 {
-#if 0
     char msgbuf[512];
     va_list argptr;
     atexit_listentry_t *entry;
     boolean exit_gui_popup;
+    static boolean already_quitting = false;
 
     if (already_quitting)
     {
-        //d_fprintf(stderr, "Warning: recursive call to I_Error detected.\n");
-#if ORIGCODE
-        exit(-1);
-#endif
+        dprintf("Warning: recursive call to I_Error detected.\n");
+        bug();
     }
     else
     {
@@ -309,7 +307,7 @@ void I_Error (char *error, ...)
 
     // Message first.
     va_start(argptr, error);
-    //fprintf(stderr, "\nError: ");
+    dprintf("\nError: ");
     va_end(argptr);
 
     // Write a copy of the message into buffer.
@@ -377,25 +375,14 @@ void I_Error (char *error, ...)
                                         message,
                                         NULL);
     }
-#else
+#elif !defined(STM32_SDK)
     {
         ZenityErrorBox(msgbuf);
     }
 #endif
 
     // abort();
-#if ORIGCODE
-    SDL_Quit();
-
-    exit(-1);
-#else
-    while (true)
-    {
-    }
-#endif
-#else /*0*/
-    for (;;) {}
-#endif /**/
+    bug();
 }
 
 //

@@ -72,7 +72,7 @@
 
 #include "g_game.h"
 
-
+#include <dev_io.h>
 #define SAVEGAMESIZE	0x2c000
 
 void	G_ReadDemoTiccmd (ticcmd_t* cmd); 

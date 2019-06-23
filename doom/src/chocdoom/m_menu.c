@@ -69,6 +69,10 @@ extern boolean		chat_on;		// in heads-up code
 
 static uint16_t level_selected = 1;
 static char level_select_message[64] = {0};
+
+#if BSP_INDIR_API
+int *joy_extrafreeze = NULL;
+#endif
 //
 // defaulted values
 //

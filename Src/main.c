@@ -37,19 +37,23 @@
 #include "main.h"
 #include "lcd_main.h"
 #include "i_video.h"
+#include <bsp_api.h>
+#include <debug.h>
+#include <audio_main.h>
+#include <input_main.h>
+#include <misc_utils.h>
 
 const char *mus_dir_path_psx = "/doom/music/psx";
 const char *mus_dir_path_3do = "/doom/music/3do";
 const char *snd_dir_path = "/doom/sound";
 const char *game_dir_path = "/doom";
 
-
 extern int d_main(void);
-extern int dev_main (void);
+extern void dev_main (void);
 
-int main(void)
+static void *__vid_alloc (uint32_t size)
 {
-    dev_main();
+    return Sys_AllocVideo((int *)&size);
 }
 
 void VID_PreConfig (void)
@@ -58,12 +62,18 @@ void VID_PreConfig (void)
     screen.buf = NULL;
     screen.width = SCREENWIDTH;
     screen.height = SCREENHEIGHT;
-    screen_win_cfg(NULL, &screen, GFX_COLOR_MODE, 2);
+    screen_win_cfg(__vid_alloc, NULL, &screen, GFX_COLOR_MODE, 2);
 }
+
 
 int mainloop (int argc, const char *argv[])
 {
     d_main();
-    return 0;
 }
+
+int main(void)
+{
+    dev_main();
+}
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

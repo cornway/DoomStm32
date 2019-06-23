@@ -26,6 +26,7 @@
 #include "v_video.h"
 #include "i_video.h"
 #include "z_zone.h"
+#include <dev_io.h>
 
 /*---------------------------------------------------------------------*
  *  public functions                                                   *
@@ -43,10 +44,10 @@ uint32_t fps_prev;
 uint32_t msec_per_frame;
 uint32_t msec_per_frame_start;
 #define MS_PER_SEC 1000
-extern uint32_t systime;
+
 void fps_update (void)
 {
-    if (systime - sec_time * MS_PER_SEC >= MS_PER_SEC) {
+    if (d_time() - sec_time * MS_PER_SEC >= MS_PER_SEC) {
         sec_time++;
         fps_prev = frames_count;
         frames_count = 0;
@@ -57,12 +58,12 @@ void fps_update (void)
 
 void frame_start ()
 {
-    msec_per_frame_start = systime;
+    msec_per_frame_start = d_time();
 }
 
 void frame_end ()
 {
-    msec_per_frame = systime - msec_per_frame_start;
+    msec_per_frame = d_time() - msec_per_frame_start;
 }
 
 extern gamestate_t gamestate;
@@ -99,14 +100,14 @@ static void DD_ProcAnim (anim_t *anim)
 {
     switch (anim->state) {
         case anim_none:
-            anim->tsf = HAL_GetTick();
+            anim->tsf = d_time();
             break;
         case anim_start:
-            anim->tsf = HAL_GetTick();
+            anim->tsf = d_time();
             break;
         case anim_proc:
-            if (anim->tsf + anim->delay < HAL_GetTick()) {
-                anim->tsf = HAL_GetTick();
+            if (anim->tsf + anim->delay < d_time()) {
+                anim->tsf = d_time();
                 anim->frame++;
             }
             if (anim->frame > anim->end) {

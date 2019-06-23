@@ -34,6 +34,7 @@
 #include "r_state.h"
 #include "hu_lib.h"
 #include "dev_io.h"
+#include <debug.h>
 
 #define VERSIONSIZE		16 
 
@@ -68,7 +69,7 @@ char *P_SaveGameFile(int slot)
     if (filename == NULL)
     {
         filename_size = strlen(savegamedir) + 32;
-        filename = Sys_Malloc(filename_size);
+        filename = (char *)Sys_Malloc(filename_size);
     }
 
     DEH_snprintf(basename, 32, SAVEGAMENAME "%d.dsg", slot);

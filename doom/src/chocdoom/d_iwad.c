@@ -33,6 +33,7 @@
 #include "z_zone.h"
 #include <misc_utils.h>
 #include <dev_io.h>
+#include <debug.h>
 
 static const iwad_t iwads[] =
 {
@@ -635,7 +636,7 @@ char *D_FindWADByName(char *name)
     int i;
     
     // Absolute path?
-
+    dprintf("%s() : %u\n", __func__, __LINE__);
     if (M_FileExists(name))
     {
         return name;
@@ -644,7 +645,7 @@ char *D_FindWADByName(char *name)
     BuildIWADDirList();
 
     // Search through all IWAD paths for a file with the given name.
-
+    dprintf("%s() : %u\n", __func__, __LINE__);
     for (i=0; i<num_iwad_dirs; ++i)
     {
         // As a special case, if this is in DOOMWADDIR or DOOMWADPATH,
@@ -752,9 +753,9 @@ char *D_FindIWAD(int mask, GameMission_t *mission)
     //
     // @arg <file>
     //
-
+    dprintf("%s() : %u\n", __func__, __LINE__);
     D_ReadConf();
-
+    dprintf("%s() : %u\n", __func__, __LINE__);
     iwadparm = M_CheckParmWithArgs("-iwad", 1);
     if (game_alt_pkg) {
         if (game_alt_pkg == pkg_psx_final) {
@@ -765,6 +766,7 @@ char *D_FindIWAD(int mask, GameMission_t *mission)
         piwadfile = iwadfile;
         iwadparm = 1;
     }
+    dprintf("%s() : %u\n", __func__, __LINE__);
     if (iwadparm)
     {
         // Search through IWAD dirs for an IWAD with the given name.

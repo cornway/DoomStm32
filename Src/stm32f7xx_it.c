@@ -35,6 +35,8 @@
   ******************************************************************************
   */
 
+#if !defined(APPLICATION) || defined(BSP_DRIVER)
+
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f7xx_it.h"
@@ -154,11 +156,9 @@ void PendSV_Handler(void)
   * @param  None
   * @retval None
   */
-extern volatile uint32_t systime;
 void SysTick_Handler(void)
 {
   HAL_IncTick();
-  systime++;
 }
 
 /******************************************************************************/
@@ -249,5 +249,7 @@ void BSP_SDMMC_DMA_Rx_IRQHandler (void)
 /**
   * @}
   */
+
+#endif
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
