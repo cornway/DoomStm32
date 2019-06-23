@@ -40,10 +40,6 @@
 #include "D_player.h"
 #include "input_main.h"
 
-#if (GFX_COLOR_MODE == GFX_COLOR_MODE_RGBA8888)
-#error "ARGB rendering broken!"
-#endif
-
 #ifndef MAX
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #endif
@@ -132,7 +128,8 @@ static pal_t *prev_clut = NULL;
 static byte *aclut = NULL;
 static byte *aclut_map = NULL;
 
-#if (GFX_COLOR_MODE == GFX_COLOR_MODE_RGB565)
+/*FIXME : !!!*/
+#if 0/*(GFX_COLOR_MODE == GFX_COLOR_MODE_RGB565)*/
 
 static const uint16_t aclut_entry_cnt = 0xffff;
 
@@ -248,17 +245,14 @@ void I_SetPalette (byte* palette, int idx)
     for (i = 0; i < clut_num_entries; i++)
     {
         color = (rgb_t*)palette;
-        pal[i] = GFX_RGB(gammatable[usegamma][color->r],
-                        gammatable[usegamma][color->g],
-                        gammatable[usegamma][color->b],
-                        0xff);
+        pal[i] = GFX_RGBA8888(gammatable[usegamma][color->r],
+                                gammatable[usegamma][color->g],
+                                gammatable[usegamma][color->b],
+                                0xff);
         palette += 3;
     }
 sw_done:
-#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
     screen_set_clut(p_palette, clut_num_entries);
-#endif
-    //I_CacheAclut();
     return;
 }
 
@@ -277,14 +271,14 @@ static void I_RefreshPalette (int pal_idx)
     }
 
     for (i = 0; i < clut_num_entries; i++) {
-        r = GFX_ARGB_R(pal[i]);
-        g = GFX_ARGB_G(pal[i]);
-        b = GFX_ARGB_B(pal[i]);
+        r = GFX_ARGB8888_R(pal[i]);
+        g = GFX_ARGB8888_G(pal[i]);
+        b = GFX_ARGB8888_B(pal[i]);
 
-        pal[i] = GFX_RGB(gammatable[usegamma][r],
-                        gammatable[usegamma][g],
-                        gammatable[usegamma][b],
-                        0xff);
+        pal[i] = GFX_RGBA8888(gammatable[usegamma][r],
+                                gammatable[usegamma][g],
+                                gammatable[usegamma][b],
+                                0xff);
     }
 }
 
@@ -299,7 +293,8 @@ void I_RefreshClutsButPlaypal (void)
     }
 }
 
-#if (GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)
+/*FIXME : !!!*/
+#if 0/*(GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)*/
 
 static int _I_GetClutIndex (pal_t *pal, pix_t pix)
 {
@@ -345,9 +340,9 @@ int I_GetPaletteIndex (int r, int g, int b)
 
     for (i = 0; i < clut_num_entries; ++i)
     {
-        color.r = GFX_ARGB_R(rgb_palette[i]);
-        color.g = GFX_ARGB_G(rgb_palette[i]);
-        color.b = GFX_ARGB_B(rgb_palette[i]);
+        color.r = GFX_ARGB8888_R(rgb_palette[i]);
+        color.g = GFX_ARGB8888_G(rgb_palette[i]);
+        color.b = GFX_ARGB8888_B(rgb_palette[i]);
         diff = (r - color.r) * (r - color.r)
              + (g - color.g) * (g - color.g)
              + (b - color.b) * (b - color.b);
@@ -447,7 +442,7 @@ void I_GetEvent (void)
 void I_InitGraphics (void)
 {
 #if !IVID_IRAM
-    I_VideoBuffer = (pix_t*)Z_Malloc (D_SCREEN_BYTE_CNT, PU_STATIC, NULL);
+    I_VideoBuffer = (pix_t*)Z_Malloc (SCREENWIDTH * SCREENHEIGHT * sizeof(pix_t), PU_STATIC, NULL);
 #else
     I_VideoBuffer = I_VideoBuffer_static;
 #endif

@@ -451,7 +451,7 @@ R_DrawVisSprite
     patch = W_CacheLumpNum (vis->patch+firstspritelump, PU_CACHE);
 
     dc_colormap = vis->colormap;
-#if (GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)
+#if 0/*(GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)*/
     if (vis->sprflags & VIS_SHADOW) {
         colfunc = fuzzcolfunc;
     } else
@@ -615,7 +615,7 @@ void R_ProjectSprite (mobj_t* thing)
     vis->texturemid = vis->gzt - viewz;
     vis->x1 = x1 < 0 ? 0 : x1;
     vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;
-#if (GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)
+#if 0/*(GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)*/
     vis->sprflags = 0;
 #endif
     if (flip)
@@ -636,7 +636,7 @@ void R_ProjectSprite (mobj_t* thing)
     // get light level
     if (thing->flags & MF_SHADOW)
     {
-#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
+#if 1/*(GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)*/
     // shadow draw
     vis->colormap = NULL;
 #else
@@ -822,7 +822,7 @@ void R_DrawPSprite (pspdef_t* psp)
     vis->x1 = x1 < 0 ? 0 : x1;
     vis->x2 = x2 >= viewwidth ? viewwidth-1 : x2;
     vis->scale = pspritescale<<detailshift;
-#if (GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)
+#if 0/*(GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)*/
     vis->sprflags = 0;
 #endif
     if (flip)
@@ -845,7 +845,7 @@ void R_DrawPSprite (pspdef_t* psp)
     if (viewplayer->powers[pw_invisibility] > 4*32
 	|| viewplayer->powers[pw_invisibility] & 8)
     {
-#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
+#if 1/*(GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)*/
 	// shadow draw
 	vis->colormap = NULL;
 #else

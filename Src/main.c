@@ -62,7 +62,7 @@ void VID_PreConfig (void)
     screen.buf = NULL;
     screen.width = SCREENWIDTH;
     screen.height = SCREENHEIGHT;
-    screen_win_cfg(__vid_alloc, NULL, &screen, GFX_COLOR_MODE, 2);
+    screen_win_cfg(__vid_alloc, NULL, &screen, GFX_COLOR_MODE_CLUT, 2);
 }
 
 

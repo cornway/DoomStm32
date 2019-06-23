@@ -1031,7 +1031,7 @@ void ST_drawWidgets(boolean refresh)
 
 }
 
-#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
+#if 1/*(GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)*/
 
 #else
 

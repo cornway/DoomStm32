@@ -38,6 +38,10 @@
 
 #define MAX_MOUSE_BUTTONS 8
 
+typedef uint8_t pix_t;
+typedef uint32_t pal_t;
+#define COLOR_MODE_KEY
+
 typedef struct
 {
     // Screen width and height
@@ -147,7 +151,7 @@ pix_t I_BlendPix (pix_t fg, pix_t bg, byte a);
 pix_t I_BlendPixMap (pix_t fg, pix_t bg);
 
 
-#if (GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)
+#if 0/*(GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)*/
 
 int I_GetClutIndex (pix_t pix);
 
