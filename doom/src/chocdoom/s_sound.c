@@ -39,6 +39,7 @@
 #include "z_zone.h"
 #include "audio_main.h"
 #include "dev_io.h"
+#include <bsp_sys.h>
 
 // when to clip out sounds
 // Does not fit the large outdoor areas.

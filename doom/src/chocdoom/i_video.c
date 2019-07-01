@@ -39,6 +39,7 @@
 #include "g_game.h"
 #include "D_player.h"
 #include "input_main.h"
+#include <bsp_sys.h>
 
 #ifndef MAX
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -105,7 +106,7 @@ void I_FinishUpdate (void)
     scr.buf = &I_VideoBuffer[0];
     scr.width = SCREENWIDTH;
     scr.height = SCREENHEIGHT;
-    screen_update(&scr);
+    vid_upate(&scr);
 }
 
 
@@ -252,7 +253,7 @@ void I_SetPalette (byte* palette, int idx)
         palette += 3;
     }
 sw_done:
-    screen_set_clut(p_palette, clut_num_entries);
+    vid_set_clut(p_palette, clut_num_entries);
     return;
 }
 

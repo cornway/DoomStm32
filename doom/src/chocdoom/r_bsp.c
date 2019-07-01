@@ -34,6 +34,7 @@
 #include "r_state.h"
 
 #include "st_stuff.h"
+#include <bsp_sys.h>
 
 //#include "r_local.h"
 

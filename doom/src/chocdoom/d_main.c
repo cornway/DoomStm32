@@ -78,6 +78,9 @@
 #include "input_main.h"
 #include <debug.h>
 #include <dev_io.h>
+#include <bsp_sys.h>
+#include <bsp_cmd.h>
+#include <bsp_api.h>
 
 //
 // D-DoomLoop()
@@ -406,7 +409,6 @@ boolean D_GrabMouseCallback(void)
 extern void fps_update (void);
 extern void frame_start (void);
 extern void frame_end (void);
-extern void dev_tickle (void);
 
 void D_DoomLoop (void)
 {
@@ -447,7 +449,7 @@ void D_DoomLoop (void)
     while (1)
     {
         // frame syncronous IO operations
-        dev_tickle();
+        bsp_tickle();
         frame_start();
         I_StartFrame ();
 
@@ -884,14 +886,18 @@ static void D_ForeachFileHdlr(void *_filename)
 
 extern const char *game_dir_path;
 
-static int D_ChangeConf (void *p1, void *p2)
+static int D_ChangeConf (int argc, const char **argv)
 {
-    char path[128] = {0}, version[32] = {0};
-    char *p = (char *)p1;
+    char version[32] = {0};
+    char path[128];
     const char *confname = "conf.txt";
-    int f, len = *(int *)p2;
+    int f;
 
-    if (!sscanf(p, "%16s", version)) {
+    if (argc < 1) {
+        return 0;
+    }
+
+    if (!sscanf(argv[0], "%16s", version)) {
         version[0] = 0;
     }
     snprintf(path, sizeof(path), "%s/%s", game_dir_path, confname);
@@ -899,39 +905,33 @@ static int D_ChangeConf (void *p1, void *p2)
     if (version[0] == 0) {
         d_open(path, &f, "r");
         if (f < 0) {
-            return len;
+            return 0;
         }
         d_gets(f, version, sizeof(version));
         dprintf("Current version \'%s\'\n", version);
         d_close(f);
-        return len;
+        return 0;
     }
     if (strncmp(version, "psx", 3) &&
         strncmp(version, "3do", 3)) {
         dprintf("%s() : fail, unknown version \'%s\'\n", __func__, version);
-        return len;
+        return 0;
     }
     d_open(path, &f, "+w");
     if (f < 0) {
         dprintf("%s() : fail to open\n", __func__);
-        return len;
+        return 0;
     }
     d_printf(f, "version=%s", version);
     d_close(f);
 
     dprintf("Version changed : \'%s\'\n", version);
-    return len;
+    return 0;
 }
 
 void D_AddPwads()
 {
-    dvar_t dvar;
-
-    dvar.ptr = D_ChangeConf;
-    dvar.ptrsize = sizeof(&D_ChangeConf);
-    dvar.type = DVAR_FUNC;
-
-    d_dvar_reg(&dvar, "doomver");
+    cmd_register_func(D_ChangeConf, "doomver");
     D_FindWADByExt(D_ForeachFileHdlr);
 
     return;
@@ -1171,7 +1171,7 @@ static void LoadIwadDeh(void)
         if (sep != NULL)
         {
             size_t chex_deh_len = strlen(iwadfile) + 9;
-            chex_deh = Sys_Malloc(chex_deh_len);
+            chex_deh = heap_malloc(chex_deh_len);
             M_StringCopy(chex_deh, iwadfile, chex_deh_len);
             chex_deh[sep - iwadfile + 1] = '\0';
             M_StringConcat(chex_deh, "chex.deh", chex_deh_len);
@@ -1185,7 +1185,7 @@ static void LoadIwadDeh(void)
         // search path instead.  We might find it...
         if (!M_FileExists(chex_deh))
         {
-            Sys_Free(chex_deh);
+            heap_free(chex_deh);
             chex_deh = D_FindWADByName("chex.deh");
         }
 

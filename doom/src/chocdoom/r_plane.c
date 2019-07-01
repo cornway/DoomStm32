@@ -34,6 +34,7 @@
 #include "st_stuff.h"
 #include "p_local.h"
 #include "v_video.h"
+#include <bsp_sys.h>
 
 
 extern planefunction_t		floorfunc;

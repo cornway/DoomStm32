@@ -40,7 +40,7 @@
 // Data.
 #include "dstrings.h"
 #include "sounds.h"
-
+#include <bsp_sys.h>
 //
 // Locally used constants, shortcuts.
 //

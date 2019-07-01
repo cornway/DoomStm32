@@ -34,6 +34,7 @@
 #include <misc_utils.h>
 #include <dev_io.h>
 #include <debug.h>
+#include <heap.h>
 
 static const iwad_t iwads[] =
 {
@@ -217,12 +218,12 @@ static char *GetRegistryString(registry_value_t *reg_val)
     {
         // Allocate a buffer for the value and read the value
 
-        result = Sys_Malloc(len);
+        result = heap_malloc(len);
 
         if (RegQueryValueEx(key, reg_val->value, NULL, &valtype,
                             (unsigned char *) result, &len) != ERROR_SUCCESS)
         {
-            Sys_Free(result);
+            heap_free(result);
             result = NULL;
         }
     }
@@ -257,7 +258,7 @@ static void CheckUninstallStrings(void)
 
         if (unstr == NULL)
         {
-            Sys_Free(val);
+            heap_free(val);
         }
         else
         {
@@ -354,7 +355,7 @@ static void CheckSteamGUSPatches(void)
     }
 
     len = strlen(install_path) + strlen(STEAM_BFG_GUS_PATCHES) + 20;
-    patch_path = Sys_Malloc(len);
+    patch_path = heap_malloc(len);
     M_snprintf(patch_path, len, "%s\\%s\\ACBASS.PAT",
                install_path, STEAM_BFG_GUS_PATCHES);
 
@@ -366,8 +367,8 @@ static void CheckSteamGUSPatches(void)
         M_SetVariable("gus_patch_path", patch_path);
     }
 
-    Sys_Free(patch_path);
-    Sys_Free(install_path);
+    heap_free(patch_path);
+    heap_free(install_path);
 }
 
 // Default install directories for DOS Doom
@@ -445,7 +446,7 @@ static char *CheckDirectoryHasIWAD(char *dir, char *iwadname)
         return filename;
     }
 
-    Sys_Free(filename);
+    heap_free(filename);
 
     return NULL;
 }
@@ -667,7 +668,7 @@ char *D_FindWADByName(char *name)
         }
     }
 
-    Sys_Free(path);
+    heap_free(path);
     // File not found
 
     return NULL;
@@ -712,7 +713,7 @@ char *D_TryFindWADByName(char *filename)
 // to determine whether registered/commercial features
 // should be executed (notably loading PWADs).
 //
-static char D_ReadConf (void)
+static void D_ReadConf (void)
 {
     int f = -1;
     char buf[256];
@@ -753,9 +754,7 @@ char *D_FindIWAD(int mask, GameMission_t *mission)
     //
     // @arg <file>
     //
-    dprintf("%s() : %u\n", __func__, __LINE__);
     D_ReadConf();
-    dprintf("%s() : %u\n", __func__, __LINE__);
     iwadparm = M_CheckParmWithArgs("-iwad", 1);
     if (game_alt_pkg) {
         if (game_alt_pkg == pkg_psx_final) {
@@ -766,7 +765,6 @@ char *D_FindIWAD(int mask, GameMission_t *mission)
         piwadfile = iwadfile;
         iwadparm = 1;
     }
-    dprintf("%s() : %u\n", __func__, __LINE__);
     if (iwadparm)
     {
         // Search through IWAD dirs for an IWAD with the given name.
@@ -809,7 +807,7 @@ const iwad_t **D_FindAllIWADs(int mask)
     char *filename;
     int i;
 
-    result = (const iwad_t **)Sys_Malloc(sizeof(iwad_t *) * (arrlen(iwads) + 1));
+    result = (const iwad_t **)heap_malloc(sizeof(iwad_t *) * (arrlen(iwads) + 1));
     result_len = 0;
 
     // Try to find all IWADs

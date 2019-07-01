@@ -42,6 +42,7 @@
 #include <audio_main.h>
 #include <input_main.h>
 #include <misc_utils.h>
+#include <heap.h>
 
 const char *mus_dir_path_psx = "/doom/music/psx";
 const char *mus_dir_path_3do = "/doom/music/3do";
@@ -53,7 +54,7 @@ extern void dev_main (void);
 
 static void *__vid_alloc (uint32_t size)
 {
-    return Sys_AllocVideo((int *)&size);
+    return heap_alloc_shared(size);
 }
 
 void VID_PreConfig (void)
@@ -62,13 +63,14 @@ void VID_PreConfig (void)
     screen.buf = NULL;
     screen.width = SCREENWIDTH;
     screen.height = SCREENHEIGHT;
-    screen_win_cfg(__vid_alloc, NULL, &screen, GFX_COLOR_MODE_CLUT, 2);
+    vid_config(__vid_alloc, NULL, &screen, GFX_COLOR_MODE_CLUT, 2);
 }
 
 
 int mainloop (int argc, const char *argv[])
 {
     d_main();
+    return 0;
 }
 
 int main(void)

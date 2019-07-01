@@ -34,7 +34,7 @@
 
 #include "doomstat.h"
 #include "st_stuff.h"
-
+#include <bsp_sys.h>
 
 
 

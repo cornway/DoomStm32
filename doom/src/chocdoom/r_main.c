@@ -36,7 +36,7 @@
 #include "r_sky.h"
 
 #include "z_zone.h"
-
+#include <bsp_sys.h>
 
 
 // Fineangles in the SCREENWIDTH wide window.

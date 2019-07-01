@@ -35,6 +35,7 @@
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
+#include <bsp_sys.h>
 
 #include "config.h"
 #ifdef HAVE_LIBPNG

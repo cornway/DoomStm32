@@ -106,7 +106,7 @@ static void LoadResponseFile(int argv_index)
     // at the end of the response file, in which case a '\0' will be
     // needed.
 
-    file = Sys_Malloc(size + 1);
+    file = heap_malloc(size + 1);
 
     i = 0;
 
@@ -126,7 +126,7 @@ static void LoadResponseFile(int argv_index)
 
     // Create new arguments list array
 
-    newargv = Sys_Malloc(sizeof(char *) * MAXARGVS);
+    newargv = heap_malloc(sizeof(char *) * MAXARGVS);
     newargc = 0;
     memset(newargv, 0, sizeof(char *) * MAXARGVS);
 

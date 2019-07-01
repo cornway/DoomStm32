@@ -334,7 +334,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls> </MiscControls>
-              <Define>STM32F769xx,USE_HAL_DRIVER,USE_STM32F769I_DISCO,DATA_IN_ExtSDRAM,USE_LCD_HDMI,USE_USB_HS,STM32_SDK</Define>
+              <Define>STM32F769xx,USE_HAL_DRIVER,USE_STM32F769I_DISCO,DATA_IN_ExtSDRAM,USE_LCD_HDMI,USE_USB_HS,STM32_SDK,BSP_DRIVER,APPLICATION</Define>
               <Undefine></Undefine>
               <IncludePath>..\Inc;..\common\STM32F7xx_Driver\Inc;..\common\FatFs\src;..\common\STM32F7xx_Driver\BSP\Components\Common;..\common\STM32F7xx_Driver\BSP\STM32F769I-Discovery;..\common\STM32F7xx_Driver\CMSIS\Device\ST\STM32F7xx\Include;..\doom\src;..\doom\src\chocdoom;..\common\inc</IncludePath>
             </VariousControls>
@@ -378,16 +378,6 @@
       </TargetOption>
       <Groups>
         <Group>
-          <GroupName>Drivers/CMSIS</GroupName>
-          <Files>
-            <File>
-              <FileName>system_stm32f7xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/system_stm32f7xx.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
           <GroupName>Example/MDK-ARM</GroupName>
           <Files>
             <File>
@@ -424,6 +414,11 @@
               <FileName>stm32f7xx_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\stm32f7xx_it.c</FilePath>
+            </File>
+            <File>
+              <FileName>system_stm32f7xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\misc\arch\Arm\m7\src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -866,11 +861,6 @@
               <FilePath>..\common\audio_mix.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_api.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\bsp_api.c</FilePath>
-            </File>
-            <File>
               <FileName>dev_cmd.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\common\dev_cmd.c</FilePath>
@@ -881,19 +871,9 @@
               <FilePath>..\common\dev_io.c</FilePath>
             </File>
             <File>
-              <FileName>dev_main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\dev_main.c</FilePath>
-            </File>
-            <File>
               <FileName>hdmi_mem.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\common\hdmi_mem.c</FilePath>
-            </File>
-            <File>
-              <FileName>heap.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\heap.c</FilePath>
             </File>
             <File>
               <FileName>input_main.c</FileName>
@@ -904,16 +884,6 @@
               <FileName>lcd_main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\common\lcd_main.c</FilePath>
-            </File>
-            <File>
-              <FileName>mach_stub.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\mach_stub.c</FilePath>
-            </File>
-            <File>
-              <FileName>mpu.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\mpu.c</FilePath>
             </File>
             <File>
               <FileName>music_main.c</FileName>
@@ -1015,6 +985,16 @@
               <FileType>2</FileType>
               <FilePath>..\common\misc\arch\Arm\m7\src\asm_utils.s</FilePath>
             </File>
+            <File>
+              <FileName>bsp_cmd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\bsp_cmd.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_mod.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\bsp_mod.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1054,11 +1034,6 @@
               <FileName>stm32f7xx_hal.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\common\STM32F7xx_Driver\Src\stm32f7xx_hal.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f7xx_hal_cortex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\STM32F7xx_Driver\Src\stm32f7xx_hal_cortex.c</FilePath>
             </File>
             <File>
               <FileName>stm32f7xx_hal_crc.c</FileName>
@@ -1379,6 +1354,71 @@
               <FileName>wm8994.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\common\STM32F7xx_Driver\BSP\Components\wm8994\wm8994.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>boot</GroupName>
+          <Files>
+            <File>
+              <FileName>baudio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\boot\baudio.c</FilePath>
+            </File>
+            <File>
+              <FileName>bgui.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\boot\bgui.c</FilePath>
+            </File>
+            <File>
+              <FileName>bhal.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\boot\bhal.c</FilePath>
+            </File>
+            <File>
+              <FileName>bmain.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\boot\bmain.c</FilePath>
+            </File>
+            <File>
+              <FileName>bwin.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\boot\bwin.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>app</GroupName>
+          <Files>
+            <File>
+              <FileName>stm32f7xx_hal_cortex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\STM32F7xx_Driver\Src\stm32f7xx_hal_cortex.c</FilePath>
+            </File>
+            <File>
+              <FileName>mach_stub.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\mach_stub.c</FilePath>
+            </File>
+            <File>
+              <FileName>mpu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\mpu.c</FilePath>
+            </File>
+            <File>
+              <FileName>dev_main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\dev_main.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_api.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\bsp_api.c</FilePath>
+            </File>
+            <File>
+              <FileName>heap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\heap.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1759,16 +1799,6 @@
       </TargetOption>
       <Groups>
         <Group>
-          <GroupName>Drivers/CMSIS</GroupName>
-          <Files>
-            <File>
-              <FileName>system_stm32f7xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/system_stm32f7xx.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
           <GroupName>Example/MDK-ARM</GroupName>
           <Files>
             <File>
@@ -1805,6 +1835,61 @@
               <FileName>stm32f7xx_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\stm32f7xx_it.c</FilePath>
+              <FileOption>
+                <CommonProperty>
+                  <UseCPPCompiler>2</UseCPPCompiler>
+                  <RVCTCodeConst>0</RVCTCodeConst>
+                  <RVCTZI>0</RVCTZI>
+                  <RVCTOtherData>0</RVCTOtherData>
+                  <ModuleSelection>0</ModuleSelection>
+                  <IncludeInBuild>0</IncludeInBuild>
+                  <AlwaysBuild>2</AlwaysBuild>
+                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
+                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
+                  <PublicsOnly>2</PublicsOnly>
+                  <StopOnExitCode>11</StopOnExitCode>
+                  <CustomArgument></CustomArgument>
+                  <IncludeLibraryModules></IncludeLibraryModules>
+                  <ComprImg>1</ComprImg>
+                </CommonProperty>
+                <FileArmAds>
+                  <Cads>
+                    <interw>2</interw>
+                    <Optim>0</Optim>
+                    <oTime>2</oTime>
+                    <SplitLS>2</SplitLS>
+                    <OneElfS>2</OneElfS>
+                    <Strict>2</Strict>
+                    <EnumInt>2</EnumInt>
+                    <PlainCh>2</PlainCh>
+                    <Ropi>2</Ropi>
+                    <Rwpi>2</Rwpi>
+                    <wLevel>0</wLevel>
+                    <uThumb>2</uThumb>
+                    <uSurpInc>2</uSurpInc>
+                    <uC99>2</uC99>
+                    <useXO>2</useXO>
+                    <v6Lang>0</v6Lang>
+                    <v6LangP>0</v6LangP>
+                    <vShortEn>2</vShortEn>
+                    <vShortWch>2</vShortWch>
+                    <v6Lto>2</v6Lto>
+                    <v6WtE>2</v6WtE>
+                    <v6Rtti>2</v6Rtti>
+                    <VariousControls>
+                      <MiscControls></MiscControls>
+                      <Define></Define>
+                      <Undefine></Undefine>
+                      <IncludePath></IncludePath>
+                    </VariousControls>
+                  </Cads>
+                </FileArmAds>
+              </FileOption>
+            </File>
+            <File>
+              <FileName>system_stm32f7xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\misc\arch\Arm\m7\src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -2225,6 +2310,74 @@
         </Group>
         <Group>
           <GroupName>common</GroupName>
+          <GroupOption>
+            <CommonProperty>
+              <UseCPPCompiler>0</UseCPPCompiler>
+              <RVCTCodeConst>0</RVCTCodeConst>
+              <RVCTZI>0</RVCTZI>
+              <RVCTOtherData>0</RVCTOtherData>
+              <ModuleSelection>0</ModuleSelection>
+              <IncludeInBuild>0</IncludeInBuild>
+              <AlwaysBuild>2</AlwaysBuild>
+              <GenerateAssemblyFile>2</GenerateAssemblyFile>
+              <AssembleAssemblyFile>2</AssembleAssemblyFile>
+              <PublicsOnly>2</PublicsOnly>
+              <StopOnExitCode>11</StopOnExitCode>
+              <CustomArgument></CustomArgument>
+              <IncludeLibraryModules></IncludeLibraryModules>
+              <ComprImg>1</ComprImg>
+            </CommonProperty>
+            <GroupArmAds>
+              <Cads>
+                <interw>2</interw>
+                <Optim>0</Optim>
+                <oTime>2</oTime>
+                <SplitLS>2</SplitLS>
+                <OneElfS>2</OneElfS>
+                <Strict>2</Strict>
+                <EnumInt>2</EnumInt>
+                <PlainCh>2</PlainCh>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <wLevel>0</wLevel>
+                <uThumb>2</uThumb>
+                <uSurpInc>2</uSurpInc>
+                <uC99>2</uC99>
+                <useXO>2</useXO>
+                <v6Lang>0</v6Lang>
+                <v6LangP>0</v6LangP>
+                <vShortEn>2</vShortEn>
+                <vShortWch>2</vShortWch>
+                <v6Lto>2</v6Lto>
+                <v6WtE>2</v6WtE>
+                <v6Rtti>2</v6Rtti>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Cads>
+              <Aads>
+                <interw>2</interw>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <thumb>2</thumb>
+                <SplitLS>2</SplitLS>
+                <SwStkChk>2</SwStkChk>
+                <NoWarn>2</NoWarn>
+                <uSurpInc>2</uSurpInc>
+                <useXO>2</useXO>
+                <uClangAs>2</uClangAs>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Aads>
+            </GroupArmAds>
+          </GroupOption>
           <Files>
             <File>
               <FileName>audio_ext.c</FileName>
@@ -2247,11 +2400,6 @@
               <FilePath>..\common\audio_mix.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_api.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\bsp_api.c</FilePath>
-            </File>
-            <File>
               <FileName>dev_cmd.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\common\dev_cmd.c</FilePath>
@@ -2262,19 +2410,9 @@
               <FilePath>..\common\dev_io.c</FilePath>
             </File>
             <File>
-              <FileName>dev_main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\dev_main.c</FilePath>
-            </File>
-            <File>
               <FileName>hdmi_mem.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\common\hdmi_mem.c</FilePath>
-            </File>
-            <File>
-              <FileName>heap.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\heap.c</FilePath>
             </File>
             <File>
               <FileName>input_main.c</FileName>
@@ -2285,16 +2423,6 @@
               <FileName>lcd_main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\common\lcd_main.c</FilePath>
-            </File>
-            <File>
-              <FileName>mach_stub.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\mach_stub.c</FilePath>
-            </File>
-            <File>
-              <FileName>mpu.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\mpu.c</FilePath>
             </File>
             <File>
               <FileName>music_main.c</FileName>
@@ -2396,10 +2524,88 @@
               <FileType>2</FileType>
               <FilePath>..\common\misc\arch\Arm\m7\src\asm_utils.s</FilePath>
             </File>
+            <File>
+              <FileName>bsp_cmd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\bsp_cmd.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_mod.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\bsp_mod.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>third</GroupName>
+          <GroupOption>
+            <CommonProperty>
+              <UseCPPCompiler>0</UseCPPCompiler>
+              <RVCTCodeConst>0</RVCTCodeConst>
+              <RVCTZI>0</RVCTZI>
+              <RVCTOtherData>0</RVCTOtherData>
+              <ModuleSelection>0</ModuleSelection>
+              <IncludeInBuild>0</IncludeInBuild>
+              <AlwaysBuild>2</AlwaysBuild>
+              <GenerateAssemblyFile>2</GenerateAssemblyFile>
+              <AssembleAssemblyFile>2</AssembleAssemblyFile>
+              <PublicsOnly>2</PublicsOnly>
+              <StopOnExitCode>11</StopOnExitCode>
+              <CustomArgument></CustomArgument>
+              <IncludeLibraryModules></IncludeLibraryModules>
+              <ComprImg>1</ComprImg>
+            </CommonProperty>
+            <GroupArmAds>
+              <Cads>
+                <interw>2</interw>
+                <Optim>0</Optim>
+                <oTime>2</oTime>
+                <SplitLS>2</SplitLS>
+                <OneElfS>2</OneElfS>
+                <Strict>2</Strict>
+                <EnumInt>2</EnumInt>
+                <PlainCh>2</PlainCh>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <wLevel>0</wLevel>
+                <uThumb>2</uThumb>
+                <uSurpInc>2</uSurpInc>
+                <uC99>2</uC99>
+                <useXO>2</useXO>
+                <v6Lang>0</v6Lang>
+                <v6LangP>0</v6LangP>
+                <vShortEn>2</vShortEn>
+                <vShortWch>2</vShortWch>
+                <v6Lto>2</v6Lto>
+                <v6WtE>2</v6WtE>
+                <v6Rtti>2</v6Rtti>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Cads>
+              <Aads>
+                <interw>2</interw>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <thumb>2</thumb>
+                <SplitLS>2</SplitLS>
+                <SwStkChk>2</SwStkChk>
+                <NoWarn>2</NoWarn>
+                <uSurpInc>2</uSurpInc>
+                <useXO>2</useXO>
+                <uClangAs>2</uClangAs>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Aads>
+            </GroupArmAds>
+          </GroupOption>
           <Files>
             <File>
               <FileName>diskio.c</FileName>
@@ -2430,16 +2636,79 @@
         </Group>
         <Group>
           <GroupName>hal</GroupName>
+          <GroupOption>
+            <CommonProperty>
+              <UseCPPCompiler>0</UseCPPCompiler>
+              <RVCTCodeConst>0</RVCTCodeConst>
+              <RVCTZI>0</RVCTZI>
+              <RVCTOtherData>0</RVCTOtherData>
+              <ModuleSelection>0</ModuleSelection>
+              <IncludeInBuild>0</IncludeInBuild>
+              <AlwaysBuild>2</AlwaysBuild>
+              <GenerateAssemblyFile>2</GenerateAssemblyFile>
+              <AssembleAssemblyFile>2</AssembleAssemblyFile>
+              <PublicsOnly>2</PublicsOnly>
+              <StopOnExitCode>11</StopOnExitCode>
+              <CustomArgument></CustomArgument>
+              <IncludeLibraryModules></IncludeLibraryModules>
+              <ComprImg>1</ComprImg>
+            </CommonProperty>
+            <GroupArmAds>
+              <Cads>
+                <interw>2</interw>
+                <Optim>0</Optim>
+                <oTime>2</oTime>
+                <SplitLS>2</SplitLS>
+                <OneElfS>2</OneElfS>
+                <Strict>2</Strict>
+                <EnumInt>2</EnumInt>
+                <PlainCh>2</PlainCh>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <wLevel>0</wLevel>
+                <uThumb>2</uThumb>
+                <uSurpInc>2</uSurpInc>
+                <uC99>2</uC99>
+                <useXO>2</useXO>
+                <v6Lang>0</v6Lang>
+                <v6LangP>0</v6LangP>
+                <vShortEn>2</vShortEn>
+                <vShortWch>2</vShortWch>
+                <v6Lto>2</v6Lto>
+                <v6WtE>2</v6WtE>
+                <v6Rtti>2</v6Rtti>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Cads>
+              <Aads>
+                <interw>2</interw>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <thumb>2</thumb>
+                <SplitLS>2</SplitLS>
+                <SwStkChk>2</SwStkChk>
+                <NoWarn>2</NoWarn>
+                <uSurpInc>2</uSurpInc>
+                <useXO>2</useXO>
+                <uClangAs>2</uClangAs>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Aads>
+            </GroupArmAds>
+          </GroupOption>
           <Files>
             <File>
               <FileName>stm32f7xx_hal.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\common\STM32F7xx_Driver\Src\stm32f7xx_hal.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f7xx_hal_cortex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\STM32F7xx_Driver\Src\stm32f7xx_hal_cortex.c</FilePath>
             </File>
             <File>
               <FileName>stm32f7xx_hal_crc.c</FileName>
@@ -2705,6 +2974,74 @@
         </Group>
         <Group>
           <GroupName>bsp</GroupName>
+          <GroupOption>
+            <CommonProperty>
+              <UseCPPCompiler>0</UseCPPCompiler>
+              <RVCTCodeConst>0</RVCTCodeConst>
+              <RVCTZI>0</RVCTZI>
+              <RVCTOtherData>0</RVCTOtherData>
+              <ModuleSelection>0</ModuleSelection>
+              <IncludeInBuild>0</IncludeInBuild>
+              <AlwaysBuild>2</AlwaysBuild>
+              <GenerateAssemblyFile>2</GenerateAssemblyFile>
+              <AssembleAssemblyFile>2</AssembleAssemblyFile>
+              <PublicsOnly>2</PublicsOnly>
+              <StopOnExitCode>11</StopOnExitCode>
+              <CustomArgument></CustomArgument>
+              <IncludeLibraryModules></IncludeLibraryModules>
+              <ComprImg>1</ComprImg>
+            </CommonProperty>
+            <GroupArmAds>
+              <Cads>
+                <interw>2</interw>
+                <Optim>0</Optim>
+                <oTime>2</oTime>
+                <SplitLS>2</SplitLS>
+                <OneElfS>2</OneElfS>
+                <Strict>2</Strict>
+                <EnumInt>2</EnumInt>
+                <PlainCh>2</PlainCh>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <wLevel>0</wLevel>
+                <uThumb>2</uThumb>
+                <uSurpInc>2</uSurpInc>
+                <uC99>2</uC99>
+                <useXO>2</useXO>
+                <v6Lang>0</v6Lang>
+                <v6LangP>0</v6LangP>
+                <vShortEn>2</vShortEn>
+                <vShortWch>2</vShortWch>
+                <v6Lto>2</v6Lto>
+                <v6WtE>2</v6WtE>
+                <v6Rtti>2</v6Rtti>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Cads>
+              <Aads>
+                <interw>2</interw>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <thumb>2</thumb>
+                <SplitLS>2</SplitLS>
+                <SwStkChk>2</SwStkChk>
+                <NoWarn>2</NoWarn>
+                <uSurpInc>2</uSurpInc>
+                <useXO>2</useXO>
+                <uClangAs>2</uClangAs>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Aads>
+            </GroupArmAds>
+          </GroupOption>
           <Files>
             <File>
               <FileName>stm32f769i_discovery.c</FileName>
@@ -2760,6 +3097,139 @@
               <FileName>wm8994.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\common\STM32F7xx_Driver\BSP\Components\wm8994\wm8994.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>boot</GroupName>
+          <GroupOption>
+            <CommonProperty>
+              <UseCPPCompiler>0</UseCPPCompiler>
+              <RVCTCodeConst>0</RVCTCodeConst>
+              <RVCTZI>0</RVCTZI>
+              <RVCTOtherData>0</RVCTOtherData>
+              <ModuleSelection>0</ModuleSelection>
+              <IncludeInBuild>0</IncludeInBuild>
+              <AlwaysBuild>2</AlwaysBuild>
+              <GenerateAssemblyFile>2</GenerateAssemblyFile>
+              <AssembleAssemblyFile>2</AssembleAssemblyFile>
+              <PublicsOnly>2</PublicsOnly>
+              <StopOnExitCode>11</StopOnExitCode>
+              <CustomArgument></CustomArgument>
+              <IncludeLibraryModules></IncludeLibraryModules>
+              <ComprImg>1</ComprImg>
+            </CommonProperty>
+            <GroupArmAds>
+              <Cads>
+                <interw>2</interw>
+                <Optim>0</Optim>
+                <oTime>2</oTime>
+                <SplitLS>2</SplitLS>
+                <OneElfS>2</OneElfS>
+                <Strict>2</Strict>
+                <EnumInt>2</EnumInt>
+                <PlainCh>2</PlainCh>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <wLevel>0</wLevel>
+                <uThumb>2</uThumb>
+                <uSurpInc>2</uSurpInc>
+                <uC99>2</uC99>
+                <useXO>2</useXO>
+                <v6Lang>0</v6Lang>
+                <v6LangP>0</v6LangP>
+                <vShortEn>2</vShortEn>
+                <vShortWch>2</vShortWch>
+                <v6Lto>2</v6Lto>
+                <v6WtE>2</v6WtE>
+                <v6Rtti>2</v6Rtti>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Cads>
+              <Aads>
+                <interw>2</interw>
+                <Ropi>2</Ropi>
+                <Rwpi>2</Rwpi>
+                <thumb>2</thumb>
+                <SplitLS>2</SplitLS>
+                <SwStkChk>2</SwStkChk>
+                <NoWarn>2</NoWarn>
+                <uSurpInc>2</uSurpInc>
+                <useXO>2</useXO>
+                <uClangAs>2</uClangAs>
+                <VariousControls>
+                  <MiscControls></MiscControls>
+                  <Define></Define>
+                  <Undefine></Undefine>
+                  <IncludePath></IncludePath>
+                </VariousControls>
+              </Aads>
+            </GroupArmAds>
+          </GroupOption>
+          <Files>
+            <File>
+              <FileName>baudio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\boot\baudio.c</FilePath>
+            </File>
+            <File>
+              <FileName>bgui.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\boot\bgui.c</FilePath>
+            </File>
+            <File>
+              <FileName>bhal.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\boot\bhal.c</FilePath>
+            </File>
+            <File>
+              <FileName>bmain.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\boot\bmain.c</FilePath>
+            </File>
+            <File>
+              <FileName>bwin.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\boot\bwin.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>app</GroupName>
+          <Files>
+            <File>
+              <FileName>stm32f7xx_hal_cortex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\STM32F7xx_Driver\Src\stm32f7xx_hal_cortex.c</FilePath>
+            </File>
+            <File>
+              <FileName>mach_stub.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\mach_stub.c</FilePath>
+            </File>
+            <File>
+              <FileName>mpu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\mpu.c</FilePath>
+            </File>
+            <File>
+              <FileName>dev_main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\dev_main.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_api.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\bsp_api.c</FilePath>
+            </File>
+            <File>
+              <FileName>heap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\heap.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -3140,16 +3610,6 @@
       </TargetOption>
       <Groups>
         <Group>
-          <GroupName>Drivers/CMSIS</GroupName>
-          <Files>
-            <File>
-              <FileName>system_stm32f7xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../Src/system_stm32f7xx.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
           <GroupName>Example/MDK-ARM</GroupName>
           <Files>
             <File>
@@ -3186,6 +3646,11 @@
               <FileName>stm32f7xx_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\stm32f7xx_it.c</FilePath>
+            </File>
+            <File>
+              <FileName>system_stm32f7xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\misc\arch\Arm\m7\src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -3628,11 +4093,6 @@
               <FilePath>..\common\audio_mix.c</FilePath>
             </File>
             <File>
-              <FileName>bsp_api.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\bsp_api.c</FilePath>
-            </File>
-            <File>
               <FileName>dev_cmd.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\common\dev_cmd.c</FilePath>
@@ -3643,19 +4103,9 @@
               <FilePath>..\common\dev_io.c</FilePath>
             </File>
             <File>
-              <FileName>dev_main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\dev_main.c</FilePath>
-            </File>
-            <File>
               <FileName>hdmi_mem.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\common\hdmi_mem.c</FilePath>
-            </File>
-            <File>
-              <FileName>heap.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\heap.c</FilePath>
             </File>
             <File>
               <FileName>input_main.c</FileName>
@@ -3666,16 +4116,6 @@
               <FileName>lcd_main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\common\lcd_main.c</FilePath>
-            </File>
-            <File>
-              <FileName>mach_stub.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\mach_stub.c</FilePath>
-            </File>
-            <File>
-              <FileName>mpu.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\mpu.c</FilePath>
             </File>
             <File>
               <FileName>music_main.c</FileName>
@@ -3777,6 +4217,16 @@
               <FileType>2</FileType>
               <FilePath>..\common\misc\arch\Arm\m7\src\asm_utils.s</FilePath>
             </File>
+            <File>
+              <FileName>bsp_cmd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\bsp_cmd.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_mod.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\bsp_mod.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -3816,11 +4266,6 @@
               <FileName>stm32f7xx_hal.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\common\STM32F7xx_Driver\Src\stm32f7xx_hal.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f7xx_hal_cortex.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\STM32F7xx_Driver\Src\stm32f7xx_hal_cortex.c</FilePath>
             </File>
             <File>
               <FileName>stm32f7xx_hal_crc.c</FileName>
@@ -4141,6 +4586,71 @@
               <FileName>wm8994.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\common\STM32F7xx_Driver\BSP\Components\wm8994\wm8994.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>boot</GroupName>
+          <Files>
+            <File>
+              <FileName>baudio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\boot\baudio.c</FilePath>
+            </File>
+            <File>
+              <FileName>bgui.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\boot\bgui.c</FilePath>
+            </File>
+            <File>
+              <FileName>bhal.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\boot\bhal.c</FilePath>
+            </File>
+            <File>
+              <FileName>bmain.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\boot\bmain.c</FilePath>
+            </File>
+            <File>
+              <FileName>bwin.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\boot\bwin.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>app</GroupName>
+          <Files>
+            <File>
+              <FileName>stm32f7xx_hal_cortex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\STM32F7xx_Driver\Src\stm32f7xx_hal_cortex.c</FilePath>
+            </File>
+            <File>
+              <FileName>mach_stub.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\mach_stub.c</FilePath>
+            </File>
+            <File>
+              <FileName>mpu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\mpu.c</FilePath>
+            </File>
+            <File>
+              <FileName>dev_main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\dev_main.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_api.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\bsp_api.c</FilePath>
+            </File>
+            <File>
+              <FileName>heap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\heap.c</FilePath>
             </File>
           </Files>
         </Group>

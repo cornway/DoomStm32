@@ -21,7 +21,8 @@
 #include <string.h>
 
 #include <stdarg.h>
-#include "debug.h"
+#include <heap.h>
+#include <debug.h>
 
 
 #ifdef _WIN32
@@ -49,6 +50,7 @@
 
 #include "w_wad.h"
 #include "z_zone.h"
+#include <bsp_sys.h>
 
 #ifdef __MACOSX__
 #include <CoreFoundation/CFUserNotification.h>
@@ -119,7 +121,7 @@ static byte *AutoAllocMemory(int *size, int default_ram, int min_ram)
         *size = default_ram;
 
         //zonemem = (byte *)malloc(*size);
-        zonemem = (byte *)Sys_AllocShared(size);
+        zonemem = (byte *)heap_malloc(*size);
         // Failed to allocate?  Reduce zone size until we reach a size
         // that is acceptable.
 
@@ -153,7 +155,7 @@ byte *I_ZoneBase (int *size)
     }
     else
     {
-        default_ram = Sys_AllocBytesLeft() - (1024 * 64);
+        default_ram = heap_avail() - (1024 * 64);
         default_ram = default_ram - (default_ram & ((1024 * 64) - 1));
         min_ram = MIN_RAM;
     }

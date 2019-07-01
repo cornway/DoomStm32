@@ -60,6 +60,7 @@
 #include "d_iwad.h"
 #include "p_saveg.h"
 #include <dev_io.h>
+#include <bsp_sys.h>
 
 
 extern patch_t*		hu_font[HU_FONTSIZE];
