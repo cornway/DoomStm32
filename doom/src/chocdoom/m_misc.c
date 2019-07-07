@@ -46,6 +46,7 @@
 #include "w_wad.h"
 #include "z_zone.h"
 #include <dev_io.h>
+#include <heap.h>
 //
 // Create a directory
 //
@@ -64,7 +65,7 @@ void M_MakeDirectory(char *path)
     // remove trailing slash
     len = strlen (path);
 
-    path_mod = (char*)Sys_Malloc (len + 1);
+    path_mod = (char*)heap_malloc (len + 1);
 
     if (path_mod ==  NULL) {
         return;
@@ -75,15 +76,18 @@ void M_MakeDirectory(char *path)
     {
     	path_mod[len - 1] = 0;
     }
-
-    dir = d_mkdir(path_mod);
-
+    dir = d_opendir(path_mod);
+    if (dir >= 0) {
+        d_closedir(dir);
+    } else {
+        dir = d_mkdir(path_mod);
+    }
     if (dir < 0)
     {
     	I_Error ("M_MakeDirectory: path = '%s', path_mod = '%s'", path, path_mod);
     }
 
-    Sys_Free (path_mod);
+    heap_free (path_mod);
 #endif
 #endif
 }
@@ -498,7 +502,7 @@ char *M_StringJoin(const char *s, ...)
     }
     va_end(args);
 
-    result = Sys_Malloc(result_len);
+    result = (char *)heap_malloc(result_len);
 
     if (result == NULL)
     {
@@ -576,11 +580,11 @@ char *M_OEMToUTF8(const char *oem)
     wchar_t *tmp;
     char *result;
 
-    tmp = Sys_Malloc(len * sizeof(wchar_t));
+    tmp = heap_malloc(len * sizeof(wchar_t));
     MultiByteToWideChar(CP_OEMCP, 0, oem, len, tmp, len);
-    result = Sys_Malloc(len * 4);
+    result = heap_malloc(len * 4);
     WideCharToMultiByte(CP_UTF8, 0, tmp, len, result, len * 4, NULL, NULL);
-    Sys_Free(tmp);
+    heap_free(tmp);
 
     return result;
 }

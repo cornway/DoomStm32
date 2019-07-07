@@ -42,7 +42,7 @@ extern "C" {
 #endif
 
 #include "stm32f769i_discovery_audio.h"
-
+#include "stm32f769i_discovery_sd.h"
 
 /* Includes ------------------------------------------------------------------*/
 /* Exported types ------------------------------------------------------------*/

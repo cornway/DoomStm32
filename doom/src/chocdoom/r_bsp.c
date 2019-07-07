@@ -34,6 +34,7 @@
 #include "r_state.h"
 
 #include "st_stuff.h"
+#include <bsp_sys.h>
 
 //#include "r_local.h"
 
@@ -506,6 +507,7 @@ void R_Subsector (int num)
 
 void R_RenderBSPNode(int bspnum)
 {
+  profiler_enter();
   while (!(bspnum & NF_SUBSECTOR))  // Found a subsector?
     {
       node_t *bsp = &nodes[bspnum];
@@ -518,11 +520,14 @@ void R_RenderBSPNode(int bspnum)
 
       // Possibly divide back space.
 
-      if (!R_CheckBBox(bsp->bbox[side^1]))
+      if (!R_CheckBBox(bsp->bbox[side^1])) {
+        profiler_exit();
         return;
+      }
 
       bspnum = bsp->children[side^1];
     }
   R_Subsector(bspnum == -1 ? 0 : bspnum & ~NF_SUBSECTOR);
+  profiler_exit();
 }
 

@@ -415,7 +415,7 @@ void R_DrawColumnLow (void)
 //
 // Spectre/Invisibility.
 //
-#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
+#if 1/*(GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)*/
 #define FUZZTABLE		50 
 #define FUZZOFF	(SCREENWIDTH)
 
@@ -448,7 +448,7 @@ void R_DrawFuzzColumn (void)
     pix_t       *dest;
     float       frac;
     float       fracstep;
-#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
+#if 1/*(GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)*/
     int         clut_idx;
 #endif
 
@@ -493,7 +493,8 @@ void R_DrawFuzzColumn (void)
 	//  a pixel that is either one column
 	//  left or right of the current one.
 	// Add index from colormap to index.
-#if (GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)
+        /*FIXME : !!!*/
+#if 0/*(GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)*/
 
     pix = dc_colormap[dc_source[(int)frac & 0x7f]];
     *dest = I_BlendPix(pixel(pix), *dest, 48);
@@ -524,7 +525,7 @@ void R_DrawFuzzColumnLow (void)
     pix_t       *dest2;
     float       frac;
     float       fracstep;
-#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
+#if 1/*(GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)*/
     int         clut_idx;
 #endif
     int x;
@@ -575,7 +576,7 @@ void R_DrawFuzzColumnLow (void)
 	//  a pixel that is either one column
 	//  left or right of the current one.
 	// Add index from colormap to index.
-#if (GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)
+#if 0/*(GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)*/
 
     pix = dc_colormap[dc_source[(int)frac & 0x7f]];
     *dest = I_BlendPix(pixel(pix), *dest, 48);
@@ -1056,13 +1057,13 @@ void R_FillBackScreen (void)
     { 
 	for (x=0 ; x<SCREENWIDTH/64 ; x++) 
 	{ 
-	    memcpy (dest, src+((y&63)<<6), 64 * sizeof(pix_t)); 
+	    d_memcpy (dest, src+((y&63)<<6), 64 * sizeof(pix_t)); 
 	    dest += 64; 
 	} 
 
 	if (SCREENWIDTH&63) 
 	{ 
-	    memcpy (dest, src+((y&63)<<6), SCREENWIDTH&63 * sizeof(pix_t)); 
+	    d_memcpy (dest, src+((y&63)<<6), SCREENWIDTH&63 * sizeof(pix_t)); 
 	    dest += (SCREENWIDTH&63); 
 	} 
     } 
@@ -1125,7 +1126,7 @@ R_VideoErase
 
     if (background_buffer != NULL)
     {
-        memcpy(I_VideoBuffer + ofs, background_buffer + ofs, count * sizeof(pix_t)); 
+        d_memcpy(I_VideoBuffer + ofs, background_buffer + ofs, count * sizeof(pix_t)); 
     }
 } 
 

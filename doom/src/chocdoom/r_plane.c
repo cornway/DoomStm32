@@ -34,6 +34,7 @@
 #include "st_stuff.h"
 #include "p_local.h"
 #include "v_video.h"
+#include <bsp_sys.h>
 
 
 extern planefunction_t		floorfunc;
@@ -279,24 +280,13 @@ R_MakeSpans
 {
     fixed_t distance = FixedMul (planeheight, yslope[b1]);
 
-    if (distance >= R_DISTANCE_MID) {
-        while (t1 < t2 && t1<=b1) {
-            V_DrawHorizLine(spanstart[t1], t1, x - 1 - spanstart[t1], 0);
-            t1++;
-        }
-        while (b1 > b2 && b1>=t1) {
-            V_DrawHorizLine(spanstart[b1], b1, x - 1 - spanstart[b1], 0);
-            b1--;
-        }
-    } else {
-        while (t1 < t2 && t1<=b1) {
-            R_MapPlane (t1,spanstart[t1],x-1);
-            t1++;
-        }
-        while (b1 > b2 && b1>=t1) {
-            R_MapPlane (b1,spanstart[b1],x-1);
-            b1--;
-        }
+    while (t1 < t2 && t1<=b1) {
+        R_MapPlane (t1,spanstart[t1],x-1);
+        t1++;
+    }
+    while (b1 > b2 && b1>=t1) {
+        R_MapPlane (b1,spanstart[b1],x-1);
+        b1--;
     }
     while (t2 < t1 && t2<=b2)
     {
@@ -325,6 +315,7 @@ void R_DrawPlanes (void)
     int			angle;
     int                 lumpnum;
 
+    profiler_enter();
     render_on_distance = false;
 #ifdef RANGECHECK
     if (ds_p - drawsegs > MAXDRAWSEGS)
@@ -403,4 +394,5 @@ void R_DrawPlanes (void)
 	
     W_ReleaseLumpNum(lumpnum);
     }
+    profiler_exit();
 }

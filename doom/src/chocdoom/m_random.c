@@ -21,6 +21,7 @@
 #endif
 
 #include "m_random.h"
+#include <dev_io.h>
 //
 // M_Random
 // Returns a 0-255 number
@@ -64,7 +65,6 @@ int M_Random (void)
     return rndtable[rndindex];
 }
 
-extern volatile uint32_t systime;
 void M_ClearRandom (void)
 {
     prndindex = 0;
@@ -73,7 +73,7 @@ void M_ClearRandom (void)
 #if ORIGCODE
     rndindex = time(NULL) & 0xff;
 #else
-	rndindex = systime & 0xff;
+	rndindex = d_time() & 0xff;
 #endif
 }
 

@@ -12,8 +12,6 @@
 #define AUDIO_MODULE_PRESENT        (1)
 #define MUSIC_MODULE_PRESENT        (1)
 
-#define GFX_COLOR_MODE GFX_COLOR_MODE_CLUT
-
 #define AUDIO_SAMPLE_RATE           (22050U)
 
 #define DEVIO_READONLY              (0)

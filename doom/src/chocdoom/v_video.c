@@ -35,6 +35,7 @@
 #include "v_video.h"
 #include "w_wad.h"
 #include "z_zone.h"
+#include <bsp_sys.h>
 
 #include "config.h"
 #ifdef HAVE_LIBPNG
@@ -277,7 +278,9 @@ void V_DrawPatchFlipped(int x, int y, patch_t *patch)
 
 void V_DrawPatchDirect(int x, int y, patch_t *patch)
 {
+    profiler_enter();
     V_DrawPatch(x, y, patch); 
+    profiler_exit();
 } 
 
 //

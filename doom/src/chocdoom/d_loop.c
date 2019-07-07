@@ -41,6 +41,8 @@
 #include "net_server.h"
 #include "net_sdl.h"
 #include "net_loop.h"
+#include <misc_utils.h>
+#include <bsp_sys.h>
 
 extern void I_GetEvent (void);
 
@@ -721,6 +723,7 @@ void TryRunTics (void)
     int	availabletics;
     int	counts;
 
+    profiler_enter();
     // get real tics
     entertic = I_GetTime() / ticdup;
     realtics = entertic - oldentertics;
@@ -814,7 +817,7 @@ void TryRunTics (void)
             if (gametic/ticdup > lowtic)
                 I_Error ("gametic>lowtic");
 
-            memcpy(local_playeringame, set->ingame, sizeof(local_playeringame));
+            d_memcpy(local_playeringame, set->ingame, sizeof(local_playeringame));
 
             loop_interface->RunTic(set->cmds, set->ingame);
 	    gametic++;
@@ -826,6 +829,7 @@ void TryRunTics (void)
 
 	NetUpdate ();	// check for new console commands
     }
+    profiler_exit();
 }
 
 void D_RegisterLoopCallbacks(loop_interface_t *i)

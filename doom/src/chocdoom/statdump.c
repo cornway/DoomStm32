@@ -26,7 +26,7 @@
 #include "d_player.h"
 #include "d_mode.h"
 #include "m_argv.h"
-
+#include <misc_utils.h>
 #include "statdump.h"
 
 #if ORIGCODE
@@ -322,7 +322,7 @@ void StatCopy(wbstartstruct_t *stats)
 {
     if (M_ParmExists("-statdump") && num_captured_stats < MAX_CAPTURES)
     {
-        memcpy(&captured_stats[num_captured_stats], stats,
+        d_memcpy(&captured_stats[num_captured_stats], stats,
                sizeof(wbstartstruct_t));
         ++num_captured_stats;
     }

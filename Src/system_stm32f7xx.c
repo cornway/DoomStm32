@@ -95,10 +95,14 @@
 /*!< Uncomment the following line if you need to relocate your vector Table in
      Internal SRAM. */
 /* #define VECT_TAB_SRAM */
-#define VECT_TAB_OFFSET  0x00 /*!< Vector Table base offset field. 
+#if defined(APPLICATION)
+#define VECT_TAB_OFFSET  0x00100000
+                                   /*!< Vector Table base offset field. 
                                    This value must be a multiple of 0x200. */
 /******************************************************************************/
-
+#else
+#define VECT_TAB_OFFSET  0
+#endif
 /**
   * @}
   */
@@ -134,7 +138,7 @@
 /** @addtogroup STM32F7xx_System_Private_FunctionPrototypes
   * @{
   */
-#if defined (DATA_IN_ExtSDRAM)
+#if defined (DATA_IN_ExtSDRAM) || defined(APPLICATION)
   static void SystemInit_ExtMemCtl(void); 
 #endif /* DATA_IN_ExtSDRAM */
 
@@ -178,7 +182,7 @@ void SystemInit(void)
   /* Disable all interrupts */
   RCC->CIR = 0x00000000;
 
-#if defined (DATA_IN_ExtSDRAM)
+#if defined (DATA_IN_ExtSDRAM) || defined(APPLICATION)
   SystemInit_ExtMemCtl(); 
 #endif /* DATA_IN_ExtSDRAM */
 
@@ -274,7 +278,7 @@ void SystemCoreClockUpdate(void)
   SystemCoreClock >>= tmp;
 }
 
-#if defined (DATA_IN_ExtSDRAM)
+#if defined (DATA_IN_ExtSDRAM) || defined(APPLICATION)
 /**
   * @brief  Setup the external memory controller.
   *         Called in startup_stm32f7xx.s before jump to main.

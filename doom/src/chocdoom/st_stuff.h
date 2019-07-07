@@ -62,7 +62,7 @@ typedef enum {
     LT_MAX,
 } light_t;
 
-#if (GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)
+#if 1/*(GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)*/
 static inline int ST_setPaletteNum (int num);
 static inline int ST_StartLight (fixed_t distance, int prio, int light, light_t type) {return -1;};
 static inline void ST_StopLight (void) {};

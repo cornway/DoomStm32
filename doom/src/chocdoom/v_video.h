@@ -25,6 +25,7 @@
 #include "doomtype.h"
 
 // Needed because we are refering to patches.
+#include <i_video.h>
 #include "v_patch.h"
 #include "gfx.h"
 //
@@ -41,7 +42,8 @@ extern byte *tinttable;
 
 extern pal_t *p_palette;
 
-#if (GFX_COLOR_MODE == GFX_COLOR_MODE_RGB565)
+/*FIXME : !!!*/
+#if 0/*(COLOR_MODE_KEY == GFX_COLOR_MODE_RGB565)*/
 #define pixel(p) (p_palette[p])
 #else
 #define pixel(p) (p)

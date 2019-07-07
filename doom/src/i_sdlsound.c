@@ -696,15 +696,6 @@ static boolean ExpandSoundData_SDL(sfxinfo_t *sfxinfo,
     return true;
 }
 
-extern int
-search_ext_sound (char *name, int lumpnum);
-
-extern int
-get_ext_snd_size (int num);
-
-extern int
-cache_ext_sound (int num, uint8_t *dest, int size);
-
 static void *I_CacheSoundExt(int lumpnum, int tag)
 {
     byte *result;
@@ -718,12 +709,12 @@ static void *I_CacheSoundExt(int lumpnum, int tag)
 
     lump = &lumpinfo[lumpnum];
 
-    sndnum = search_ext_sound(lump->name, lumpnum);
+    sndnum = audio_open_wave(lump->name, lumpnum);
     if (sndnum < 0) {
         return NULL;
     }
 
-    lump->size = get_ext_snd_size(sndnum);
+    lump->size = audio_wave_size(sndnum);
 
     if (lump->cache != NULL)
     {
@@ -737,7 +728,7 @@ static void *I_CacheSoundExt(int lumpnum, int tag)
         // Not yet loaded, so load it now
 
         lump->cache = Z_Malloc(lump->size, tag, &lump->cache);
-        cache_ext_sound(sndnum, lump->cache, lump->size);
+        audio_cache_wave(sndnum, lump->cache, lump->size);
         result = lump->cache;
     }
 
@@ -754,12 +745,14 @@ static boolean CacheSFX(sfxinfo_t *sfxinfo)
     unsigned int lumplen;
     int samplerate;
     unsigned int length;
-    byte *data;
+    byte *data = NULL;
 
     // need to load the sound
 
     lumpnum = sfxinfo->lumpnum;
-    data = I_CacheSoundExt(lumpnum, PU_STATIC);
+    if (game_alt_pkg == pkg_psx_final) {
+        data = I_CacheSoundExt(lumpnum, PU_STATIC);
+    }
     if (data == NULL) {
         data = W_CacheLumpNum(lumpnum, PU_STATIC);
     } else {
@@ -924,7 +917,9 @@ static int I_SDL_GetSfxLumpNum(sfxinfo_t *sfx)
 
     GetSfxLumpName(sfx, namebuf, sizeof(namebuf));
 
-    s = search_ext_sound(namebuf, -1);
+    if (game_alt_pkg == pkg_psx_final) {
+        s = audio_open_wave(namebuf, -1);
+    }
     if (s >= 0) {
         return s;
     }

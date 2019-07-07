@@ -36,6 +36,7 @@
 
 #include "i_swap.h"
 #include "sha1.h"
+#include <misc_utils.h>
 
 void SHA1_Init(sha1_context_t *hd)
 {
@@ -297,7 +298,7 @@ void SHA1_Final(sha1_digest_t digest, sha1_context_t *hd)
     X(4);
 #undef X
 
-    memcpy(digest, hd->buf, sizeof(sha1_digest_t));
+    d_memcpy(digest, hd->buf, sizeof(sha1_digest_t));
 }
 
 void SHA1_UpdateInt32(sha1_context_t *context, unsigned int val)

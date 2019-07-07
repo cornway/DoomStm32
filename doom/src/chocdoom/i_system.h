@@ -80,14 +80,6 @@ void I_PrintBanner(char *text);
 
 void I_PrintDivider(void);
 
-
-extern void Sys_AllocInit (void);
-extern void *Sys_Malloc (int size);
-extern void *Sys_AllocShared (int *size);
-extern void Sys_Free (void *p);
-extern void *Sys_AllocVideo (int *size);
-extern int Sys_AllocBytesLeft (void);
-
 extern void H_memcpy (void *dest, void *src, int count);
 extern int H_strcmp (const char *s1, const char *s2);
 

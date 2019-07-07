@@ -77,6 +77,10 @@
 #include "w_merge.h"
 #include "input_main.h"
 #include <debug.h>
+#include <dev_io.h>
+#include <bsp_sys.h>
+#include <bsp_cmd.h>
+#include <bsp_api.h>
 
 //
 // D-DoomLoop()
@@ -183,10 +187,11 @@ void D_Display (void)
     boolean			done;
     boolean			wipe;
     boolean			redrawsbar;
-
-    if (nodrawers)
+    profiler_enter();
+    if (nodrawers) {
+        profiler_exit();
     	return;                    // for comparative timing / profiling
-		
+    }
     redrawsbar = false;
     
     // change the view size if needed
@@ -304,8 +309,9 @@ void D_Display (void)
     // normal update
     if (!wipe)
     {
-	I_FinishUpdate ();              // page flip or blit buffer
-	return;
+        I_FinishUpdate ();              // page flip or blit buffer
+        profiler_exit();
+        return;
     }
     
     // wipe update
@@ -319,6 +325,7 @@ void D_Display (void)
 	M_Drawer ();                            // menu is drawn even on top of wipes
 	I_FinishUpdate ();                      // page flip or blit buffer
     } while (!done);
+    profiler_exit();
 }
 
 //
@@ -402,7 +409,6 @@ boolean D_GrabMouseCallback(void)
 extern void fps_update (void);
 extern void frame_start (void);
 extern void frame_end (void);
-extern void dev_tickle (void);
 
 void D_DoomLoop (void)
 {
@@ -443,7 +449,7 @@ void D_DoomLoop (void)
     while (1)
     {
         // frame syncronous IO operations
-        dev_tickle();
+        bsp_tickle();
         frame_start();
         I_StartFrame ();
 
@@ -538,7 +544,7 @@ void D_DoAdvanceDemo (void)
 	gamestate = GS_DEMOSCREEN;
 	pagename = DEH_String("TITLEPIC");
 	if ( gamemode == commercial )
-	  S_StartMusic(mus_dm2ttl);
+	  S_StartMusic(mus_dm2int);
 	else
 	  S_StartMusic (mus_intro);
 	break;
@@ -870,21 +876,39 @@ static boolean D_AddFile(char *filename)
     return handle != NULL;
 }
 
-static void D_ForeachFileHdlr(void *_filename)
+static void D_MergeFileHdlr(void *_filename)
 {
     char *filename = (char *)_filename;
     modifiedgame = true;
-    W_MergeFile(filename);
-    //W_AddFile(filename);
+
+    if (!W_MergeFile(filename)) {
+        dprintf("Failed to merge pwad : [%s]\n", filename);
+    } else {
+        dprintf("Merged pwad : [%s]\n", filename);
+    }
 }
 
-void D_AddPwads()
+static void D_AddFileHdlr(void *_filename)
 {
-    D_FindWADByExt(D_ForeachFileHdlr);
+    char *filename = (char *)_filename;
+    modifiedgame = true;
 
-    return;
+    if (!W_AddFile(filename)) {
+        dprintf("Failed to add pwad : [%s]\n", filename);
+    } else {
+        dprintf("Added pwad : [%s]\n", filename);
+    }
 }
 
+void D_AddPwads (void)
+{
+    D_FindWADByExt(D_AddFileHdlr);
+}
+
+void D_MergePwads (void)
+{
+    D_FindWADByExt(D_MergeFileHdlr);
+}
 
 // Copyright message banners
 // Some dehacked mods replace these.  These are only displayed if they are 
@@ -1119,7 +1143,7 @@ static void LoadIwadDeh(void)
         if (sep != NULL)
         {
             size_t chex_deh_len = strlen(iwadfile) + 9;
-            chex_deh = Sys_Malloc(chex_deh_len);
+            chex_deh = heap_malloc(chex_deh_len);
             M_StringCopy(chex_deh, iwadfile, chex_deh_len);
             chex_deh[sep - iwadfile + 1] = '\0';
             M_StringConcat(chex_deh, "chex.deh", chex_deh_len);
@@ -1133,7 +1157,7 @@ static void LoadIwadDeh(void)
         // search path instead.  We might find it...
         if (!M_FileExists(chex_deh))
         {
-            Sys_Free(chex_deh);
+            heap_free(chex_deh);
             chex_deh = D_FindWADByName("chex.deh");
         }
 
@@ -1350,14 +1374,15 @@ void D_DoomMain (void)
 
     // Load configuration files before initialising other subsystems.
     DEH_printf("M_LoadDefaults: Load system defaults.\n");
-    M_SetConfigFilenames("default.cfg", PROGRAM_PREFIX "doom.cfg");
-    D_BindVariables();
-    M_LoadDefaults();
+    //M_SetConfigFilenames("default.cfg", PROGRAM_PREFIX "doom.cfg");
+    //D_BindVariables();
+    //M_LoadDefaults();
 
     // Save configuration at exit.
     I_AtExit(M_SaveDefaults, false);
 
     // Find main IWAD file and load it.
+    dprintf("D_FindIWAD :\n");
     iwadfile = D_FindIWAD(    IWAD_MASK_DOOM    |
                                 IWAD_MASK_HERETIC |
                                 IWAD_MASK_HEXEN,

@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "memio.h"
+#include <misc_utils.h>
 
 #include "z_zone.h"
 typedef enum {
@@ -74,7 +75,7 @@ size_t mem_fread(void *buf, size_t size, size_t nmemb, MEMFILE *stream)
 	
 	// Copy bytes to buffer
 	
-	memcpy(buf, stream->buf + stream->position, items * size);
+	d_memcpy(buf, stream->buf + stream->position, items * size);
 
 	// Update position
 
@@ -121,7 +122,7 @@ size_t mem_fwrite(const void *ptr, size_t size, size_t nmemb, MEMFILE *stream)
 		unsigned char *newbuf;
 
 		newbuf = Z_Malloc(stream->alloced * 2, PU_STATIC, 0);
-		memcpy(newbuf, stream->buf, stream->alloced);
+		d_memcpy(newbuf, stream->buf, stream->alloced);
 		Z_Free(stream->buf);
 		stream->buf = newbuf;
 		stream->alloced *= 2;
@@ -129,7 +130,7 @@ size_t mem_fwrite(const void *ptr, size_t size, size_t nmemb, MEMFILE *stream)
 
 	// Copy into buffer
 	
-	memcpy(stream->buf + stream->position, ptr, bytes);
+	d_memcpy(stream->buf + stream->position, ptr, bytes);
 	stream->position += bytes;
 
 	if (stream->position > stream->buflen)

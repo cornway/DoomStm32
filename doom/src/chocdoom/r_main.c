@@ -36,7 +36,7 @@
 #include "r_sky.h"
 
 #include "z_zone.h"
-
+#include <bsp_sys.h>
 
 
 // Fineangles in the SCREENWIDTH wide window.
@@ -584,6 +584,8 @@ void R_ExecuteSetViewSize (void)
     int		startmap; 	
     int tempCentery;
 
+    profiler_enter();
+
     detailshift = setdetail;
 
     setsizeneeded = false;
@@ -679,6 +681,7 @@ void R_ExecuteSetViewSize (void)
 	    scalelight[i][j] = colormaps + level*256;
 	}
     }
+    profiler_exit();
 }
 
 
@@ -742,7 +745,6 @@ R_PointInSubsector
 void R_SetupFrame (player_t* player)
 {		
     int		i;
-    
     viewplayer = player;
     viewx = player->mo->x;
     viewy = player->mo->y;
@@ -770,7 +772,6 @@ void R_SetupFrame (player_t* player)
     else
 	fixedcolormap = 0;
 
-#if 1
     int tempCentery = viewheight / 2 + (players[0].lookdir >> FRACBITS) * screenblocks / 10;
     if (centery != tempCentery)
     {
@@ -783,7 +784,6 @@ void R_SetupFrame (player_t* player)
                                      FRACUNIT / 2));
         }
     }
-#endif
 		
     framecount++;
     validcount++;
@@ -795,9 +795,10 @@ void R_SetupFrame (player_t* player)
 //
 void R_RenderPlayerView (player_t* player)
 {	
+    profiler_enter();
     R_SetupFrame (player);
-
     // Clear buffers.
+
     R_ClearClipSegs ();
     R_ClearDrawSegs ();
     R_ClearPlanes ();
@@ -808,7 +809,7 @@ void R_RenderPlayerView (player_t* player)
 
     // The head node is the last node output.
     R_RenderBSPNode (numnodes-1);
-    
+
     // Check for new console commands.
     NetUpdate ();
     
@@ -820,5 +821,6 @@ void R_RenderPlayerView (player_t* player)
     R_DrawMasked ();
 
     // Check for new console commands.
-    NetUpdate ();				
+    NetUpdate ();			
+    profiler_exit();
 }

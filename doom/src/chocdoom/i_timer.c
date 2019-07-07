@@ -22,6 +22,7 @@
 
 #include "i_timer.h"
 #include "doomtype.h"
+#include <dev_io.h>
 
 #ifdef ORIGCODE
 
@@ -90,12 +91,12 @@ void I_InitTimer(void)
 //
 
 static uint32_t basetime = 0;
-extern volatile uint32_t systime;
+
 int  I_GetTime (void)
 {
     uint32_t ticks;
 
-    ticks = systime;
+    ticks = d_time();
 
     if (basetime == 0)
         basetime = ticks;
@@ -113,7 +114,7 @@ int I_GetTimeMS(void)
 {
     uint32_t ticks;
 
-    ticks = systime;
+    ticks = d_time();
 
     if (basetime == 0)
         basetime = ticks;
@@ -131,9 +132,9 @@ static inline void sleep_ms (uint32_t ms)
 {
     uint32_t wait_start;
 
-    wait_start = systime;
+    wait_start = d_time();
 
-    while (systime - wait_start < ms)
+    while (d_time() - wait_start < ms)
     {
     }
 }

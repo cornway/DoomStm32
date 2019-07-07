@@ -37,11 +37,16 @@
 //
 // DEFAULTS
 //
-
+#if 0
+#define mconfig_debug(args ...) \
+    dprintf(args)
+#else
+#define mconfig_debug(args ...)
+#endif
 // Location where all configuration data is stored - 
 // default.cfg, savegames, etc.
 
-char *configdir;
+char *configdir = "/";
 
 // Default filenames for configuration files.
 
@@ -86,7 +91,7 @@ typedef struct
 
 typedef struct
 {
-    default_t *defaults;
+    const default_t *defaults;
     int numdefaults;
     char *filename;
 } default_collection_t;
@@ -1559,18 +1564,20 @@ static default_collection_t extra_defaults =
 
 // Search a collection for a variable
 
-static default_t *SearchCollection(default_collection_t *collection, char *name)
+static const default_t *SearchCollection(default_collection_t *collection, char *name)
 {
     int i;
-
+    mconfig_debug("%s() : %p\n", __func__, collection);
     for (i=0; i<collection->numdefaults; ++i) 
     {
+        mconfig_debug("[%i] : <%p> \'%s\'\n",
+            i, &collection->defaults[i], collection->defaults[i].name);
         if (!strcmp(name, collection->defaults[i].name))
         {
             return &collection->defaults[i];
         }
     }
-
+    mconfig_debug("Fail\n");
     return NULL;
 }
 
@@ -1797,7 +1804,7 @@ static void LoadDefaultCollection(default_collection_t *collection)
 
         // Find the setting in the list
 
-        def = SearchCollection(collection, defname);
+        def = (default_t *)SearchCollection(collection, defname);
 
         if (def == NULL || !def->bound)
         {
@@ -1880,7 +1887,6 @@ void M_SaveDefaultsAlternate(char *main, char *extra)
 void M_LoadDefaults (void)
 {
     int i;
- 
     // check for a custom default file
 
     //!
@@ -1934,12 +1940,14 @@ static default_t *GetDefaultForName(char *name)
     default_t *result;
 
     // Try the main list and the extras
-
-    result = SearchCollection(&doom_defaults, name);
+    mconfig_debug("%s() : name=%s\n", __func__, name);
+    mconfig_debug("doom_defaults :\n");
+    result = (default_t *)SearchCollection(&doom_defaults, name);
 
     if (result == NULL)
     {
-        result = SearchCollection(&extra_defaults, name);
+        mconfig_debug("extra_defaults :\n");
+        result = (default_t *)SearchCollection(&extra_defaults, name);
     }
 
     // Not found? Internal error.
@@ -2131,7 +2139,7 @@ char *M_GetSaveGameDir(char *iwadname)
         M_MakeDirectory(savegamedir);
 
         free(topdir);
-#elif defined(STM32_SDL)
+#elif defined(STM32_SDK)
         savegamedir = M_StringJoin(configdir, "", NULL);
         M_MakeDirectory(savegamedir);
 
