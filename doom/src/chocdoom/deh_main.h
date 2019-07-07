@@ -22,6 +22,7 @@
 #include "doomfeatures.h"
 #include "deh_str.h"
 #include "sha1.h"
+#include <debug.h>
 
 // These are the limits that dehacked uses (from dheinit.h in the dehacked
 // source).  If these limits are exceeded, it does not generate an error, but

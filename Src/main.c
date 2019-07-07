@@ -66,9 +66,29 @@ void VID_PreConfig (void)
     vid_config(__vid_alloc, NULL, &screen, GFX_COLOR_MODE_CLUT, 2);
 }
 
+#endif
 
-int mainloop (int argc, const char *argv[])
+
+extern void dev_main (void);
+
+
+
+int mainloop (int argc, const char **argv)
 {
+#if defined(BSP_DRIVER)
+    static const char *_argv[] =
+    {
+        "doom",
+        "-iwad", "doom2.wad",
+        "-decor", "psx",
+    };
+    myargc = arrlen(_argv);
+    myargv = _argv;
+#else
+    myargc = argc;
+    myargv = (char **)argv;
+#endif
+    audio_conf("samplerate=22050, volume=100");
     d_main();
     return 0;
 }

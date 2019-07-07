@@ -876,67 +876,39 @@ static boolean D_AddFile(char *filename)
     return handle != NULL;
 }
 
-static void D_ForeachFileHdlr(void *_filename)
+static void D_MergeFileHdlr(void *_filename)
 {
     char *filename = (char *)_filename;
     modifiedgame = true;
-    W_MergeFile(filename);
-    //W_AddFile(filename);
+
+    if (!W_MergeFile(filename)) {
+        dprintf("Failed to merge pwad : [%s]\n", filename);
+    } else {
+        dprintf("Merged pwad : [%s]\n", filename);
+    }
 }
 
-extern const char *game_dir_path;
-
-static int D_ChangeConf (int argc, const char **argv)
+static void D_AddFileHdlr(void *_filename)
 {
-    char version[32] = {0};
-    char path[128];
-    const char *confname = "conf.txt";
-    int f;
+    char *filename = (char *)_filename;
+    modifiedgame = true;
 
-    if (argc < 1) {
-        return 0;
+    if (!W_AddFile(filename)) {
+        dprintf("Failed to add pwad : [%s]\n", filename);
+    } else {
+        dprintf("Added pwad : [%s]\n", filename);
     }
-
-    if (!sscanf(argv[0], "%16s", version)) {
-        version[0] = 0;
-    }
-    snprintf(path, sizeof(path), "%s/%s", game_dir_path, confname);
-
-    if (version[0] == 0) {
-        d_open(path, &f, "r");
-        if (f < 0) {
-            return 0;
-        }
-        d_gets(f, version, sizeof(version));
-        dprintf("Current version \'%s\'\n", version);
-        d_close(f);
-        return 0;
-    }
-    if (strncmp(version, "psx", 3) &&
-        strncmp(version, "3do", 3)) {
-        dprintf("%s() : fail, unknown version \'%s\'\n", __func__, version);
-        return 0;
-    }
-    d_open(path, &f, "+w");
-    if (f < 0) {
-        dprintf("%s() : fail to open\n", __func__);
-        return 0;
-    }
-    d_printf(f, "version=%s", version);
-    d_close(f);
-
-    dprintf("Version changed : \'%s\'\n", version);
-    return 0;
 }
 
-void D_AddPwads()
+void D_AddPwads (void)
 {
-    cmd_register_func(D_ChangeConf, "doomver");
-    D_FindWADByExt(D_ForeachFileHdlr);
-
-    return;
+    D_FindWADByExt(D_AddFileHdlr);
 }
 
+void D_MergePwads (void)
+{
+    D_FindWADByExt(D_MergeFileHdlr);
+}
 
 // Copyright message banners
 // Some dehacked mods replace these.  These are only displayed if they are 

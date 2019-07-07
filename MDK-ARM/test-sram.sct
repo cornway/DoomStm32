@@ -1,0 +1,29 @@
+LR_IROM1 0x20022000 RELOC {    ; load region size_region
+  ER_IROM1 +0 {  ; load address = execution address
+   *.o (RESET, +First)
+   *(InRoot$$Sections)
+   .ANY (+RO)
+  }
+  RW_IRAM1 +0 {  ; RW data
+   .ANY (iram, +RW +ZI)
+   *(HEAP)
+  }
+}
+LR_IRAM1 0x20018000 0x00008000  {
+  DBG_RAM 0x20018000 UNINIT 0x00001000  {  ; DBG ALGO    
+   *(DBG_RAM)
+  }
+  DTCM_STACK 0x20019000 UNINIT 0x00007000  {  ; DTCM    
+   *(STACK)
+  }
+}
+LR_SHARED 0x20000000 0x00001000 {
+  SHARED 0x20000000 UNINIT 0x00001000  {  ; DTCM
+    *(SHARED)
+  }
+}
+LR_SDRAM1 0xC0fa6000 0x0005b000 {
+  SDRAM_BSS 0xC0fa6000 UNINIT 0x0005b000  {  ; SDRAM
+    .ANY (iram2, +RW +ZI)
+  }
+}

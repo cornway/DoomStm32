@@ -25,6 +25,7 @@
 #include "i_system.h"
 #include "m_misc.h"
 #include "m_argv.h"  // haleyjd 20110212: warning fix
+#include "deh_main.h"
 
 int		myargc;
 char**		myargv;
@@ -46,8 +47,10 @@ int M_CheckParmWithArgs(char *check, int num_args)
 
     for (i = 1; i < myargc - num_args; i++)
     {
-	if (!strcmp(check, myargv[i]))
-	    return i;
+        if (!strcmp(check, myargv[i])) {
+            DEH_printf("parm : [%s] arg : [%s]\n", check, myargv[i + 1]);
+            return i;
+        }
     }
 
     return 0;

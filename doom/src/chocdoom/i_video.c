@@ -115,7 +115,7 @@ void I_FinishUpdate (void)
 //
 void I_ReadScreen (pix_t* scr)
 {
-    memcpy (scr, I_VideoBuffer, SCREENHEIGHT * SCREENWIDTH * sizeof(pix_t));
+    d_memcpy (scr, I_VideoBuffer, SCREENHEIGHT * SCREENWIDTH * sizeof(pix_t));
 }
 
 //

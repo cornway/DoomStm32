@@ -17,12 +17,9 @@ LR_IROM1 0x08100000 0x000100000  {    ; load region size_region
    .ANY (iram, +RW +ZI)
   }
   RW_IRAM3 0x2007C000 0x00001000  {  ; RW data
-   .ANY (iram2, +RW +ZI)
+   *(HEAP)
   }
   RW_RAM2 0x2001A000 UNINIT 0x00008000  { ; STACK
    *(STACK)
-  }
-  DTCM_STACK 0xC0000000 UNINIT 0x01000000  {  ; SDRAM
-   *(HEAP)
   }
 }

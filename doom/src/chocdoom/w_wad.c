@@ -177,22 +177,6 @@ W_CountMaps (lumpinfo_t *lump, boolean pwad)
     }
 }
 
-static void
-W_SetAltPkgType (lumpinfo_t *lump)
-{
-    GameAltPackage_t pkg = pkg_none;
-
-    if (game_alt_pkg != pkg_none) {
-        return;
-    }
-    if (!strcmp(GAME_3D0_PKG_MARKER, lump->name)) {
-        pkg = pkg_3d0_doom;
-    } else if (!strcmp(GAME_PSX_PKG_MARKER, lump->name)) {
-        pkg = pkg_psx_final;
-    }
-    game_alt_pkg = pkg;
-}
-
 wad_file_t *W_AddFile (char *filename)
 {
     wadinfo_t header;
@@ -372,7 +356,6 @@ wad_file_t *W_AddPwad (char *filename)
         lump_p->cache = NULL;
 		strncpy(lump_p->name, filerover->name, 8);
         W_CountMaps(lump_p, true);
-        W_SetAltPkgType(lump_p);
 
         ++lump_p;
         ++filerover;

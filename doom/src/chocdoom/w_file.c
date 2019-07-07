@@ -71,17 +71,6 @@ typedef struct
 
 } wad_file_class_t;*/
 
-static void __wdebug (void)
-{
-    dprintf("%s() :\n", __func__);
-    dprintf("stdc_wad_file= <0x%p>\n", &stdc_wad_file);
-    dprintf("open= <0x%p>, close= <0x%p>, read= <0x%p>, mmap= <0x%p>, foreach= <0x%p>\n",
-            stdc_wad_file.OpenFile, stdc_wad_file.CloseFile, stdc_wad_file.Read,
-            stdc_wad_file.MMapFile, stdc_wad_file.foreach);
-    dprintf("%s() : exit\n", __func__);
-    serial_flush();
-}
-
 wad_file_t *W_OpenFile(char *path)
 {
     wad_file_t *result;
@@ -91,7 +80,6 @@ wad_file_t *W_OpenFile(char *path)
     // Use the OS's virtual memory subsystem to map WAD files
     // directly into memory.
     //
-    __wdebug();
     if (!M_CheckParm("-mmap"))
     {
         return stdc_wad_file.OpenFile(path);

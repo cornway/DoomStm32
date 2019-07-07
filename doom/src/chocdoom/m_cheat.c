@@ -22,6 +22,7 @@
 
 #include "doomtype.h"
 #include "m_cheat.h"
+#include <misc_utils.h>
 
 //
 // CHEAT SEQUENCE PACKAGE
@@ -83,7 +84,7 @@ cht_GetParam
 ( cheatseq_t*	cht,
   char*		buffer )
 {
-    memcpy(buffer, cht->parameter_buf, cht->parameter_chars);
+    d_memcpy(buffer, cht->parameter_buf, cht->parameter_chars);
 }
 
 

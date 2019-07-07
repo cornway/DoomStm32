@@ -637,7 +637,6 @@ char *D_FindWADByName(char *name)
     int i;
     
     // Absolute path?
-    dprintf("%s() : %u\n", __func__, __LINE__);
     if (M_FileExists(name))
     {
         return name;
@@ -646,7 +645,6 @@ char *D_FindWADByName(char *name)
     BuildIWADDirList();
 
     // Search through all IWAD paths for a file with the given name.
-    dprintf("%s() : %u\n", __func__, __LINE__);
     for (i=0; i<num_iwad_dirs; ++i)
     {
         // As a special case, if this is in DOOMWADDIR or DOOMWADPATH,
@@ -676,9 +674,24 @@ char *D_FindWADByName(char *name)
 
 extern const char *game_dir_path;
 
-char *D_FindWADByExt(void (*handle)(void *))
+const char *D_FindWADByExt(void (*handle)(void *))
 {
-    W_ForEach((char *)pwads_path, handle);
+    char path[128];
+    const char *resource = "";
+    switch (game_alt_pkg) {
+        case pkg_3d0_doom:
+            resource = "3do";
+        break;
+        case pkg_psx_final:
+            resource = "psx";
+        break;
+        default:
+                return resource;
+                /*skip this step*/
+        break;
+    }
+    snprintf(path, sizeof(path), "%s/%s", pwads_path, resource);
+    W_ForEach(path, handle);
 
     return "";
 }
@@ -713,30 +726,6 @@ char *D_TryFindWADByName(char *filename)
 // to determine whether registered/commercial features
 // should be executed (notably loading PWADs).
 //
-static void D_ReadConf (void)
-{
-    int f = -1;
-    char buf[256];
-    const char *confname = "conf.txt";
-
-    snprintf(buf, sizeof(buf), "%s/%s", game_dir_path, confname);
-    d_open(buf, &f, "r");
-    if (f >= 0) {
-        if (d_gets(f, buf, sizeof(buf))) {
-            if (strncmp(buf, "version=", 8) == 0) {
-                if (strncmp(buf + 8, "psx", 3) == 0) {
-                    game_alt_pkg = pkg_psx_final;
-                    snprintf(pwads_path, sizeof(pwads_path), "%s/psx", game_dir_path);
-                } else if (strncmp(buf + 8, "3do", 3) == 0) {
-                    game_alt_pkg = pkg_3d0_doom;
-                    snprintf(pwads_path, sizeof(pwads_path), "%s/3do", game_dir_path);
-                }
-            }
-        }
-        d_close(f);
-    }
-
-}
 
 static char iwadfile[256] = "/doom/DOOM.WAD";
 
@@ -754,17 +743,15 @@ char *D_FindIWAD(int mask, GameMission_t *mission)
     //
     // @arg <file>
     //
-    D_ReadConf();
-    iwadparm = M_CheckParmWithArgs("-iwad", 1);
-    if (game_alt_pkg) {
-        if (game_alt_pkg == pkg_psx_final) {
-            snprintf(iwadfile, sizeof(iwadfile), "%s/%s", game_dir_path, "DOOM2.WAD");
-        } else if (game_alt_pkg == pkg_3d0_doom) {
-            snprintf(iwadfile, sizeof(iwadfile), "%s/%s", game_dir_path, "DOOM.WAD");
+    iwadparm = M_CheckParmWithArgs("-decor", 1);
+    if (iwadparm) {
+        if (strcmp(myargv[iwadparm + 1], "psx") == 0) {
+            game_alt_pkg = pkg_psx_final;
+        } else if (strcmp(myargv[iwadparm + 1], "3do") == 0) {
+            game_alt_pkg = pkg_3d0_doom;
         }
-        piwadfile = iwadfile;
-        iwadparm = 1;
     }
+    iwadparm = M_CheckParmWithArgs("-iwad", 1);
     if (iwadparm)
     {
         // Search through IWAD dirs for an IWAD with the given name.

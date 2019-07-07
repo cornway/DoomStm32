@@ -23,6 +23,7 @@
 #include <stdarg.h>
 #include <heap.h>
 #include <debug.h>
+#include <bsp_cmd.h>
 
 
 #ifdef _WIN32
@@ -230,6 +231,7 @@ void I_BindVariables(void)
 void I_Quit (void)
 {
     atexit_listentry_t *entry;
+    char buf[32];
 
     // Run through all exit functions
  
@@ -241,11 +243,8 @@ void I_Quit (void)
         entry = entry->next;
     }
 
-#if ORIGCODE
-    SDL_Quit();
-
-    exit(0);
-#endif
+    cmd_bsp_exec("reset");
+    assert(0);
 }
 
 #if !defined(_WIN32) && !defined(__MACOSX__)

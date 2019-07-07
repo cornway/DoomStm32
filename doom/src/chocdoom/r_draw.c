@@ -1057,13 +1057,13 @@ void R_FillBackScreen (void)
     { 
 	for (x=0 ; x<SCREENWIDTH/64 ; x++) 
 	{ 
-	    memcpy (dest, src+((y&63)<<6), 64 * sizeof(pix_t)); 
+	    d_memcpy (dest, src+((y&63)<<6), 64 * sizeof(pix_t)); 
 	    dest += 64; 
 	} 
 
 	if (SCREENWIDTH&63) 
 	{ 
-	    memcpy (dest, src+((y&63)<<6), SCREENWIDTH&63 * sizeof(pix_t)); 
+	    d_memcpy (dest, src+((y&63)<<6), SCREENWIDTH&63 * sizeof(pix_t)); 
 	    dest += (SCREENWIDTH&63); 
 	} 
     } 
@@ -1126,7 +1126,7 @@ R_VideoErase
 
     if (background_buffer != NULL)
     {
-        memcpy(I_VideoBuffer + ofs, background_buffer + ofs, count * sizeof(pix_t)); 
+        d_memcpy(I_VideoBuffer + ofs, background_buffer + ofs, count * sizeof(pix_t)); 
     }
 } 
 
