@@ -11108,7 +11108,7 @@
           <AfterMake>
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name>E:..\common\pc\win\postbuild.bat E:\Keil_v5\ARM app-sram sram</UserProg1Name>
+            <UserProg1Name>fromelf app-sram\%L --bin --output=app-sram\bin\sram.bin</UserProg1Name>
             <UserProg2Name>fromelf app-sram\%L --disassemble --interleave=source  --text -c --output=outfile.lst</UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
@@ -11359,7 +11359,7 @@
             <v6WtE>0</v6WtE>
             <v6Rtti>0</v6Rtti>
             <VariousControls>
-              <MiscControls> </MiscControls>
+              <MiscControls> --no_unaligned_access</MiscControls>
               <Define>STM32F769xx,USE_STM32F769I_DISCO,STM32_SDK,APPLICATION</Define>
               <Undefine></Undefine>
               <IncludePath>..\Inc;..\common\STM32F7xx_Driver\Inc;..\common\FatFs\src;..\common\STM32F7xx_Driver\BSP\Components\Common;..\common\STM32F7xx_Driver\BSP\STM32F769I-Discovery;..\common\STM32F7xx_Driver\CMSIS\Device\ST\STM32F7xx\Include;..\doom\src;..\doom\src\chocdoom;..\common\inc</IncludePath>

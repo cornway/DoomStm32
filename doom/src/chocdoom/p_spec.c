@@ -46,7 +46,7 @@
 
 // Data.
 #include "sounds.h"
-
+#include <heap.h>
 
 //
 // Animating textures and planes

@@ -1,8 +1,11 @@
-LR_IROM1 0x20022000 0x0005a000 {    ; load region size_region
-  ER_IROM1 0x20022000 0x0005a000 {  ; load address = execution address
+LR_IROM1 0x20020000 0x00070000 {    ; load region size_region
+  ER_IROM1 0x20020000 0x00070000 {  ; load address = execution address
    *.o (RESET, +First)
    *(InRoot$$Sections)
    .ANY (+RO)
+  }
+  RW_IRAM1 0x20070000 UNINIT 0x00008000  {  ; RW data
+   *(BSPHEAP)
   }
   DBG_RAM 0x20018000 UNINIT 0x00001000  {  ; DBG ALGO    
    *(DBG_RAM)
@@ -13,10 +16,20 @@ LR_IROM1 0x20022000 0x0005a000 {    ; load region size_region
   SHARED 0x20000000 UNINIT 0x00001000  {  ; DTCM
     *(SHARED)
   }
-  SDRAM_HEAP 0xC0000000 0x0005b000 {  ; SDRAM
+  DTCM 0x20001000 UNINIT 0x00017000  {  ; DTCM
+   *(BSPBSS)
+  }
+  SDRAM_HEAP 0xC0000000 0x00070000 {  ; SDRAM
     .ANY (iram2, +RW +ZI)
   }
-  SDRAM_BSS 0xC005b000 UNINIT 0xC0fa5000  {  ; SDRAM
+  SDRAM_BSS 0xC0070000 UNINIT 0x00f90000  {  ; SDRAM
     *(HEAP)
   }
 }
+
+;STM32F769 MEMORY MAP:
+;
+;SRAM2  (16 KB)     0x2007 C000 - 0x2007 FFFF
+;SRAM1  (368 KB)    0x2002 0000 - 0x2007 BFFF
+;DTCM   (128 KB)    0x2000 0000 - 0x2001 FFFF
+;ITCM RAM (16kb)    0x0000 0000 - 0x0000 3FFF

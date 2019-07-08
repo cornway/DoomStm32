@@ -66,12 +66,11 @@ void VID_PreConfig (void)
     vid_config(__vid_alloc, NULL, &screen, GFX_COLOR_MODE_CLUT, 2);
 }
 
-#endif
-
 
 extern void dev_main (void);
 
-
+extern int myargc;
+extern char **myargv;
 
 int mainloop (int argc, const char **argv)
 {
@@ -81,6 +80,7 @@ int mainloop (int argc, const char **argv)
         "doom",
         "-iwad", "doom2.wad",
         "-decor", "psx",
+        "-vol", "64",
     };
     myargc = arrlen(_argv);
     myargv = _argv;
@@ -88,7 +88,6 @@ int mainloop (int argc, const char **argv)
     myargc = argc;
     myargv = (char **)argv;
 #endif
-    audio_conf("samplerate=22050, volume=100");
     d_main();
     return 0;
 }

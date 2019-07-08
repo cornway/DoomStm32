@@ -80,7 +80,7 @@
 #include <dev_io.h>
 #include <bsp_sys.h>
 #include <bsp_cmd.h>
-#include <bsp_api.h>
+#include <audio_main.h>
 
 //
 // D-DoomLoop()
@@ -1198,6 +1198,16 @@ void D_DoomMain (void)
     
     DEH_printf("Z_Init: Init zone memory allocation daemon. \n");
     Z_Init ();
+    {
+        const char *vol = "64";
+        p = M_CheckParm("-vol");
+        if (p > 0)
+        {
+            vol = myargv[p + 1];
+        }
+        snprintf(file, sizeof(file), "samplerate=22050, volume=%s", vol);
+        audio_conf(file);
+    }
 #ifdef FEATURE_MULTIPLAYER
     //!
     // @category net

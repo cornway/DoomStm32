@@ -576,7 +576,7 @@ void P_RemoveMobj (mobj_t* mobj)
 	&& (mobj->type != MT_INV)
 	&& (mobj->type != MT_INS))
     {
-	itemrespawnque[iquehead] = mobj->spawnpoint;
+    d_memcpy(&itemrespawnque[iquehead], &mobj->spawnpoint, sizeof(mobj->spawnpoint));
 	itemrespawntime[iquehead] = leveltime;
 	iquehead = (iquehead+1)&(ITEMQUESIZE-1);
 

@@ -193,9 +193,6 @@ Z_Malloc
     memblock_t* newblock;
     memblock_t*	base;
     void *result;
-
-    size = (size + MEM_ALIGN - 1) & ~(MEM_ALIGN - 1);
-    
     // scan through the block list,
     // looking for the first free block
     // of sufficient size,
@@ -203,7 +200,7 @@ Z_Malloc
 
     // account for size of block header
     size += sizeof(memblock_t);
-    
+    size = ROUND_UP(size, sizeof(void*));
     // if there is a free block behind the rover,
     //  back up over them
     base = mainzone->rover;
