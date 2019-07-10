@@ -26,6 +26,7 @@
 #include "v_video.h"
 #include "i_video.h"
 #include "z_zone.h"
+#include <misc_utils.h>
 #include <dev_io.h>
 
 /*---------------------------------------------------------------------*

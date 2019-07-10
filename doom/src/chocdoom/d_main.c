@@ -77,6 +77,7 @@
 #include "w_merge.h"
 #include "input_main.h"
 #include <debug.h>
+#include <misc_utils.h>
 #include <dev_io.h>
 #include <bsp_sys.h>
 #include <bsp_cmd.h>
@@ -1200,7 +1201,7 @@ void D_DoomMain (void)
     Z_Init ();
     {
         const char *vol = "64";
-        p = M_CheckParm("-vol");
+        p = M_CheckParmWithArgs("-vol", 1);
         if (p > 0)
         {
             vol = myargv[p + 1];

@@ -19,8 +19,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "input_main.h"
-
 #include "doomfeatures.h"
 
 #include "d_event.h"
@@ -41,7 +39,6 @@
 #include "net_server.h"
 #include "net_sdl.h"
 #include "net_loop.h"
-#include <misc_utils.h>
 #include <bsp_sys.h>
 #include <heap.h>
 

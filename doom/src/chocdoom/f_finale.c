@@ -36,6 +36,7 @@
 
 #include "doomstat.h"
 #include "r_state.h"
+#include "misc_utils.h"
 
 typedef enum
 {

@@ -36,7 +36,7 @@
 // State.
 #include "doomstat.h"
 #include "p_local.h"
-
+#include <misc_utils.h>
 
 // status bar height at bottom of screen
 #define SBARHEIGHT		32

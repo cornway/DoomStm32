@@ -72,6 +72,7 @@
 
 #include "g_game.h"
 
+#include "misc_utils.h"
 #include <dev_io.h>
 #define SAVEGAMESIZE	0x2c000
 

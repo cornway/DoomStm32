@@ -28,6 +28,7 @@
 
 #include "doomstat.h"
 #include "g_game.h"
+#include <misc_utils.h>
 
 
 

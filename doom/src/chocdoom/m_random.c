@@ -21,6 +21,7 @@
 #endif
 
 #include "m_random.h"
+#include <misc_utils.h>
 #include <dev_io.h>
 //
 // M_Random

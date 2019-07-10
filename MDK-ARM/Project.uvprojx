@@ -1488,6 +1488,11 @@
               <FileType>1</FileType>
               <FilePath>..\common\heap.c</FilePath>
             </File>
+            <File>
+              <FileName>dstring.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\lib\dstring.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -3309,6 +3314,11 @@
               <FileType>1</FileType>
               <FilePath>..\common\heap.c</FilePath>
             </File>
+            <File>
+              <FileName>dstring.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\lib\dstring.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -4739,6 +4749,11 @@
               <FileName>heap.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\common\heap.c</FilePath>
+            </File>
+            <File>
+              <FileName>dstring.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\lib\dstring.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -6560,6 +6575,11 @@
               <FileName>heap.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\common\heap.c</FilePath>
+            </File>
+            <File>
+              <FileName>dstring.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\lib\dstring.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -8788,6 +8808,11 @@
                 </FileArmAds>
               </FileOption>
             </File>
+            <File>
+              <FileName>dstring.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\lib\dstring.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -11015,6 +11040,11 @@
                 </FileArmAds>
               </FileOption>
             </File>
+            <File>
+              <FileName>dstring.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\lib\dstring.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -12836,6 +12866,11 @@
               <FileType>1</FileType>
               <FilePath>..\common\heap.c</FilePath>
             </File>
+            <File>
+              <FileName>dstring.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\lib\dstring.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -14402,6 +14437,11 @@
               <FileName>heap.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\common\heap.c</FilePath>
+            </File>
+            <File>
+              <FileName>dstring.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\lib\dstring.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -16377,6 +16417,11 @@
               <FileName>heap.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\common\heap.c</FilePath>
+            </File>
+            <File>
+              <FileName>dstring.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\lib\dstring.c</FilePath>
             </File>
           </Files>
         </Group>

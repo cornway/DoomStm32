@@ -76,7 +76,6 @@ void VID_PreConfig (void)
     vid_config(__vid_alloc, NULL, &screen, GFX_COLOR_MODE_CLUT, 2);
 }
 
-
 extern void dev_main (void);
 
 extern int myargc;

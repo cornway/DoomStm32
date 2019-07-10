@@ -23,6 +23,7 @@
 #include "w_file.h"
 #include "z_zone.h"
 #include "i_system.h"
+#include "misc_utils.h"
 #include <dev_io.h>
 
 typedef struct
@@ -168,7 +169,7 @@ typedef void (*w_handle_t)(void *);
 static w_handle_t w_handle = NULL;
 static char *w_path = NULL;
 
-int W_StdC_ForeachHandle (char *name, ftype_t type)
+int W_StdC_ForeachHandle (char *name, d_bool is_dir)
 {
     char buf[128] = {0};
     char path_to_file[128] = {0};
@@ -193,7 +194,7 @@ int W_StdC_ForeachHandle (char *name, ftype_t type)
 
 static void W_StdC_Foreach(char *path, w_handle_t handle)
 {
-    flist_t flist = {W_StdC_ForeachHandle, NULL};
+    fiter_t flist = { W_StdC_ForeachHandle, NULL };
     w_path = path;
     w_handle = handle;
     d_dirlist(path, &flist);

@@ -20,7 +20,6 @@
 #ifndef __P_SAVEG__
 #define __P_SAVEG__
 
-#define LOAD_SAVE_USE_RAM 0
 
 
 // maximum size of a savegame description

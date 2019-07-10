@@ -44,7 +44,7 @@
 #include "v_video.h"
 
 #include "wi_stuff.h"
-
+#include "misc_utils.h"
 //
 // Data needed to add patches to full screen intermission pics.
 // Patches are statistics messages, and animations.

@@ -33,6 +33,7 @@
 #include "m_misc.h"
 #include "r_state.h"
 #include "hu_lib.h"
+#include <misc_utils.h>
 #include "dev_io.h"
 #include <debug.h>
 #include <heap.h>

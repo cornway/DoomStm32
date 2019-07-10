@@ -38,6 +38,7 @@
 #include "w_wad.h"
 #include "z_zone.h"
 #include "audio_main.h"
+#include <misc_utils.h>
 #include "dev_io.h"
 #include <bsp_sys.h>
 

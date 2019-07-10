@@ -26,6 +26,7 @@
 #include <samplerate.h>
 #endif
 
+#include <config.h>
 #include "deh_str.h"
 #include "i_sound.h"
 #include "i_system.h"
@@ -38,10 +39,21 @@
 #include "doomtype.h"
 #include "audio_main.h"
 #include <misc_utils.h>
+#include <bsp_sys.h>
 
 #ifndef INT16_MAX
 #define INT16_MAX 0x7FFF
 #endif
+
+#define SFX_MAX_NAME 9
+
+static inline void
+SndMakePath (char *buf, const char *name, int namelen, const char *ext)
+{
+    char namebuf[SFX_MAX_NAME] = {0};
+    strncpy(namebuf, name, namelen);
+    sprintf(buf, "%s/sound/%s.%s", FILES_DIR, namebuf, ext);
+}
 
 typedef uint8_t Uint8;
 typedef uint16_t Uint16;
@@ -696,43 +708,84 @@ static boolean ExpandSoundData_SDL(sfxinfo_t *sfxinfo,
     return true;
 }
 
-static void *I_CacheSoundExt(int lumpnum, int tag)
+static void GetSfxLumpName (sfxinfo_t *sfx, char *buf, size_t buf_len)
 {
-    byte *result;
-    lumpinfo_t *lump;
-    int sndnum = -1;
+    // Linked sfx lumps? Get the lump number for the sound linked to.
 
-    if ((unsigned)lumpnum >= numlumps)
+    if (sfx->link != NULL)
     {
-        I_Error ("W_CacheLumpNum: %i >= numlumps", lumpnum);
+        sfx = sfx->link;
     }
 
-    lump = &lumpinfo[lumpnum];
+    // Doom adds a DS* prefix to sound lumps; Heretic and Hexen don't
+    // do this.
 
-    sndnum = audio_open_wave(lump->name, lumpnum);
-    if (sndnum < 0) {
+    if (use_sfx_prefix)
+    {
+        M_snprintf(buf, buf_len, "ds%s", DEH_String(sfx->name));
+    }
+    else
+    {
+        M_StringCopy(buf, DEH_String(sfx->name), buf_len);
+    }
+}
+
+static int I_SDL_SfxOpenExt2Cache(sfxinfo_t *sfx)
+{
+    char namebuf[9];
+    int lumpnum = -1;
+
+    GetSfxLumpName(sfx, namebuf, sizeof(namebuf));
+    lumpnum = W_GetNumForName(namebuf);
+
+    if (game_alt_pkg == pkg_psx_final) {
+        char path[128];
+
+        SndMakePath(path, namebuf, sizeof(namebuf) - 1, "wav");
+        sfx->lumpnum_ext = audio_open_wave(path, sfx->lumpnum_ext);
+    }
+    return lumpnum;
+}
+
+//
+// Retrieve the raw data lump index
+//  for a given SFX name.
+//
+static void *I_SfxCacheExt (sfxinfo_t *sfx, int tag)
+{
+    lumpinfo_t *lump;
+    char path[128];
+    byte *ptr;
+
+    if ((unsigned)sfx->lumpnum >= numlumps)
+    {
+        I_Error ("W_CacheLumpNum: %i >= numlumps", sfx->lumpnum);
+    }
+
+    lump = &lumpinfo[sfx->lumpnum];
+
+    SndMakePath(path, lump->name, sizeof(lump->name), "wav");
+
+    sfx->lumpnum_ext = audio_open_wave(path, sfx->lumpnum_ext);
+    if (sfx->lumpnum_ext < 0) {
         return NULL;
     }
 
-    lump->size = audio_wave_size(sndnum);
+    lump->size = audio_wave_size(sfx->lumpnum_ext);
 
     if (lump->cache != NULL)
     {
-        // Already cached, so just switch the zone tag.
-
-        result = lump->cache;
+        ptr = lump->cache;
         Z_ChangeTag(lump->cache, tag);
     }
     else
     {
-        // Not yet loaded, so load it now
-
         lump->cache = Z_Malloc(lump->size, tag, &lump->cache);
-        audio_cache_wave(sndnum, lump->cache, lump->size);
-        result = lump->cache;
+        audio_cache_wave(sfx->lumpnum_ext, lump->cache, lump->size);
+        ptr = lump->cache;
     }
 
-    return result;
+    return ptr;
 }
 
 
@@ -751,7 +804,7 @@ static boolean CacheSFX(sfxinfo_t *sfxinfo)
 
     lumpnum = sfxinfo->lumpnum;
     if (game_alt_pkg == pkg_psx_final) {
-        data = I_CacheSoundExt(lumpnum, PU_STATIC);
+        data = I_SfxCacheExt(sfxinfo, PU_STATIC);
     }
     if (data == NULL) {
         data = W_CacheLumpNum(lumpnum, PU_STATIC);
@@ -823,28 +876,6 @@ static boolean CacheSFX(sfxinfo_t *sfxinfo)
     return true;
 }
 
-static void GetSfxLumpName(sfxinfo_t *sfx, char *buf, size_t buf_len)
-{
-    // Linked sfx lumps? Get the lump number for the sound linked to.
-
-    if (sfx->link != NULL)
-    {
-        sfx = sfx->link;
-    }
-
-    // Doom adds a DS* prefix to sound lumps; Heretic and Hexen don't
-    // do this.
-
-    if (use_sfx_prefix)
-    {
-        M_snprintf(buf, buf_len, "ds%s", DEH_String(sfx->name));
-    }
-    else
-    {
-        M_StringCopy(buf, DEH_String(sfx->name), buf_len);
-    }
-}
-
 #ifdef HAVE_LIBSAMPLERATE
 
 // Preload all the sound effects - stops nasty ingame freezes
@@ -863,10 +894,6 @@ static void I_SDL_PrecacheSounds(sfxinfo_t *sounds, int num_sounds)
 
     for (i=0; i<num_sounds; ++i)
     {
-        if ((i % 6) == 0)
-        {
-        }
-
         GetSfxLumpName(&sounds[i], namebuf, sizeof(namebuf));
 
         sounds[i].lumpnum = W_CheckNumForName(namebuf);
@@ -903,28 +930,6 @@ static boolean LockSound(sfxinfo_t *sfxinfo)
     LockAllocatedSound(GetAllocatedSoundBySfxInfoAndPitch(sfxinfo, NORM_PITCH));
 
     return true;
-}
-
-//
-// Retrieve the raw data lump index
-//  for a given SFX name.
-//
-
-static int I_SDL_GetSfxLumpNum(sfxinfo_t *sfx)
-{
-    char namebuf[9];
-    int s;
-
-    GetSfxLumpName(sfx, namebuf, sizeof(namebuf));
-
-    if (game_alt_pkg == pkg_psx_final) {
-        s = audio_open_wave(namebuf, -1);
-    }
-    if (s >= 0) {
-        return s;
-    }
-
-    return W_GetNumForName(namebuf);
 }
 
 static void I_SDL_UpdateSoundParams(int handle, int vol, int sep)
@@ -1133,7 +1138,7 @@ sound_module_t sound_sdl_module =
     arrlen(sound_sdl_devices),
     I_SDL_InitSound,
     I_SDL_ShutdownSound,
-    I_SDL_GetSfxLumpNum,
+    I_SDL_SfxOpenExt2Cache,
     I_SDL_UpdateSound,
     I_SDL_UpdateSoundParams,
     I_SDL_StartSound,

@@ -35,7 +35,7 @@
 #include "doomstat.h"
 #include "st_stuff.h"
 #include <bsp_sys.h>
-
+#include "misc_utils.h"
 
 
 #define MINZ				(FRACUNIT*4)

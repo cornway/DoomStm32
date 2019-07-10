@@ -40,6 +40,8 @@
 #include "D_player.h"
 #include "input_main.h"
 #include <bsp_sys.h>
+#include <misc_utils.h>
+#include <dev_io.h>
 
 #ifndef MAX
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -403,6 +405,8 @@ void I_CheckIsScreensaver (void)
 float mouse_acceleration = 1.0f;
 int usemouse = 0;
 int mouse_threshold;
+int *joy_extrafreeze = NULL;
+uint32_t joy_act_timestamp = 0;
 
 const kbdmap_t gamepad_to_kbd_map[JOY_STD_MAX] =
 {
@@ -422,15 +426,20 @@ const kbdmap_t gamepad_to_kbd_map[JOY_STD_MAX] =
     [JOY_K10]           = {KEY_ESCAPE, PAD_FREQ_LOW},
 };
 
-extern int *joy_extrafreeze;
-
 static i_event_t *__post_key (i_event_t *events, i_event_t *e)
 {
     event_t event =
-        {
-            e->state == keyup ? ev_keyup : ev_keydown,
-            e->sym, -1, -1, -1
-        };
+    {
+        e->state == keyup ? ev_keyup : ev_keydown,
+        e->sym, -1, -1, -1
+    };
+    if (joy_act_timestamp && joy_act_timestamp > d_time()) {
+        return events;
+    } else if (event.type == ev_keydown && joy_extrafreeze && *joy_extrafreeze) {
+        joy_act_timestamp = d_time() + 100;//ms
+    } else {
+        joy_act_timestamp = 0;
+    }
     D_PostEvent(&event);
     return events;
 }

@@ -48,7 +48,11 @@ int M_CheckParmWithArgs(char *check, int num_args)
     for (i = 1; i < myargc - num_args; i++)
     {
         if (!strcmp(check, myargv[i])) {
-            DEH_printf("parm : [%s] arg : [%s]\n", check, myargv[i + 1]);
+            if (num_args) {
+                DEH_printf("parm : [%s] arg : [%s]\n", check, myargv[i + 1]);
+            } else {
+                DEH_printf("parm : [%s] arg : ---\n", check);
+            }
             return i;
         }
     }

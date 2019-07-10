@@ -59,6 +59,7 @@
 #include "m_menu.h"
 #include "d_iwad.h"
 #include "p_saveg.h"
+#include <misc_utils.h>
 #include <dev_io.h>
 #include <bsp_sys.h>
 
@@ -71,9 +72,7 @@ extern boolean		chat_on;		// in heads-up code
 static uint16_t level_selected = 1;
 static char level_select_message[64] = {0};
 
-#if BSP_INDIR_API
-int *joy_extrafreeze = NULL;
-#endif
+extern int *joy_extrafreeze;
 //
 // defaulted values
 //

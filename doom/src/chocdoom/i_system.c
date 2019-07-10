@@ -52,6 +52,8 @@
 #include "w_wad.h"
 #include "z_zone.h"
 #include <bsp_sys.h>
+#include "misc_utils.h"
+
 
 #ifdef __MACOSX__
 #include <CoreFoundation/CFUserNotification.h>

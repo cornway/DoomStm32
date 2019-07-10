@@ -37,12 +37,7 @@
 //
 // DEFAULTS
 //
-#if 0
-#define mconfig_debug(args ...) \
-    dprintf(args)
-#else
-#define mconfig_debug(args ...)
-#endif
+
 // Location where all configuration data is stored - 
 // default.cfg, savegames, etc.
 
@@ -1567,17 +1562,13 @@ static default_collection_t extra_defaults =
 static const default_t *SearchCollection(default_collection_t *collection, char *name)
 {
     int i;
-    mconfig_debug("%s() : %p\n", __func__, collection);
     for (i=0; i<collection->numdefaults; ++i) 
     {
-        mconfig_debug("[%i] : <%p> \'%s\'\n",
-            i, &collection->defaults[i], collection->defaults[i].name);
         if (!strcmp(name, collection->defaults[i].name))
         {
             return &collection->defaults[i];
         }
     }
-    mconfig_debug("Fail\n");
     return NULL;
 }
 
@@ -1940,13 +1931,10 @@ static default_t *GetDefaultForName(char *name)
     default_t *result;
 
     // Try the main list and the extras
-    mconfig_debug("%s() : name=%s\n", __func__, name);
-    mconfig_debug("doom_defaults :\n");
     result = (default_t *)SearchCollection(&doom_defaults, name);
 
     if (result == NULL)
     {
-        mconfig_debug("extra_defaults :\n");
         result = (default_t *)SearchCollection(&extra_defaults, name);
     }
 
@@ -2074,6 +2062,7 @@ static char *GetDefaultConfigDir(void)
         return strdup(FILES_DIR"/");
     }
 }
+
 
 // 
 // SetConfigDir:
