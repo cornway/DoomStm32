@@ -1,10 +1,10 @@
-LR_IROM1 0x20020000 0x00070000 {    ; load region size_region
-  ER_IROM1 0x20020000 0x00070000 {  ; load address = execution address
+LR_IROM1 0x20020000 0x0005C000 {    ; load region size_region
+  ER_IROM1 0x20020000 0x0005C000 {  ; load address = execution address
    *.o (RESET, +First)
    *(InRoot$$Sections)
    .ANY (+RO)
   }
-  RW_IRAM1 0x20070000 UNINIT 0x00008000  {  ; RW data
+  RW_IRAM1 0x2007C000 UNINIT 0x00004000  {  ; RW data
    *(BSPHEAP)
   }
   DBG_RAM 0x20018000 UNINIT 0x00001000  {  ; DBG ALGO    

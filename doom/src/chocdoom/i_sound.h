@@ -58,6 +58,7 @@ struct sfxinfo_struct
 
     // lump number of sfx
     int lumpnum;		
+    int lumpnum_ext;
 
     // Maximum number of channels that the sound can be played on 
     // (Heretic)
@@ -121,7 +122,7 @@ typedef struct
 
     // Returns the lump index of the given sound.
 
-    int (*GetSfxLumpNum)(sfxinfo_t *sfxinfo);
+    int (*SfxOpenExt2Cache)(sfxinfo_t *sfxinfo);
 
     // Called periodically to update the subsystem.
 

@@ -265,7 +265,7 @@ int I_GetSfxLumpNum(sfxinfo_t *sfxinfo)
 {
     if (sound_module != NULL) 
     {
-        return sound_module->GetSfxLumpNum(sfxinfo);
+        return sound_module->SfxOpenExt2Cache(sfxinfo);
     }
     else
     {

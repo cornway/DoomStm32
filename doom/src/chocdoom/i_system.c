@@ -243,7 +243,7 @@ void I_Quit (void)
         entry = entry->next;
     }
 
-    cmd_bsp_exec("reset");
+    cmd_execute("reset", 0);
     assert(0);
 }
 

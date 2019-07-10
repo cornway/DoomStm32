@@ -22,6 +22,7 @@
 
 #include "i_timer.h"
 #include "doomtype.h"
+#include <misc_utils.h>
 #include <dev_io.h>
 
 #ifdef ORIGCODE

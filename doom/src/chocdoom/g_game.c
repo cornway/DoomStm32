@@ -1581,7 +1581,7 @@ G_InitNew
     M_ClearRandom ();
 
     if (skill == sk_nightmare || respawnparm )
-	respawnmonsters = false;
+	respawnmonsters = false;/*TODO : !!!*/
     else
 	respawnmonsters = false;
 

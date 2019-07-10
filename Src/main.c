@@ -42,12 +42,22 @@
 #include <audio_main.h>
 #include <input_main.h>
 #include <misc_utils.h>
+#include <bsp_sys.h>
 #include <heap.h>
 
 const char *mus_dir_path_psx = "/doom/music/psx";
 const char *mus_dir_path_3do = "/doom/music/3do";
 const char *snd_dir_path = "/doom/sound";
 const char *game_dir_path = "/doom";
+
+static bsp_user_api_t bsp_user_api =
+{
+    .heap =
+    {
+        .malloc = heap_malloc,
+        .free = heap_free,
+    },
+};
 
 extern int d_main(void);
 extern void dev_main (void);
@@ -88,6 +98,7 @@ int mainloop (int argc, const char **argv)
     myargc = argc;
     myargv = (char **)argv;
 #endif
+    sys_user_attach(&bsp_user_api);
     d_main();
     return 0;
 }
