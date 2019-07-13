@@ -882,7 +882,7 @@ static void D_MergeFileHdlr(void *_filename)
     char *filename = (char *)_filename;
     modifiedgame = true;
 
-    if (!W_MergeFile(filename, true)) {
+    if (!W_MergeFile(filename, false)) {
         dprintf("Failed to merge pwad : [%s]\n", filename);
     } else {
         dprintf("Merged pwad : [%s]\n", filename);

@@ -20,7 +20,9 @@
 #include "string.h"
 
 #include <misc_utils.h>
+#include <debug.h>
 #include <dev_io.h>
+#include <bsp_sys.h>
 
 #include <d_main.h>
 #include "m_misc.h"
@@ -28,10 +30,16 @@
 #include "z_zone.h"
 #include "i_system.h"
 
+#define W_IO_SHARED 1
+
 typedef struct
 {
     wad_file_t wad;
+#if W_IO_SHARED
+    char path[D_MAX_PATH];
+#else
     int fstream;
+#endif
 } stdc_wad_file_t;
 
 extern wad_file_class_t stdc_wad_file;
@@ -65,17 +73,22 @@ static wad_file_t *W_StdC_OpenFile(char *path)
     length = d_open(path, &file, "r");
     if (file < 0)
     {
-    	return NULL;
+        return NULL;
     }
-
+#if W_IO_SHARED
+    d_close(file);
+#endif
     // Create a new stdc_wad_file_t to hold the file handle.
 
     result = Z_Malloc(sizeof(stdc_wad_file_t), PU_STATIC, 0);
 	result->wad.file_class = &stdc_wad_file;
 	result->wad.mapped = NULL;
     result->wad.length = length;
+#if W_IO_SHARED
+    snprintf(result->path, sizeof(result->path), "%s", path);
+#else
 	result->fstream = file;
-
+#endif
 	return &result->wad;
 #endif
 }
@@ -98,9 +111,11 @@ static void W_StdC_CloseFile(wad_file_t *wad)
         Z_Free(stdc_wad->wad.mapped);
         stdc_wad->wad.mapped = NULL;
     } else {
+#if !W_IO_SHARED
         d_close(stdc_wad->fstream);
+        stdc_wad->fstream = -1;
+#endif
     }
-    stdc_wad->fstream = -1;
     Z_Free(stdc_wad);	
 #endif
 }
@@ -139,10 +154,30 @@ size_t W_StdC_Read(wad_file_t *wad, unsigned int offset,
         return buffer_len;
     }
 
+#if W_IO_SHARED
+    {
+        int f, size, err;
+
+        size = d_open(stdc_wad->path, &f, "r");
+        if (size < 0) {
+            return size;
+        }
+        if (size != stdc_wad->wad.length) {
+            dprintf("%s() : file length differs; [%u] -> [%u]\n",
+                __func__, size, stdc_wad->wad.length);
+            assert(0);
+        }
+        err = d_seek (f, offset, DSEEK_SET);
+        err = err < 0 ? err : d_read(f, buffer, buffer_len);
+        d_close(f);
+        return err;
+    }
+#else
     d_seek (stdc_wad->fstream, offset, DSEEK_SET);
     // Read into the buffer.
 
     return d_read(stdc_wad->fstream, buffer, buffer_len);
+#endif /*W_IO_SHARED*/
 #endif
 }
 
@@ -150,6 +185,7 @@ static wad_file_t *W_StdC_MapFile(char *path)
 {
     stdc_wad_file_t *result;
     unsigned int length;
+    int f;
 
     // Create a new stdc_wad_file_t to hold the file handle.
     result = Z_Malloc(sizeof(stdc_wad_file_t), PU_STATIC, 0);
@@ -157,21 +193,20 @@ static wad_file_t *W_StdC_MapFile(char *path)
     
     result->wad.length = length;
 
-    d_open (path, &result->fstream, "r");
-    if (result->fstream < 0)
+    length = d_open (path, &f, "r");
+    if (f < 0)
     {
         Z_Free(result);
         return NULL;
     }
 
-    length = M_FileLength(result->fstream);
     result->wad.mapped = Z_Malloc(length, PU_STATIC, 0);
 
-    if (d_read (result->fstream, result->wad.mapped, length) < 0)
+    if (d_read (f, result->wad.mapped, length) < 0)
     {
         I_Error("Ooops!");
     }
-    d_close(result->fstream);
+    d_close(f);
     return &result->wad;
 
 }
