@@ -1432,10 +1432,8 @@ G_SaveGame
 void G_DoSaveGame (void) 
 { 
     char *savegame_file;
-    char *temp_savegame_file;
 
-    temp_savegame_file = strupr (P_TempSaveGameFile());
-    savegame_file = strupr (P_SaveGameFile(savegameslot));
+    savegame_file = d_strupr (P_SaveGameFile(savegameslot));
 
     // Open the savegame file for writing.  We write to a temporary file
     // and then rename it at the end if it was successfully written.

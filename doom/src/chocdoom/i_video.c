@@ -21,8 +21,18 @@
 //	DOOM graphics stuff for X11, UNIX.
 //
 //-----------------------------------------------------------------------------
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdbool.h>
 
-#include "config.h"
+#include <input_main.h>
+#include <lcd_main.h>
+#include <bsp_sys.h>
+#include <misc_utils.h>
+#include <dev_io.h>
+#include <bsp_cmd.h>
+
+
 #include "v_video.h"
 #include "m_argv.h"
 #include "d_event.h"
@@ -33,15 +43,8 @@
 #include "tables.h"
 #include "doomkeys.h"
 
-#include <stdint.h>
-#include <stdbool.h>
-#include "lcd_main.h"
 #include "g_game.h"
 #include "D_player.h"
-#include "input_main.h"
-#include <bsp_sys.h>
-#include <misc_utils.h>
-#include <dev_io.h>
 
 #ifndef MAX
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -407,6 +410,7 @@ int usemouse = 0;
 int mouse_threshold;
 int *joy_extrafreeze = NULL;
 uint32_t joy_act_timestamp = 0;
+int32_t joy_freeze_per = 0;
 
 const kbdmap_t gamepad_to_kbd_map[JOY_STD_MAX] =
 {
@@ -426,21 +430,25 @@ const kbdmap_t gamepad_to_kbd_map[JOY_STD_MAX] =
     [JOY_K10]           = {KEY_ESCAPE, PAD_FREQ_LOW},
 };
 
+extern int d_rlimit_wrap (uint32_t *tsf, uint32_t period,
+                                void (*h) (void *), void *arg);
+
+
+static void D_PostEvent_h (void *ev)
+{
+    D_PostEvent((event_t *)ev);
+}
+
 static i_event_t *__post_key (i_event_t *events, i_event_t *e)
 {
-    event_t event =
-    {
-        e->state == keyup ? ev_keyup : ev_keydown,
-        e->sym, -1, -1, -1
-    };
-    if (joy_act_timestamp && joy_act_timestamp > d_time()) {
-        return events;
-    } else if (event.type == ev_keydown && joy_extrafreeze && *joy_extrafreeze) {
-        joy_act_timestamp = d_time() + 100;//ms
+    event_t event = {e->state == keyup ? ev_keyup : ev_keydown, e->sym, -1, -1, -1};
+
+    if (joy_extrafreeze && *joy_extrafreeze) {
+        d_rlimit_wrap(&joy_act_timestamp, joy_freeze_per, D_PostEvent_h, &event);
     } else {
         joy_act_timestamp = 0;
+        D_PostEvent(&event);
     }
-    D_PostEvent(&event);
     return events;
 }
 
@@ -459,6 +467,7 @@ void I_InitGraphics (void)
 	screenvisible = true;
     p_palette = rgb_palette;
 
+    cmd_register_i32(&joy_freeze_per, "joyfreeze");
     input_soft_init(__post_key, (void *)gamepad_to_kbd_map);
 }
 

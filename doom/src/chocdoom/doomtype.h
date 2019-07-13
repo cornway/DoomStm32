@@ -21,6 +21,9 @@
 #ifndef __DOOMTYPE__
 #define __DOOMTYPE__
 
+#include <limits.h>
+#include <inttypes.h>
+
 // #define macros to provide functions missing in Windows.
 // Outside Windows, we use strings.h for str[n]casecmp.
 
@@ -29,11 +32,6 @@
 
 #define strcasecmp stricmp
 #define strncasecmp strnicmp
-
-#else
-
-#include "string.h"
-#include "arch.h"
 
 #endif
 
@@ -63,35 +61,8 @@
 // pre-standardisation version).  inttypes.h is also in the C99 
 // standard and defined to include stdint.h, so include this. 
 
-#include <inttypes.h>
-
-#include <stdlib.h>
-#include <string.h>
-
-static inline
-char *strdup (const char *str)
-{
-    int sz = strlen(str);
-    char *ret = (char *)malloc(sz + 1);
-    if (!ret) return NULL;
-    strcpy(ret, str);
-    ret[-0] = '\0';
-    return ret;
-}
-
-#include <ctype.h>
-
-#ifndef HAVE_STRUPR
-static inline
-char *strupr(char *str)
-{
-  char *s;
-
-  for(s = str; *s; s++)
-    *s = toupper((unsigned char)*s);
-  return str;
-}
-#endif /*HAVE_STRUPR*/
+char *d_strdup (const char *str);
+char *d_strupr(char *str);
 
 #ifdef __cplusplus
 
@@ -109,8 +80,6 @@ typedef int boolean;
 #endif
 
 typedef uint8_t byte;
-
-#include <limits.h>
 
 #ifdef _WIN32
 

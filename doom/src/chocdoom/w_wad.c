@@ -24,9 +24,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "doomtype.h"
+#include <misc_utils.h>
+#include <bsp_sys.h>
 
-#include "config.h"
+#include "doomtype.h"
 #include "d_iwad.h"
 #include "i_swap.h"
 #include "i_system.h"
@@ -35,14 +36,12 @@
 #include "z_zone.h"
 
 #include "w_wad.h"
-#include "misc_utils.h"
 
 extern GameMode_t gamemode;
+extern DoomDecorPkg_t game_alt_pkg;
 
-GameAltPackage_t game_alt_pkg = pkg_none;
-
-#define GAME_3D0_PKG_MARKER "V3DO"
-#define GAME_PSX_PKG_MARKER "VPSX"
+#define CHK_WAD(name) \
+    (!d_astrnmatch(name, "WAD", 1 - sizeof("WAD")))
 
 typedef struct
 {
@@ -147,61 +146,100 @@ static void ExtendLumpInfo(int newnumlumps)
 //  for the lump name.
 int game_levels_total = 0;
 
+extern int d_astrmatch (const char *a, const char *b);
+
 static inline void
-W_ExtendMaps (lumpinfo_t *lump)
+W_RegisterMAPX (lumpinfo_t *lump)
 {
     M_snprintf(lump->name, 8, "MAP%d", game_levels_total + 1);
+}
+
+#define D_PER_EP_LEVELS 9
+
+static inline boolean
+W_Is_MAPX_Or_EXMX (const char *check)
+{
+    if (d_astrmatch(check, "E*M*")) {
+        return !d_astrmatch(check, "MAP**");
+    }
+    return true;
+}
+
+static int
+W_Convert_EXMX_2_MAPX (char *a)
+{
+    int n, b = D_PER_EP_LEVELS;
+
+    if (a[0] != 'E') return -1;
+
+    n = ((a[1] - '0') * b) + (a[3] - '0');
+    assert(n < 99);
+    a[0] = 'M'; a[1] = 'A'; a[2] = 'P';
+    a[3] = (n / 10) + '0'; a[4] = (n % 10) + '0';
+    return 5;
+}
+
+static int
+W_Convert_MAPX_2_EXMX (char *a)
+{
+    int n, b = D_PER_EP_LEVELS;
+
+    if (a[0] != 'M') return -1;
+
+    n = ((a[3] - '0') * 10) + (a[4] - '0');
+    assert(n < 99);
+    a[0] = 'E'; a[2] = 'M';
+    a[1] = (n / b) + '1'; a[3] = (n % b) + '0'; a[4] = 0;
+    return 5;
 }
 
 static void
 W_CountMaps (lumpinfo_t *lump, boolean pwad)
 {
-    if (0 == strncmp(lump->name, "MAP", 3) &&
-        isdigit(lump->name[3])) {
+    if (!W_Is_MAPX_Or_EXMX(lump->name)) {
+        return;
+    }
+    if (!pwad) {
+        game_levels_total++;
+        return;
+    }
 
-        if (pwad && game_alt_pkg == pkg_3d0_doom) {
-            int map = atoi(lump->name + 3);
-            int ep = map / 8;
-
-            map--;
-            map = map % 8;
-            map++;
-            M_snprintf(lump->name, 8, "E%dM%d", ep + 1, map);
-        } else {
-            if (pwad && game_levels_total) {
-                W_ExtendMaps(lump);
-            }
+    if (gamemode == commercial) {
+        assert(game_levels_total);
+        
+        W_RegisterMAPX(lump);
+        game_levels_total++;
+    } else {
+        if (W_Convert_MAPX_2_EXMX(lump->name) > 0) {
         }
-        game_levels_total++;
-    } else if (((lump->name[0] == 'E') && (lump->name[2] == 'M'))) {
-        game_levels_total++;
     }
 }
 
-wad_file_t *W_AddFile (char *filename)
+wad_file_t *W_AddFile (char *filename, wad_file_t *wad_file)
 {
     wadinfo_t header;
     lumpinfo_t *lump_p;
     unsigned int i;
-    wad_file_t *wad_file;
     int length;
     int startlump;
     filelump_t *fileinfo;
     filelump_t *filerover;
     int newnumlumps;
+    boolean is_pwad = false;
 
     // open the file and add to directory
 
-    wad_file = W_OpenFile(filename);
+    if (wad_file == NULL) {
+        wad_file = W_OpenFile(filename);
+    }
 
-    if (wad_file == NULL)
-    {
-		return NULL;
+    if (wad_file == NULL) {
+        return NULL;
     }
 
     newnumlumps = numlumps;
 
-    if (strcasecmp(filename+strlen(filename)-3 , "wad" ) )
+    if (!CHK_WAD(filename))
     {
     	// single lump file
 
@@ -233,8 +271,8 @@ wad_file_t *W_AddFile (char *filename)
 			I_Error ("Wad file %s doesn't have IWAD "
 				 "or PWAD id\n", filename);
 			}
-
 			// ???modifiedgame = true;
+            is_pwad = true;
 		}
 
 		header.numlumps = LONG(header.numlumps);
@@ -256,13 +294,12 @@ wad_file_t *W_AddFile (char *filename)
 
     for (i=startlump; i<numlumps; ++i)
     {
-		lump_p->wad_file = wad_file;
-		lump_p->position = LONG(filerover->filepos);
-		lump_p->size = LONG(filerover->size);
-			lump_p->cache = NULL;
-		strncpy(lump_p->name, filerover->name, 8);
-        W_CountMaps(lump_p, false);
-
+        lump_p->wad_file = wad_file;
+        lump_p->position = LONG(filerover->filepos);
+        lump_p->size = LONG(filerover->size);
+        lump_p->cache = NULL;
+        strncpy(lump_p->name, filerover->name, 8);
+        W_CountMaps(lump_p, is_pwad);
         ++lump_p;
         ++filerover;
     }
@@ -277,101 +314,6 @@ wad_file_t *W_AddFile (char *filename)
 
     return wad_file;
 }
-
-wad_file_t *W_AddPwad (char *filename)
-{
-    wadinfo_t *header;
-    lumpinfo_t *lump_p;
-    unsigned int i;
-    wad_file_t *wad_file;
-    int newnumlumps, startlump;
-    filelump_t *filerover;
-    filelump_t *fileinfo;
-
-    // open the file and add to directory
-
-    wad_file = W_MapFile(filename);
-
-    if (wad_file == NULL) {
-        return NULL;
-    } 
-
-    newnumlumps = numlumps;
-
-    if (strcasecmp(filename+strlen(filename)-3 , "wad" ) )
-    {
-        // single lump file
-
-        // fraggle: Swap the filepos and size here.  The WAD directory
-        // parsing code expects a little-endian directory, so will swap
-        // them back.  Effectively we're constructing a "fake WAD directory"
-        // here, as it would appear on disk.
-
-		fileinfo = Z_Malloc(sizeof(filelump_t), PU_STATIC, 0);
-		fileinfo->filepos = LONG(0);
-		fileinfo->size = LONG(wad_file->length);
-
-        // Name the lump after the base of the filename (without the
-        // extension).
-
-		M_ExtractFileBase (filename, fileinfo->name);
-		newnumlumps++;
-    }
-    else
-    {
-        // WAD file
-        header = (wadinfo_t *)((uint8_t *)wad_file->mapped);
-
-		if (strncmp(header->identification,"IWAD",4))
-		{
-			// Homebrew levels?
-			if (strncmp(header->identification,"PWAD",4))
-			{
-			I_Error ("Wad file %s doesn't have IWAD "
-				 "or PWAD id\n", filename);
-			}
-
-			// ???modifiedgame = true;
-		}
-
-		header->numlumps = READ_LE_U32(header->numlumps);
-		header->infotableofs = READ_LE_U32(header->infotableofs);
-		fileinfo = (filelump_t *)((uint8_t *)wad_file->mapped + header->infotableofs);
-
-        newnumlumps += header->numlumps;
-    }
-
-    // Increase size of numlumps array to accomodate the new file.
-    startlump = numlumps;
-    ExtendLumpInfo(newnumlumps);
-
-    lump_p = &lumpinfo[startlump];
-
-    filerover = fileinfo;
-
-    for (i=startlump; i<numlumps; ++i)
-    {
-		lump_p->wad_file = wad_file;
-		lump_p->position = READ_LE_I32(filerover->filepos);
-		lump_p->size     = READ_LE_I32(filerover->size);
-        lump_p->cache = NULL;
-		strncpy(lump_p->name, filerover->name, 8);
-        W_CountMaps(lump_p, true);
-
-        ++lump_p;
-        ++filerover;
-    }
-
-    if (lumphash != NULL)
-    {
-        Z_Free(lumphash);
-        lumphash = NULL;
-    }
-
-    return wad_file;
-
-}
-
 
 //
 // W_NumLumps
@@ -732,13 +674,11 @@ void W_CheckCorrectIWAD(GameMission_t mission)
             if (lumpnum >= 0)
             {
                 I_Error("\nYou are trying to use a %s IWAD file with "
-                        "the %s%s binary.\nThis isn't going to work.\n"
-                        "You probably want to use the %s%s binary.",
+                        "the %s binary.\nThis isn't going to work.\n"
+                        "You probably want to use the %s binary.\n",
                         D_SuggestGameName(unique_lumps[i].mission,
                                           indetermined),
-                        PROGRAM_PREFIX,
                         D_GameMissionString(mission),
-                        PROGRAM_PREFIX,
                         D_GameMissionString(unique_lumps[i].mission));
             }
         }

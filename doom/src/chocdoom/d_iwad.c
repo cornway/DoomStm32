@@ -21,9 +21,10 @@
 #include <ctype.h>
 #include <string.h>
 
-#include "config.h"
 #include "deh_str.h"
 #include "doomkeys.h"
+#include <doomtype.h>
+#include "d_main.h"
 #include "d_iwad.h"
 #include "i_system.h"
 #include "m_argv.h"
@@ -61,11 +62,10 @@ static const iwad_t iwads[] =
 
 #define MAX_IWAD_DIRS 128
 
-static char *iwad_dirs[MAX_IWAD_DIRS];
+static const char *iwad_dirs[MAX_IWAD_DIRS];
 static int num_iwad_dirs = 0;
-static char pwads_path[256] = "/doom";
 
-static void AddIWADDir(char *dir)
+static void AddIWADDir(const char *dir)
 {
     if (num_iwad_dirs < MAX_IWAD_DIRS)
     {
@@ -400,7 +400,7 @@ static void CheckDOSDefaults(void)
 // Returns true if the specified path is a path to a file
 // of the specified name.
 
-static boolean DirIsFile(char *path, char *filename)
+static boolean DirIsFile(const char *path, const char *filename)
 {
     size_t path_len;
     size_t filename_len;
@@ -417,7 +417,7 @@ static boolean DirIsFile(char *path, char *filename)
 // file, returning the full path to the IWAD if found, or NULL
 // if not found.
 
-static char *CheckDirectoryHasIWAD(char *dir, char *iwadname)
+static char *CheckDirectoryHasIWAD(const char *dir, const char *iwadname)
 {
     char *filename; 
 
@@ -426,7 +426,7 @@ static char *CheckDirectoryHasIWAD(char *dir, char *iwadname)
 
     if (DirIsFile(dir, iwadname) && M_FileExists(dir))
     {
-        return strdup(dir);
+        return d_strdup(dir);
     }
 
     // Construct the full path to the IWAD if it is located in
@@ -434,7 +434,7 @@ static char *CheckDirectoryHasIWAD(char *dir, char *iwadname)
 
     if (!strcmp(dir, "."))
     {
-        filename = strdup(iwadname);
+        filename = d_strdup(iwadname);
     }
     else
     {
@@ -454,7 +454,7 @@ static char *CheckDirectoryHasIWAD(char *dir, char *iwadname)
 // Search a directory to try to find an IWAD
 // Returns the location of the IWAD if found, otherwise NULL.
 
-static char *SearchDirectoryForIWAD(char *dir, int mask, GameMission_t *mission)
+static char *SearchDirectoryForIWAD(const char *dir, int mask, GameMission_t *mission)
 {
     char *filename;
     size_t i;
@@ -537,7 +537,7 @@ static void AddDoomWadPath(void)
         return;
     }
 
-    doomwadpath = strdup(doomwadpath);
+    doomwadpath = d_strdup(doomwadpath);
 
     // Add the initial directory
 
@@ -614,17 +614,17 @@ static void BuildIWADDirList(void)
 
     CheckSteamGUSPatches();
 
-#else
+#else /*_WIN32*/
 
     // Standard places where IWAD files are installed under Unix.
 
     AddIWADDir("/usr/share/games/doom");
     AddIWADDir("/usr/local/share/games/doom");
 
-#endif
-#else
-    AddIWADDir (FILES_DIR);
-#endif
+#endif /*_WIN32*/
+#else /*ORIGCODE*/
+    AddIWADDir (DD_DOOMPATH());
+#endif /*ORIGCODE*/
 }
 
 //
@@ -653,7 +653,7 @@ char *D_FindWADByName(char *name)
 
         if (DirIsFile(iwad_dirs[i], name) && M_FileExists(iwad_dirs[i]))
         {
-            return strdup(iwad_dirs[i]);
+            return d_strdup(iwad_dirs[i]);
         }
 
         // Construct a string for the full path
@@ -670,30 +670,6 @@ char *D_FindWADByName(char *name)
     // File not found
 
     return NULL;
-}
-
-extern const char *game_dir_path;
-
-const char *D_FindWADByExt(void (*handle)(void *))
-{
-    char path[128];
-    const char *resource = "";
-    switch (game_alt_pkg) {
-        case pkg_3d0_doom:
-            resource = "3do";
-        break;
-        case pkg_psx_final:
-            resource = "psx";
-        break;
-        default:
-                return resource;
-                /*skip this step*/
-        break;
-    }
-    snprintf(path, sizeof(path), "%s/%s", pwads_path, resource);
-    W_ForEach(path, handle);
-
-    return "";
 }
 
 
@@ -728,6 +704,7 @@ char *D_TryFindWADByName(char *filename)
 //
 
 static char iwadfile[256] = "/doom/DOOM.WAD";
+int newwadhack = 0;
 
 char *D_FindIWAD(int mask, GameMission_t *mission)
 {
@@ -746,9 +723,9 @@ char *D_FindIWAD(int mask, GameMission_t *mission)
     iwadparm = M_CheckParmWithArgs("-decor", 1);
     if (iwadparm) {
         if (strcmp(myargv[iwadparm + 1], "psx") == 0) {
-            game_alt_pkg = pkg_psx_final;
+            game_alt_pkg = D_DECOR_PSX_FINAL;
         } else if (strcmp(myargv[iwadparm + 1], "3do") == 0) {
-            game_alt_pkg = pkg_3d0_doom;
+            game_alt_pkg = D_DECOR_3DO_DOOM;
         }
     }
     iwadparm = M_CheckParmWithArgs("-iwad", 1);
@@ -780,6 +757,10 @@ char *D_FindIWAD(int mask, GameMission_t *mission)
         {
             result = SearchDirectoryForIWAD(iwad_dirs[i], mask, mission);
         }
+    }
+    iwadparm = M_CheckParm("-hack");
+    if (iwadparm) {
+        newwadhack = 1;
     }
 
     return result;

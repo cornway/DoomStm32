@@ -689,7 +689,7 @@ void ST_updateFaceWidget(void)
         if (st_faceindex < ST_EXPFACE0) {
             st_faceindex = ST_DEADFACE;
         }
-        if (game_alt_pkg == pkg_psx_final) {
+        if (D_PKG_PSX()) {
             if (st_oldhealth > ST_MUCHPAIN) {
                 st_faceindex = ST_EXPFACE0;
                 w_expfacecnt = ST_NUMEXPFACES - 1;
@@ -1345,7 +1345,7 @@ static void ST_loadUnloadGraphics(load_callback_t callback)
     callback(DEH_String("STFDEAD0"), &faces[facenum]);
     ++facenum;
 
-    if (game_alt_pkg == pkg_psx_final) {
+    if (D_PKG_PSX()) {
         for (j=0; j<ST_NUMEXPFACES; j++) {
             DEH_snprintf(namebuf, 9, "STFEXP%d", j);
                 callback(namebuf, &faces[facenum]);
@@ -1471,7 +1471,7 @@ void ST_createWidgets(void)
     // faces
     {
         int offx = ST_FACESX;
-        if (game_alt_pkg == pkg_psx_final) {
+        if (D_PKG_PSX()) {
             offx += 7;
         }
         STlib_initMultIcon(&w_faces,

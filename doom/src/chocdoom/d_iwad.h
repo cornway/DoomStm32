@@ -40,7 +40,6 @@ typedef struct
 } iwad_t;
 
 char *D_FindWADByName(char *filename);
-const char *D_FindWADByExt(void (*handle)(void *));
 char *D_TryFindWADByName(char *filename);
 char *D_FindIWAD(int mask, GameMission_t *mission);
 const iwad_t **D_FindAllIWADs(int mask);

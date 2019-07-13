@@ -25,8 +25,6 @@
 #ifdef HAVE_LIBSAMPLERATE
 #include <samplerate.h>
 #endif
-
-#include <config.h>
 #include "deh_str.h"
 #include "i_sound.h"
 #include "i_system.h"
@@ -34,6 +32,7 @@
 #include "m_argv.h"
 #include "m_misc.h"
 #include "w_wad.h"
+#include "d_main.h"
 #include "z_zone.h"
 
 #include "doomtype.h"
@@ -45,15 +44,12 @@
 #define INT16_MAX 0x7FFF
 #endif
 
-#define SFX_MAX_NAME 9
+#if defined(SFX_MAX_NAME) || defined(SFX_MAX_PATH)
+#error "Most be defined once"
+#endif
 
-static inline void
-SndMakePath (char *buf, const char *name, int namelen, const char *ext)
-{
-    char namebuf[SFX_MAX_NAME] = {0};
-    strncpy(namebuf, name, namelen);
-    sprintf(buf, "%s/sound/%s.%s", FILES_DIR, namebuf, ext);
-}
+#define SFX_MAX_NAME 9
+#define SFX_MAX_PATH 128
 
 typedef uint8_t Uint8;
 typedef uint16_t Uint16;
@@ -732,17 +728,15 @@ static void GetSfxLumpName (sfxinfo_t *sfx, char *buf, size_t buf_len)
 
 static int I_SDL_SfxOpenExt2Cache(sfxinfo_t *sfx)
 {
-    char namebuf[9];
+    char namebuf[SFX_MAX_NAME], path[SFX_MAX_PATH];
     int lumpnum = -1;
 
     GetSfxLumpName(sfx, namebuf, sizeof(namebuf));
     lumpnum = W_GetNumForName(namebuf);
 
-    if (game_alt_pkg == pkg_psx_final) {
-        char path[128];
-
-        SndMakePath(path, namebuf, sizeof(namebuf) - 1, "wav");
-        sfx->lumpnum_ext = audio_open_wave(path, sfx->lumpnum_ext);
+    if (0 == D_PKG_3DO()) {
+        DD_GETPATH(path, "sound/", namebuf, ".wav");
+        sfx->lumpnum_ext = audio_wave_open(path, sfx->lumpnum_ext);
     }
     return lumpnum;
 }
@@ -754,7 +748,7 @@ static int I_SDL_SfxOpenExt2Cache(sfxinfo_t *sfx)
 static void *I_SfxCacheExt (sfxinfo_t *sfx, int tag)
 {
     lumpinfo_t *lump;
-    char path[128];
+    char path[SFX_MAX_PATH];
     byte *ptr;
 
     if ((unsigned)sfx->lumpnum >= numlumps)
@@ -764,9 +758,9 @@ static void *I_SfxCacheExt (sfxinfo_t *sfx, int tag)
 
     lump = &lumpinfo[sfx->lumpnum];
 
-    SndMakePath(path, lump->name, sizeof(lump->name), "wav");
+    DD_GETPATH(path, "sound/", lump->name, ".wav");
 
-    sfx->lumpnum_ext = audio_open_wave(path, sfx->lumpnum_ext);
+    sfx->lumpnum_ext = audio_wave_open(path, sfx->lumpnum_ext);
     if (sfx->lumpnum_ext < 0) {
         return NULL;
     }
@@ -803,7 +797,7 @@ static boolean CacheSFX(sfxinfo_t *sfxinfo)
     // need to load the sound
 
     lumpnum = sfxinfo->lumpnum;
-    if (game_alt_pkg == pkg_psx_final) {
+    if (!D_PKG_3DO()) {
         data = I_SfxCacheExt(sfxinfo, PU_STATIC);
     }
     if (data == NULL) {

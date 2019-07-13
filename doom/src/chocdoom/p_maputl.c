@@ -24,6 +24,7 @@
 
 #include <stdlib.h>
 
+#include <misc_utils.h>
 
 #include "m_bbox.h"
 

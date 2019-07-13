@@ -35,8 +35,6 @@
 #include "SDL.h"
 #endif
 
-#include "config.h"
-
 #include "deh_str.h"
 #include "doomtype.h"
 #include "m_argv.h"
@@ -168,9 +166,9 @@ byte *I_ZoneBase (int *size)
     return zonemem;
 }
 
-void I_PrintBanner(char *msg)
+void I_PrintBanner(const char *msg)
 {
-    /*TODO*/
+    dprintf(msg);
 }
 
 void I_PrintDivider(void)
@@ -178,7 +176,7 @@ void I_PrintDivider(void)
     /*TODO*/
 }
 
-void I_PrintStartupBanner(char *gamedescription)
+void I_PrintStartupBanner(const char *gamedescription)
 {
     I_PrintDivider();
     I_PrintBanner(gamedescription);

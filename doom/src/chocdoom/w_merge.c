@@ -507,13 +507,18 @@ static void DoMerge(void)
 }
 
 // Merge in a file by name
-boolean W_MergeFile(char *filename, boolean automatic)
+boolean W_MergeFile(char *filename, boolean virtual)
 {
     int old_numlumps = numlumps;
-
+    wad_file_t *wad = NULL;
+ 
     // Load PWAD
-    if (!W_AddPwad(filename))
+    if (virtual) {
+        wad = W_MapFile(filename);
+    }
+    if (!W_AddFile(filename, wad)) {
         return false;
+    }
 
     // IWAD is at the start, PWAD was appended to the end
     iwad.lumps = lumpinfo;

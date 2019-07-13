@@ -45,10 +45,9 @@
 #include <bsp_sys.h>
 #include <heap.h>
 
-const char *mus_dir_path_psx = "/doom/music/psx";
-const char *mus_dir_path_3do = "/doom/music/3do";
-const char *snd_dir_path = "/doom/sound";
-const char *game_dir_path = "/doom";
+extern int DD_DoomMain(void);
+extern void dev_main (void);
+extern const char *game_dir_path;
 
 static bsp_user_api_t bsp_user_api =
 {
@@ -58,9 +57,6 @@ static bsp_user_api_t bsp_user_api =
         .free = heap_free,
     },
 };
-
-extern int d_main(void);
-extern void dev_main (void);
 
 static void *__vid_alloc (uint32_t size)
 {
@@ -97,8 +93,10 @@ int mainloop (int argc, const char **argv)
     myargc = argc;
     myargv = (char **)argv;
 #endif
+    assert(argc > 0);
+    game_dir_path = argv[0];
     sys_user_attach(&bsp_user_api);
-    d_main();
+    DD_DoomMain();
     return 0;
 }
 

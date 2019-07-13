@@ -76,9 +76,15 @@ typedef enum
 
 typedef enum {
     pkg_none = 0,
-    pkg_psx_final,
-    pkg_3d0_doom,
-} GameAltPackage_t;
+    D_DECOR_PSX_FINAL,
+    D_DECOR_3DO_DOOM,
+} DoomDecorPkg_t;
+
+#define D_PKG_PSX() \
+    (game_alt_pkg == D_DECOR_PSX_FINAL)
+
+#define D_PKG_3DO() \
+    (game_alt_pkg == D_DECOR_3DO_DOOM)
 
 // Skill level.
 
@@ -100,7 +106,7 @@ int D_GetNumEpisodes(GameMission_t mission, GameMode_t mode);
 boolean D_IsEpisodeMap(GameMission_t mission);
 char *D_GameMissionString(GameMission_t mission);
 
-extern GameAltPackage_t game_alt_pkg;
+extern DoomDecorPkg_t game_alt_pkg;
 
 #endif /* #ifndef __D_MODE__ */
 

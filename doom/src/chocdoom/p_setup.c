@@ -517,10 +517,10 @@ void P_LoadBlockMap (int lump)
 
     // Swap all short integers to native byte ordering.
   
-    for (i=0; i<count; i++)
-    {
+    //for (i=0; i<count; i++)
+    //{
 	//blockmaplump[i] = ReadLe16(&blockmaplump[i]);
-    }
+    //}
 		
     // Read the header
 

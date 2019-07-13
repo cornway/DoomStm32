@@ -18,6 +18,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <audio_main.h>
+#include <misc_utils.h>
+#include <dev_io.h>
+#include <bsp_sys.h>
+#include <debug.h>
+
 #include "i_sound.h"
 #include "i_system.h"
 
@@ -37,11 +43,7 @@
 #include "p_local.h"
 #include "w_wad.h"
 #include "z_zone.h"
-#include "audio_main.h"
-#include <misc_utils.h>
-#include "dev_io.h"
-#include <bsp_sys.h>
-
+#include "d_main.h"
 // when to clip out sounds
 // Does not fit the large outdoor areas.
 
@@ -80,6 +82,7 @@ typedef struct
 } channel_t;
 
 static cd_track_t cd;
+static int cd_audio_present = 0;
 
 // The set of channels available
 
@@ -117,10 +120,18 @@ int snd_channels = 8;
 // Sets channels, SFX and music volume,
 //  allocates channel buffer, sets S_sfx lookup.
 //
+typedef struct {
+	const char *music_book;
+	uint8_t allocated;
+} S_Config_t;
+
+S_Config_t S_ConfigDefault = {0};
+
+static int S_ReadConf (S_Config_t *cfg, const char *path);
 
 void S_Init(int sfxVolume, int musicVolume)
 {  
-    int i;
+    int i, dummy;
 
     I_PrecacheSounds(S_sfx, NUMSFX);
 
@@ -148,6 +159,11 @@ void S_Init(int sfxVolume, int musicVolume)
     }
 
     I_AtExit(S_Shutdown, true);
+
+    DD_SetupSoundtrackList(&dummy);
+    if (dummy) {
+        cd_audio_present = 1;
+    }
 }
 
 void S_Shutdown(void)
@@ -607,77 +623,11 @@ void S_StartMusic(int m_id)
 
 }
 
-#define CD_NAME_MAX 20
-#define CD_TRACK_MAX 40
-
-extern const char *mus_dir_path_psx;
-extern const char *mus_dir_path_3do;
-
-const char *cdnames_psx[] =
-{
-    "mus_None", "mus_e1m1", "mus_e1m2", "mus_e1m3", "mus_e1m4",
-    "mus_e1m5", "mus_e1m6", "mus_e1m7", "mus_e1m8", "mus_e1m9",
-    "mus_e2m1", "mus_e2m2", "mus_e2m3", "mus_e2m4", "mus_e2m5",
-    "mus_e2m6", "mus_e2m7", "mus_e2m8", "mus_e2m9", "mus_e3m1",
-    "mus_e1m1", "mus_e1m2", "mus_e1m3", "mus_e1m4", "mus_e1m5",
-    "mus_e1m6", "mus_e1m7", "mus_e1m8", "musinter",
-    "mus_e1m5", "mus_e1m6", "mus_e1m7", "mus_e1m8", "mus_e2m1",
-    "mus_e2m2", "mus_e2m3", "mus_e2m3", "mus_e2m4", "mus_e2m5",
-    "mus_e2m6", "mus_e2m7", "mus_e2m8", "mus_e2m9", "mus_e3m1",
-    "mus_e1m1", "mus_e1m2", "mus_e1m3", "mus_e1m4", "mus_e1m5",
-    "mus_e1m6", "mus_e1m7", "mus_e1m8", "mus_e1m9", "mus_e2m1",
-    "mus_e2m1", "mus_e2m2", "mus_e2m3", "mus_e2m4", "mus_e2m5",
-    "mus_e2m6", "mus_e2m7", "mus_e2m8", "mus_e2m9", "mus_e2m1",
-    "mus_e2m1", "mus_e2m2", "mus_e2m3", "mus_e2m4", "mus_e2m5"
-    "mus_e1m6", "mus_e1m7", "mus_e1m8", "musinter",
-    "mus_e1m5", "mus_e1m6", "mus_e1m7", "mus_e1m8", "mus_e2m1",
-    "mus_e2m2", "mus_e2m3", "mus_e2m3", "mus_e2m4", "mus_e2m5",
-    "mus_e2m6", "mus_e2m7", "mus_e2m8", "mus_e2m9", "mus_e3m1",
-    "mus_e1m1", "mus_e1m2", "mus_e1m3", "mus_e1m4", "mus_e1m5",
-    "mus_e1m6", "mus_e1m7", "mus_e1m8", "mus_e1m9", "mus_e2m1",
-    "mus_e2m1", "mus_e2m2", "mus_e2m3", "mus_e2m4", "mus_e2m5",
-    "mus_e2m6", "mus_e2m7", "mus_e2m8", "mus_e2m9", "mus_e2m1",
-    "mus_e2m1", "mus_e2m2", "mus_e2m3", "mus_e2m4", "mus_e2m5",
-    [mus_dm2ttl] = "mus_ttl",
-    [mus_dm2int] = "mus_int",
-};
-
-const char *cdnames_3do[] =
-{
-    "mus_None", "mus_e1m1", "mus_e1m2", "mus_e1m3", "mus_e1m4",
-    "mus_e1m5", "mus_e1m6", "mus_e1m7", "mus_e1m8", "mus_e1m9",
-    "mus_e2m1", "mus_e2m2", "mus_e2m3","mus_e1m1", "mus_e1m2", 
-    "mus_e1m3", "mus_e1m4", "mus_e1m5", "mus_e1m6", "mus_e1m7",
-    "mus_e1m8", "mus_e1m9", "mus_e2m1", "mus_e2m2", "mus_e2m3",
-    "mus_e1m1", "mus_e1m2", "mus_e1m3", "mus_e1m4", "mus_e2m3"
-    "mus_e1m5", "mus_e1m6", "mus_e1m7", "mus_e1m8", "mus_e1m9",
-    "mus_e2m1", "mus_e2m2", "mus_e2m3","mus_e1m1", "mus_e1m2", 
-    "mus_e1m3", "mus_e1m4", "mus_e1m5", "mus_e1m6", "mus_e1m7",
-    "mus_e1m8", "mus_e1m9", "mus_e2m1", "mus_e2m2", "mus_e2m3",
-    [mus_dm2ttl] = "mus_e1m7",
-    [mus_dm2int] = "mus_e1m1",
-    [mus_intro] = "mus_e1m7",
-};
-
-
 void S_PlayNum (int num)
 {
-    char *name, buf[256];
-    char *cdpath = NULL;
-    if (game_alt_pkg == pkg_psx_final) {
-        if (num >= arrlen(cdnames_psx)) {
-            return;
-        }
-        cdpath = (char *)mus_dir_path_psx;
-        name = (char *)cdnames_psx[num];
-    } else if (game_alt_pkg == pkg_3d0_doom) {
-        cdpath = (char *)mus_dir_path_3do;
-        name = (char *)cdnames_3do[num];   
+    if (DD_PlaySoundtrackNum(&cd, num, musicVolume << 3) < 0) {
+        dprintf("%s() : fail to play [%i] track\n", __func__, num);
     }
-    snprintf(buf, sizeof(buf), "%s/%s.WAV", cdpath, name);
-
-    cd_play_name(&cd, buf);
-    cd_volume(&cd, musicVolume << 3);
 }
 
 void S_ChangeMusic(int musicnum, int looping)
@@ -746,16 +696,25 @@ boolean S_MusicPlaying(void)
 
 void S_PauseMusic (void)
 {
+    if (!cd_audio_present) {
+        return;
+    }
     cd_pause(&cd);
 }
 
 void S_MusicResume (void)
 {
+    if (!cd_audio_present) {
+        return;
+    }
     cd_resume(&cd);
 }
 
 void S_StopMusic(void)
 {
+    if (!cd_audio_present) {
+        return;
+    }
     if (mus_playing)
     {
         if (mus_paused)
@@ -770,5 +729,16 @@ void S_StopMusic(void)
 #endif
         mus_playing = 0;
     }
+}
+
+
+static int S_ReadConf (S_Config_t *cfg, const char *path)
+{
+	int f;
+
+	d_open(path, &f, "r");
+	if (f < 0) {
+
+	}
 }
 

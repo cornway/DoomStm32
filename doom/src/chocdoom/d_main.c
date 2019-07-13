@@ -25,7 +25,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
 #include "deh_main.h"
 #include "doomdef.h"
 #include "doomstat.h"
@@ -60,6 +59,13 @@
 
 #include "g_game.h"
 
+#include <debug.h>
+#include <misc_utils.h>
+#include <dev_io.h>
+#include <bsp_sys.h>
+#include <bsp_cmd.h>
+#include <audio_main.h>
+
 #include "hu_stuff.h"
 #include "wi_stuff.h"
 #include "st_stuff.h"
@@ -72,16 +78,8 @@
 #include "r_local.h"
 #include "statdump.h"
 
-
 #include "d_main.h"
 #include "w_merge.h"
-#include "input_main.h"
-#include <debug.h>
-#include <misc_utils.h>
-#include <dev_io.h>
-#include <bsp_sys.h>
-#include <bsp_cmd.h>
-#include <audio_main.h>
 
 //
 // D-DoomLoop()
@@ -131,8 +129,10 @@ boolean         bfgedition;
 // If true, the main game loop has started.
 boolean         main_loop_started = false;
 
+#ifndef STM32_SDK
 char		wadfile[1024];		// primary wad file
 char		mapdir[1024];           // directory of development maps
+#endif /*STM32_SDK*/
 
 int             show_endoom = 1;
 
@@ -407,9 +407,9 @@ boolean D_GrabMouseCallback(void)
 //
 //  D_DoomLoop
 //
-extern void fps_update (void);
-extern void frame_start (void);
-extern void frame_end (void);
+extern void DD_FpsUpdate (void);
+extern void DD_FrameBegin (void);
+extern void DD_FrameEnd (void);
 
 void D_DoomLoop (void)
 {
@@ -451,7 +451,7 @@ void D_DoomLoop (void)
     {
         // frame syncronous IO operations
         bsp_tickle();
-        frame_start();
+        DD_FrameBegin();
         I_StartFrame ();
 
         TryRunTics (); // will run at least one tic
@@ -463,8 +463,8 @@ void D_DoomLoop (void)
             D_Display ();
         }
         DD_ProcGameAct();
-        frame_end();
-        fps_update();
+        DD_FrameEnd();
+        DD_FpsUpdate();
     }
 }
 
@@ -872,7 +872,7 @@ static boolean D_AddFile(char *filename)
 {
     wad_file_t *handle;
 
-    handle = W_AddFile(filename);
+    handle = W_AddFile(filename, NULL);
 
     return handle != NULL;
 }
@@ -882,7 +882,7 @@ static void D_MergeFileHdlr(void *_filename)
     char *filename = (char *)_filename;
     modifiedgame = true;
 
-    if (!W_MergeFile(filename)) {
+    if (!W_MergeFile(filename, true)) {
         dprintf("Failed to merge pwad : [%s]\n", filename);
     } else {
         dprintf("Merged pwad : [%s]\n", filename);
@@ -894,7 +894,7 @@ static void D_AddFileHdlr(void *_filename)
     char *filename = (char *)_filename;
     modifiedgame = true;
 
-    if (!W_AddFile(filename)) {
+    if (!W_AddFile(filename, NULL)) {
         dprintf("Failed to add pwad : [%s]\n", filename);
     } else {
         dprintf("Added pwad : [%s]\n", filename);
@@ -903,12 +903,12 @@ static void D_AddFileHdlr(void *_filename)
 
 void D_AddPwads (void)
 {
-    D_FindWADByExt(D_AddFileHdlr);
+    DD_PwadAddEach(D_AddFileHdlr);
 }
 
 void D_MergePwads (void)
 {
-    D_FindWADByExt(D_MergeFileHdlr);
+    DD_PwadAddEach(D_MergeFileHdlr);
 }
 
 // Copyright message banners
@@ -1151,7 +1151,7 @@ static void LoadIwadDeh(void)
         }
         else
         {
-            chex_deh = strdup("chex.deh");
+            chex_deh = d_strdup("chex.deh");
         }
 
         // If the dehacked patch isn't found, try searching the WAD
@@ -1180,6 +1180,7 @@ static void LoadIwadDeh(void)
 }
 #endif
 
+extern const char *DD_DoomBanner;
 //
 // D_DoomMain
 //
@@ -1195,7 +1196,7 @@ void D_DoomMain (void)
     I_AtExit(D_Endoom, false);
 
     // print banner
-    I_PrintBanner(PACKAGE_STRING);
+    I_PrintBanner(DD_DoomBanner);
     
     DEH_printf("Z_Init: Init zone memory allocation daemon. \n");
     Z_Init ();
@@ -1805,6 +1806,7 @@ void D_DoomMain (void)
 
     DEH_printf("ST_Init: Init status bar.\n");
     ST_Init ();
+    DEH_printf("Memory left: [0x%08x] bytes\n", heap_avail());
 
     // If Doom II without a MAP01 lump, this is a store demo.
     // Moved this here so that MAP01 isn't constantly looked up
@@ -1866,4 +1868,3 @@ void D_DoomMain (void)
 
     D_DoomLoop ();  // never returns
 }
-

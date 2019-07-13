@@ -17,7 +17,7 @@
 //
 
 #include <stdio.h>
-
+#include <misc_utils.h>
 #include "i_system.h"
 #include "z_zone.h"
 #include "m_random.h"

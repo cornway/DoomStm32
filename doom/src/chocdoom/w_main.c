@@ -183,7 +183,7 @@ boolean W_ParseCommandLine(void)
 
             filename = D_TryFindWADByName(myargv[p]);
 
-	    W_AddFile(filename);
+	    W_AddFile(filename, NULL);
         }
     } else {
         D_MergePwads();

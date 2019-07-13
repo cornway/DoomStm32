@@ -24,8 +24,6 @@
 #include <ctype.h>
 #include <errno.h>
 
-#include "config.h"
-
 #include "doomtype.h"
 #include "doomkeys.h"
 #include "doomfeatures.h"
@@ -33,6 +31,7 @@
 #include "m_argv.h"
 #include "m_misc.h"
 #include "z_zone.h"
+#include "d_main.h"
 #include <misc_utils.h>
 //
 // DEFAULTS
@@ -41,7 +40,7 @@
 // Location where all configuration data is stored - 
 // default.cfg, savegames, etc.
 
-char *configdir = "/";
+const char *configdir = "/";
 
 // Default filenames for configuration files.
 
@@ -1731,7 +1730,7 @@ static void SetVariable(default_t *def, char *value)
     switch (def->type)
     {
         case DEFAULT_STRING:
-            * (char **) def->location = strdup(value);
+            * (char **) def->location = d_strdup(value);
             break;
 
         case DEFAULT_INT:
@@ -2031,10 +2030,10 @@ float M_GetFloatVariable(char *name)
 // Get the path to the default configuration dir to use, if NULL
 // is passed to M_SetConfigDir.
 
-static char *GetDefaultConfigDir(void)
+static const char *GetDefaultConfigDir(void)
 {
-#ifdef STM32_SDK
-    return FILES_DIR;
+#if defined(STM32_SDK)
+    return DD_DOOMPATH();
 #elif !defined(_WIN32) || defined(_WIN32_WCE)
 
     // Configuration settings are stored in ~/.chocolate-doom/,
@@ -2056,11 +2055,7 @@ static char *GetDefaultConfigDir(void)
 
         return result;
     }
-    else
-#endif /* #ifndef _WIN32 */
-    {
-        return strdup(FILES_DIR"/");
-    }
+#endif /* !defined(_WIN32) || defined(_WIN32_WCE) */
 }
 
 
@@ -2110,7 +2105,7 @@ char *M_GetSaveGameDir(char *iwadname)
 
     if (!strcmp(configdir, ""))
     {
-    	savegamedir = strdup("");
+    	savegamedir = d_strdup("");
     }
     else
     {

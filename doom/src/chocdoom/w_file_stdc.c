@@ -19,12 +19,14 @@
 #include <stdio.h>
 #include "string.h"
 
+#include <misc_utils.h>
+#include <dev_io.h>
+
+#include <d_main.h>
 #include "m_misc.h"
 #include "w_file.h"
 #include "z_zone.h"
 #include "i_system.h"
-#include "misc_utils.h"
-#include <dev_io.h>
 
 typedef struct
 {
@@ -92,7 +94,12 @@ static void W_StdC_CloseFile(wad_file_t *wad)
 
     stdc_wad = (stdc_wad_file_t *) wad;
 
-    d_close(stdc_wad->fstream);
+    if (stdc_wad->wad.mapped) {
+        Z_Free(stdc_wad->wad.mapped);
+        stdc_wad->wad.mapped = NULL;
+    } else {
+        d_close(stdc_wad->fstream);
+    }
     stdc_wad->fstream = -1;
     Z_Free(stdc_wad);	
 #endif
@@ -126,15 +133,20 @@ size_t W_StdC_Read(wad_file_t *wad, unsigned int offset,
 
     // Jump to the specified position in the file.
 
-	d_seek (stdc_wad->fstream, offset, DSEEK_SET);
+    if (stdc_wad->wad.mapped) {
+        byte *ptr = stdc_wad->wad.mapped;
+        d_memcpy(buffer, ptr + offset, buffer_len);
+        return buffer_len;
+    }
 
+    d_seek (stdc_wad->fstream, offset, DSEEK_SET);
     // Read into the buffer.
 
     return d_read(stdc_wad->fstream, buffer, buffer_len);
 #endif
 }
 
-static wad_file_t *W_StdC_MMapFile(char *path)
+static wad_file_t *W_StdC_MapFile(char *path)
 {
     stdc_wad_file_t *result;
     unsigned int length;
@@ -164,40 +176,23 @@ static wad_file_t *W_StdC_MMapFile(char *path)
 
 }
 
-typedef void (*w_handle_t)(void *);
-
-static w_handle_t w_handle = NULL;
-static char *w_path = NULL;
-
-int W_StdC_ForeachHandle (char *name, d_bool is_dir)
+static void W_StdC_Foreach(char *dirpath, void (*handle)(void *))
 {
-    char buf[128] = {0};
-    char path_to_file[128] = {0};
-    char *ext;
+    char path[D_MAX_PATH];
+    fobj_t obj;
+    int dir, i;
 
-    strncpy(buf, name, sizeof(buf));
-
-    ext = buf + strlen(buf) - sizeof(WAD_EXT) + 1;
-    strupr(ext);
-    if (0 == strncmp(ext, WAD_EXT, sizeof(WAD_EXT))) {
-        M_snprintf(path_to_file, sizeof(path_to_file),
-            "%s/%s", w_path, name);
-
-        w_handle(path_to_file);
-        if (path_to_file[0] == 0) {
-            return 1; /*successfully handled*/
+    dir = d_opendir(dirpath);
+    if (dir < 0) {
+        return;
+    }
+    while (d_readdir(dir, &obj) >= 0) {
+        if (0 == obj.attr.dir) {
+            sprintf(path, "%s/%s", dirpath, obj.name);
+            handle(path);
         }
     }
-    return 0;
-}
-
-
-static void W_StdC_Foreach(char *path, w_handle_t handle)
-{
-    fiter_t flist = { W_StdC_ForeachHandle, NULL };
-    w_path = path;
-    w_handle = handle;
-    d_dirlist(path, &flist);
+    d_closedir(dir);
 }
 
 
@@ -206,7 +201,7 @@ wad_file_class_t stdc_wad_file =
     W_StdC_OpenFile,
     W_StdC_CloseFile,
     W_StdC_Read,
-    W_StdC_MMapFile,
+    W_StdC_MapFile,
     W_StdC_Foreach,
 };
 

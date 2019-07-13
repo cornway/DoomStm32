@@ -363,7 +363,7 @@ void P_PlayerThink (player_t* player)
 
     if (player->wpfired_ev) {
 
-        if (game_alt_pkg == pkg_psx_final) {
+        if (D_PKG_PSX()) {
             if (player->wpfired_ev > (arrlen(wp_fired_mo[0]) - 1) / 2) {
                 player->lookdir += wp_fired_mo[player->readyweapon][player->wpfired_ev];
             } else {

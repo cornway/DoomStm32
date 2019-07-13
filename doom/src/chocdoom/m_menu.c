@@ -63,7 +63,7 @@
 #include <dev_io.h>
 #include <bsp_sys.h>
 
-
+extern int game_levels_total;
 extern patch_t*		hu_font[HU_FONTSIZE];
 extern boolean		message_dontfuckwithme;
 
@@ -974,36 +974,23 @@ void M_NewGame(int choice)
 	
     // Chex Quest disabled the episode select screen, as did Doom II.
 
-    if (gamemode == commercial || gameversion == exe_chex)
+    if (D_PKG_3DO() || gamemode == commercial || gameversion == exe_chex)
         M_SetupNextMenu(&NewLvlDef);
     else
         M_SetupNextMenu(&EpiDef);
 }
 
-static void D_ForeachFileHdlr(void *_filename)
-{
-    char *filename = (char *)_filename;
-    W_AddFile(filename);
-    M_snprintf(level_select_message, sizeof(level_select_message),
-        "New map[%d]: %s", level_selected, filename);
-    level_selected--;
-    filename[0] = 0;
-}
-
-extern int game_levels_total;
 static void M_SetLevel(int choice)
 {
     memset(level_select_message, 0, sizeof(level_select_message));
     if (choice == 0) {
 
         if (level_selected > 1)
-            level_selected--;        
+            level_selected--;
     } else if (choice == 1) {
 
         if (level_selected < game_levels_total) {
             level_selected++;
-        } else {
-            D_FindWADByExt(D_ForeachFileHdlr);
         }
     } else if (choice == key_menu_forward) {
 
@@ -1030,8 +1017,11 @@ void M_VerifyNightmare(int key)
     M_ClearMenus ();
 }
 
+#define D_EPISODE_SIZE 9
+
 void M_ChooseSkill(int choice)
 {
+    int levelselected = level_selected;
 #ifndef STM32_SDK
     if (choice == nightmare)
     {
@@ -1039,7 +1029,11 @@ void M_ChooseSkill(int choice)
 	return;
     }
 #endif
-    G_DeferedInitNew((skill_t)choice,epi+1,level_selected);
+    if (D_PKG_3DO()) {
+        epi = level_selected / D_EPISODE_SIZE;
+        levelselected = (level_selected % D_EPISODE_SIZE);
+    }
+    G_DeferedInitNew((skill_t)choice,epi+1, levelselected);
     M_ClearMenus ();
 }
 

@@ -40,10 +40,25 @@ void D_DoAdvanceDemo (void);
 void D_StartTitle (void);
 
 
+void DD_PwadAddEach (void (*handle)(void *));
 void DD_SetGameAct (gameaction_t action);
 void DD_ProcGameAct (void);
 void DD_LoadAltPkgGame(void);
 void DD_UpdateNoBlit (void);
+
+extern char *__DD_GetPath (char *path, const char **subdir);
+extern const char *__DD_DoomPath (void);
+
+#define DD_GETPATH(path, args...)            \
+do {                                         \
+    const char *__p[] = {args, NULL};        \
+    __DD_GetPath(path, (const char **)__p);  \
+} while (0)
+
+#define DD_DOOMPATH() __DD_DoomPath()
+
+void DD_SetupSoundtrackList (int *cnt);
+int DD_PlaySoundtrackNum (void *_cd, int num, int volume);
 
 //
 // GLOBAL VARIABLES

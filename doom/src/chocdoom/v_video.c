@@ -37,7 +37,6 @@
 #include "z_zone.h"
 #include <bsp_sys.h>
 
-#include "config.h"
 #ifdef HAVE_LIBPNG
 #include <png.h>
 #endif

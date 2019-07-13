@@ -49,7 +49,7 @@ slidename_t	slideFrameNames[MAXSLIDEDOORS] =
 static void T_StartSoundNoKey (void)
 {
     int sfx = sfx_oof;
-    if (game_alt_pkg == pkg_psx_final) {
+    if (game_alt_pkg == D_DECOR_PSX_FINAL) {
         sfx = sfx_nokey;
     }
     S_StartSound(NULL, sfx);

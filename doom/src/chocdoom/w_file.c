@@ -18,8 +18,6 @@
 
 #include <stdio.h>
 
-#include "config.h"
-
 #include "doomtype.h"
 #include "m_argv.h"
 
@@ -102,12 +100,13 @@ wad_file_t *W_OpenFile(char *path)
     return result;
 }
 
-void W_ForEach (char *path, void (*handle) (void *))
+void W_ForEach (const char *path, 
+    void (*handle) (void *))
 {
     int i = 0;
     for (i = 0; i < arrlen(wad_file_classes); ++i)
     {
-        wad_file_classes[i]->foreach(path, handle);
+        wad_file_classes[i]->foreach((char *)path, handle);
     }
 }
 

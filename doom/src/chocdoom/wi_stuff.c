@@ -124,7 +124,7 @@ typedef struct
 
 //
 // Animation.
-// There is another anim_t used in p_spec.
+// There is another dd_animation_t used in p_spec.
 //
 typedef struct
 {
@@ -1780,7 +1780,7 @@ void WI_Drawer (void)
 	    WI_drawDeathmatchStats();
 	else if (netgame)
 	    WI_drawNetgameStats();
-	else if (game_alt_pkg == pkg_psx_final)
+	else if (D_PKG_PSX())
         WI_drawStatsPSX();
     else
 	    WI_drawStats();

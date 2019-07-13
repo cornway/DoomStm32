@@ -66,7 +66,7 @@ struct _wad_file_s
 // handle for the WAD file, or NULL if it could not be opened.
 
 wad_file_t *W_OpenFile(char *path);
-void W_ForEach (char *path, void (*handle) (void *));
+void W_ForEach (const char *path, void (*handle) (void *));
 wad_file_t *W_MapFile(char *path);
 
 
@@ -81,7 +81,7 @@ void W_CloseFile(wad_file_t *wad);
 size_t W_Read(wad_file_t *wad, unsigned int offset,
               void *buffer, size_t buffer_len);
 
-#define WAD_EXT "WAD"
+#define F_DOT_WAD "WAD"
 
 
 #endif /* #ifndef __W_FILE__ */
