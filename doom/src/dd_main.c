@@ -228,7 +228,7 @@ static void __DD_LoadAnimation (dd_animation_t *anim, char *start, char *end, in
 static void __DD_DrawAnimationTile (dd_animation_t *anim)
 {
     int x, y, w, h, f_num, i;
-    if (anim->frame < 0)
+    if (anim->frame > anim->end)
         return;
 
     patch_t *patch = W_CacheLumpNum(anim->frame, PU_CACHE);
@@ -247,15 +247,12 @@ static void __DD_DrawAnimationTile (dd_animation_t *anim)
 
 static void __DD_TickleAnimation (dd_animation_t *anim)
 {
-    if (anim->frame < -1) {
+    if (anim->frame > anim->end) {
         return;
     }
     if (anim->tsf + anim->delay < d_time()) {
         anim->tsf = d_time();
         anim->frame++;
-    }
-    if (anim->frame > anim->end) {
-        anim->frame = -1;
     }
 }
 
@@ -315,9 +312,9 @@ static const char *__DD_SoundtrackFindName (char *cfg, int *id)
     const char *keyval[2];
     int n, _id;
 
-    n = d_astrtok(keyval, arrlen(keyval), cfg);
+    n = d_wstrtok(keyval, arrlen(keyval), cfg);
     if (n < 2) {
-        dprintf("%s() : fail to parse \'%s\'\n", cfg);
+        dprintf("%s() : fail to parse \'%s\'\n", __func__, cfg);
         return NULL;
     }
     _id = __DD_SoundtrackFindId(keyval[0]);
@@ -491,6 +488,7 @@ const sndtrack_map_t soundtrack_names[NUMMUSIC] =
 };
 
 const char *DD_DoomBanner =
+"\n"
 "       ______ _____  ________  ___       \n"
 "       |  _  \\  _  ||  _  |  \\/  |       \n"
 " ______| | | | | | || | | | .  . |______ \n"
