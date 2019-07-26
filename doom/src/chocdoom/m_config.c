@@ -2092,13 +2092,13 @@ void M_SetConfigDir(char *dir)
 // Calculate the path to the directory to use to store save games.
 // Creates the directory as necessary.
 //
+#if ORIGCODE
 
 char *M_GetSaveGameDir(char *iwadname)
 {
     char *savegamedir;
-#if ORIGCODE
+
     char *topdir;
-#endif
 
     // If not "doing" a configuration directory (Windows), don't "do"
     // a savegame directory, either.
@@ -2109,7 +2109,6 @@ char *M_GetSaveGameDir(char *iwadname)
     }
     else
     {
-#if ORIGCODE
         // ~/.chocolate-doom/savegames
 
         topdir = M_StringJoin(configdir, "savegame", NULL);
@@ -2123,13 +2122,25 @@ char *M_GetSaveGameDir(char *iwadname)
         M_MakeDirectory(savegamedir);
 
         free(topdir);
-#elif defined(STM32_SDK)
-        savegamedir = M_StringJoin(configdir, "", NULL);
-        M_MakeDirectory(savegamedir);
-
-#endif
     }
 
     return savegamedir;
 }
+
+#else
+
+char *M_GetSaveGameDir(char *iwadname)
+{
+    const char *argv[2];
+    char buf[16];
+
+    int argc;
+
+    strcpy(buf, iwadname);
+    argc = d_vstrtok(argv, 2, buf, '.');
+
+    return M_StringJoin(DD_DOOMPATH(), "savegame", argv[0], NULL);
+}
+
+#endif
 

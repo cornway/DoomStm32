@@ -29,6 +29,7 @@
 #include "w_file.h"
 #include "z_zone.h"
 #include "i_system.h"
+#include <memio.h>
 
 #define W_IO_SHARED 1
 
@@ -40,6 +41,7 @@ typedef struct
 #else
     int fstream;
 #endif
+    void *extra;
 } stdc_wad_file_t;
 
 extern wad_file_class_t stdc_wad_file;
@@ -149,9 +151,7 @@ size_t W_StdC_Read(wad_file_t *wad, unsigned int offset,
     // Jump to the specified position in the file.
 
     if (stdc_wad->wad.mapped) {
-        byte *ptr = stdc_wad->wad.mapped;
-        d_memcpy(buffer, ptr + offset, buffer_len);
-        return buffer_len;
+        return mem_fread(buffer, 1, buffer_len, (MEMFILE *)stdc_wad->extra);
     }
 
 #if W_IO_SHARED
@@ -185,13 +185,11 @@ static wad_file_t *W_StdC_MapFile(char *path)
 {
     stdc_wad_file_t *result;
     unsigned int length;
+    MEMFILE *memf;
     int f;
 
     // Create a new stdc_wad_file_t to hold the file handle.
     result = Z_Malloc(sizeof(stdc_wad_file_t), PU_STATIC, 0);
-    result->wad.file_class = &stdc_wad_file;
-    
-    result->wad.length = length;
 
     length = d_open (path, &f, "r");
     if (f < 0)
@@ -199,8 +197,11 @@ static wad_file_t *W_StdC_MapFile(char *path)
         Z_Free(result);
         return NULL;
     }
-
+    result->wad.file_class = &stdc_wad_file;
+    result->wad.length = length;
+    memf = (MEMFILE *)&result->extra;
     result->wad.mapped = Z_Malloc(length, PU_STATIC, 0);
+    result->extra = mem_fopen_read(result->wad.mapped, length);
 
     if (d_read (f, result->wad.mapped, length) < 0)
     {
