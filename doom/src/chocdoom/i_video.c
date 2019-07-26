@@ -410,7 +410,7 @@ int usemouse = 0;
 int mouse_threshold;
 int *joy_extrafreeze = NULL;
 uint32_t joy_act_timestamp = 0;
-int32_t joy_freeze_per = 0;
+int32_t joy_freeze_per = 200;
 
 const kbdmap_t gamepad_to_kbd_map[JOY_STD_MAX] =
 {
@@ -430,25 +430,18 @@ const kbdmap_t gamepad_to_kbd_map[JOY_STD_MAX] =
     [JOY_K10]           = {KEY_ESCAPE, PAD_FREQ_LOW},
 };
 
-extern int d_rlimit_wrap (uint32_t *tsf, uint32_t period,
-                                void (*h) (void *), void *arg);
-
-
-static void D_PostEvent_h (void *ev)
-{
-    D_PostEvent((event_t *)ev);
-}
+extern int d_rlimit_wrap (uint32_t *tsf, uint32_t period);
 
 static i_event_t *__post_key (i_event_t *events, i_event_t *e)
 {
     event_t event = {e->state == keyup ? ev_keyup : ev_keydown, e->sym, -1, -1, -1};
 
-    if (joy_extrafreeze && *joy_extrafreeze) {
-        d_rlimit_wrap(&joy_act_timestamp, joy_freeze_per, D_PostEvent_h, &event);
-    } else {
-        joy_act_timestamp = 0;
-        D_PostEvent(&event);
+    if (e->state == keydown) {
+        if (0 == d_rlimit_wrap(&joy_act_timestamp, joy_freeze_per)) {
+            return NULL;
+        }
     }
+    D_PostEvent(&event);
     return events;
 }
 
