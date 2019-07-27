@@ -33,6 +33,8 @@
 #include "z_zone.h"
 #include "d_main.h"
 #include <misc_utils.h>
+#include <dev_io.h>
+#include <bsp_sys.h>
 //
 // DEFAULTS
 //
@@ -2132,14 +2134,18 @@ char *M_GetSaveGameDir(char *iwadname)
 char *M_GetSaveGameDir(char *iwadname)
 {
     const char *argv[2];
-    char buf[16];
-
+    char buf[128], *path;
     int argc;
 
-    strcpy(buf, iwadname);
+    DD_GETPATH(buf, "/savegame");
+    d_mkdir(buf);
+    snprintf(buf, sizeof(buf), "%s", iwadname);
     argc = d_vstrtok(argv, 2, buf, '.');
+    argc = d_vstrtok(argv, 2, (char *)argv[0], '/');
 
-    return M_StringJoin(DD_DOOMPATH(), "savegame", argv[0], NULL);
+    path = M_StringJoin(DD_DOOMPATH(), "/savegame/", argv[1], NULL);
+    d_mkdir(path);
+    return path;
 }
 
 #endif

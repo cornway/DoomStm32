@@ -767,7 +767,7 @@ P_SetupLevel
     P_InitThinkers ();
 	   
     // find map name
-    if ( gamemode == commercial)
+    if (D_PKG_3DO() || gamemode == commercial)
     {
         if (map<10)
             DEH_snprintf(lumpname, 9, "map0%i", map);

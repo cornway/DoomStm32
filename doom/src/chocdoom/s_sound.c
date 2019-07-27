@@ -131,7 +131,7 @@ static int S_ReadConf (S_Config_t *cfg, const char *path);
 
 void S_Init(int sfxVolume, int musicVolume)
 {  
-    int i, dummy;
+    int i, dummy = 0;
 
     I_PrecacheSounds(S_sfx, NUMSFX);
 
@@ -625,6 +625,9 @@ void S_StartMusic(int m_id)
 
 void S_PlayNum (int num)
 {
+    if (!cd_audio_present) {
+        return;
+    }
     if (DD_PlaySoundtrackNum(&cd, num, musicVolume << 3) < 0) {
         dprintf("%s() : fail to play [%i] track\n", __func__, num);
     }
@@ -632,6 +635,9 @@ void S_PlayNum (int num)
 
 void S_ChangeMusic(int musicnum, int looping)
 {
+    if (!cd_audio_present) {
+        return;
+    }
     S_StopMusic();
     if (mus_playing_num == musicnum) {
         if(S_MusicPlaying()) {

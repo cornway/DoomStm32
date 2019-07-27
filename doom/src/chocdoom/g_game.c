@@ -1574,7 +1574,7 @@ G_InitNew
 	map = 1;
 
     if ( (map > 9)
-	 && ( gamemode != commercial) )
+	 && ( gamemode != commercial && !D_PKG_3DO()) )
       map = 9;
 
     M_ClearRandom ();

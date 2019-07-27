@@ -1412,7 +1412,6 @@ void D_DoomMain (void)
 
     DEH_printf("W_Init: Init WADfiles.\n");
     D_AddFile(iwadfile);
-    //D_AddPwads();
 #if ORIGCODE
     numiwadlumps = numlumps;
 #endif
@@ -1587,7 +1586,11 @@ void D_DoomMain (void)
     else
 #endif
     {
-        savegamedir = M_GetSaveGameDir(D_SaveGameIWADName(gamemission));
+        if (modifiedgame) {
+            savegamedir = M_GetSaveGameDir(D_SaveGamePWADName(gamemission));
+        } else {
+            savegamedir = M_GetSaveGameDir(D_SaveGameIWADName(gamemission));
+        }
     }
 
     // Check for -file in shareware

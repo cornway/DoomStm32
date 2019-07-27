@@ -803,6 +803,12 @@ const iwad_t **D_FindAllIWADs(int mask)
     return result;
 }
 
+extern const char *g_pwad_name;
+
+char *D_SaveGamePWADName(GameMission_t gamemission)
+{
+    return (char *)g_pwad_name;
+}
 
 //
 // Get the IWAD name used for savegames.

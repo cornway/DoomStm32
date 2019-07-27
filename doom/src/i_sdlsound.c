@@ -734,7 +734,7 @@ static int I_SDL_SfxOpenExt2Cache(sfxinfo_t *sfx)
     GetSfxLumpName(sfx, namebuf, sizeof(namebuf));
     lumpnum = W_GetNumForName(namebuf);
 
-    if (0 == D_PKG_3DO()) {
+    if (D_PKG_PSX()) {
         DD_GETPATH(path, "sound/", namebuf, ".wav");
         sfx->lumpnum_ext = audio_wave_open(path, sfx->lumpnum_ext);
     }
@@ -797,7 +797,7 @@ static boolean CacheSFX(sfxinfo_t *sfxinfo)
     // need to load the sound
 
     lumpnum = sfxinfo->lumpnum;
-    if (!D_PKG_3DO()) {
+    if (D_PKG_PSX()) {
         data = I_SfxCacheExt(sfxinfo, PU_STATIC);
     }
     if (data == NULL) {

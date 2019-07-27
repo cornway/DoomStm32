@@ -1021,7 +1021,6 @@ void M_VerifyNightmare(int key)
 
 void M_ChooseSkill(int choice)
 {
-    int levelselected = level_selected;
 #ifndef STM32_SDK
     if (choice == nightmare)
     {
@@ -1029,11 +1028,7 @@ void M_ChooseSkill(int choice)
 	return;
     }
 #endif
-    if (D_PKG_3DO()) {
-        epi = level_selected / D_EPISODE_SIZE;
-        levelselected = (level_selected % D_EPISODE_SIZE);
-    }
-    G_DeferedInitNew((skill_t)choice,epi+1, levelselected);
+    G_DeferedInitNew((skill_t)choice,epi+1, level_selected);
     M_ClearMenus ();
 }
 

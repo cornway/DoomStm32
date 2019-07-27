@@ -148,70 +148,39 @@ int game_levels_total = 0;
 
 extern int d_astrmatch (const char *a, const char *b);
 
-static inline void
-W_RegisterMAPX (lumpinfo_t *lump)
-{
-    M_snprintf(lump->name, 8, "MAP%d", game_levels_total + 1);
-}
-
 #define D_PER_EP_LEVELS 9
 
 static inline boolean
-W_Is_MAPX_Or_EXMX (const char *check)
+W_Is_MAPX_Or_EXMX (const char *check, boolean *p_is_mapxx)
 {
-    if (d_astrmatch(check, "E*M*")) {
-        return !d_astrmatch(check, "MAP**");
+    boolean is_mapxx = (check[0] == 'M');
+
+    if (is_mapxx) {
+        if (check[1] == 'A' && check[2] == 'P') {
+            *p_is_mapxx = true;
+            return true;
+        }
+    } else if (check[0] != 'E') {
+    } else if (check[2] == 'M') {
+        return true;
     }
-    return true;
+    return false;
 }
 
-static int
-W_Convert_EXMX_2_MAPX (char *a)
-{
-    int n, b = D_PER_EP_LEVELS;
 
-    if (a[0] != 'E') return -1;
-
-    n = ((a[1] - '0') * b) + (a[3] - '0');
-    assert(n < 99);
-    a[0] = 'M'; a[1] = 'A'; a[2] = 'P';
-    a[3] = (n / 10) + '0'; a[4] = (n % 10) + '0';
-    return 5;
-}
-
-static int
-W_Convert_MAPX_2_EXMX (char *a)
-{
-    int n, b = D_PER_EP_LEVELS;
-
-    if (a[0] != 'M') return -1;
-
-    n = ((a[3] - '0') * 10) + (a[4] - '0');
-    assert(n < 99);
-    a[0] = 'E'; a[2] = 'M';
-    a[1] = (n / b) + '1'; a[3] = (n % b) + '0'; a[4] = 0;
-    return 5;
-}
-
-static void
+static inline void
 W_CountMaps (lumpinfo_t *lump, boolean pwad)
 {
-    if (!W_Is_MAPX_Or_EXMX(lump->name)) {
+    boolean is_mapxx = false;
+    if (!W_Is_MAPX_Or_EXMX(lump->name, &is_mapxx)) {
         return;
     }
     if (!pwad) {
-        game_levels_total++;
+        game_levels_total += is_mapxx;
         return;
     }
-
-    if (gamemode == commercial) {
-        assert(game_levels_total);
-        
-        W_RegisterMAPX(lump);
+    if (D_PKG_3DO() || gamemode == commercial) {
         game_levels_total++;
-    } else {
-        if (W_Convert_MAPX_2_EXMX(lump->name) > 0) {
-        }
     }
 }
 
@@ -298,7 +267,7 @@ wad_file_t *W_AddFile (char *filename, wad_file_t *wad_file)
         lump_p->position = LONG(filerover->filepos);
         lump_p->size = LONG(filerover->size);
         lump_p->cache = NULL;
-        strncpy(lump_p->name, filerover->name, 8);
+        d_memcpy(lump_p->name, filerover->name, 8);
         W_CountMaps(lump_p, is_pwad);
         ++lump_p;
         ++filerover;

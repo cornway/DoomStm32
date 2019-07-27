@@ -180,12 +180,16 @@ boolean W_ParseCommandLine(void)
 	while (++p != myargc && myargv[p][0] != '-')
         {
             char *filename;
+            extern const char *g_pwad_name;
 
             filename = D_TryFindWADByName(myargv[p]);
-
-	    W_AddFile(filename, NULL);
+            if (!g_pwad_name || !g_pwad_name[0]) {
+                g_pwad_name = filename;
+            }
+            W_MergeFile(filename, false);
         }
     } else {
+        modifiedgame = true;
         D_MergePwads();
     }
 

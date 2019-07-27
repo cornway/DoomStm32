@@ -436,7 +436,7 @@ static i_event_t *__post_key (i_event_t *events, i_event_t *e)
 {
     event_t event = {e->state == keyup ? ev_keyup : ev_keydown, e->sym, -1, -1, -1};
 
-    if (e->state == keydown) {
+    if (joy_extrafreeze && *joy_extrafreeze && e->state == keydown) {
         if (0 == d_rlimit_wrap(&joy_act_timestamp, joy_freeze_per)) {
             return NULL;
         }
