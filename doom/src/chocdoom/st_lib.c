@@ -175,8 +175,7 @@ STlib_updatePercent
   int			refresh )
 {
     if (refresh && *per->n.on)
-	V_DrawPatch(per->n.x, per->n.y, per->p);
-    
+        V_DrawPatch(per->n.x, per->n.y, per->p);
     STlib_updateNum(&per->n, refresh);
 }
 

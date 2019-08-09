@@ -58,18 +58,26 @@ static bsp_user_api_t bsp_user_api =
     },
 };
 
-static void *__vid_alloc (uint32_t size)
-{
-    return heap_alloc_shared(size);
-}
-
 void VID_PreConfig (void)
 {
-    screen_t screen;
-    screen.buf = NULL;
-    screen.width = SCREENWIDTH;
-    screen.height = SCREENHEIGHT;
-    vid_config(__vid_alloc, NULL, &screen, GFX_COLOR_MODE_CLUT, 2);
+    screen_conf_t conf;
+    int hwaccel = 0, p;
+
+    p = bsp_argv_check("-gfxmod");
+    if (p >= 0) {
+        const char *str = bsp_argv_get(p + 1);
+        hwaccel = atoi(str);
+    }
+
+    conf.res_x = SCREENWIDTH;
+    conf.res_y = SCREENHEIGHT;
+    conf.alloc.malloc = heap_alloc_shared;
+    conf.alloc.free = heap_free;
+    conf.colormode = GFX_COLOR_MODE_CLUT;
+    conf.laynum = 2;
+    conf.hwaccel = hwaccel;
+    conf.clockpresc = 1;
+    vid_config(&conf);
 }
 
 extern void dev_main (void);

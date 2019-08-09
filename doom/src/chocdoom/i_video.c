@@ -111,7 +111,7 @@ void I_FinishUpdate (void)
     scr.buf = &I_VideoBuffer[0];
     scr.width = SCREENWIDTH;
     scr.height = SCREENHEIGHT;
-    vid_upate(&scr);
+    vid_update(&scr);
 }
 
 

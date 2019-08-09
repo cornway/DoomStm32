@@ -69,7 +69,7 @@ extern boolean		message_dontfuckwithme;
 
 extern boolean		chat_on;		// in heads-up code
 
-static uint16_t level_selected = 1;
+int level_selected = 1;
 static char level_select_message[64] = {0};
 
 extern int *joy_extrafreeze;
