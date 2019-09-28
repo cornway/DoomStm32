@@ -401,7 +401,7 @@ char *M_StringReplace(const char *haystack, const char *needle,
 
     // Construct new string.
 
-    result = malloc(result_len);
+    result = heap_malloc(result_len);
     if (result == NULL)
     {
         I_Error("M_StringReplace: Failed to allocate new string");

@@ -299,7 +299,7 @@ void I_Error (char *error, ...)
     if (already_quitting)
     {
         dprintf("Warning: recursive call to I_Error detected.\n");
-        bug();
+        assert(0);
     }
     else
     {
@@ -308,7 +308,7 @@ void I_Error (char *error, ...)
 
     // Message first.
     va_start(argptr, error);
-    dprintf("\nError: ");
+    dvprintf(error, argptr);
     va_end(argptr);
 
     // Write a copy of the message into buffer.
@@ -383,7 +383,7 @@ void I_Error (char *error, ...)
 #endif
 
     // abort();
-    bug();
+    assert(0);
 }
 
 //

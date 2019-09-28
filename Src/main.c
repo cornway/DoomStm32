@@ -80,7 +80,7 @@ void VID_PreConfig (void)
     vid_config(&conf);
 }
 
-extern void dev_main (void);
+extern void app_main (void);
 
 extern int myargc;
 extern char **myargv;
@@ -110,7 +110,7 @@ int mainloop (int argc, const char **argv)
 
 int main(void)
 {
-    dev_main();
+    app_main();
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

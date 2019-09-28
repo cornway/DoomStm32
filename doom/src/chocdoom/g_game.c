@@ -1366,7 +1366,7 @@ void G_LoadGame (char* name)
 #define VERSIONSIZE		16 
 
 void G_DoLoadGame (void) 
-{ 
+{
     int savedleveltime;
 	 
     gameaction = ga_nothing; 

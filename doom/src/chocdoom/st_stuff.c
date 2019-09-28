@@ -144,7 +144,7 @@
 // HEALTH number pos.
 #define ST_HEALTHWIDTH		3	
 #define ST_HEALTHX			90
-#define ST_HEALTHY			183
+#define ST_HEALTHY			171
 #define ST_HEALTHX_3DO		(90 + 16)
 #define ST_HEALTHY_3DO		(171 + 10)
 

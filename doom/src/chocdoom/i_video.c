@@ -424,8 +424,8 @@ const kbdmap_t gamepad_to_kbd_map[JOY_STD_MAX] =
     [JOY_K2]            = {KEY_TAB,    PAD_FREQ_LOW},
     [JOY_K5]            = {KEY_STRAFE_L,    0},
     [JOY_K6]            = {KEY_STRAFE_R,    0},
-    [JOY_K7]            = {'<',  0},
-    [JOY_K8]            = {'>', 0},
+    [JOY_K7]            = {'<',  PAD_FREQ_LOW},
+    [JOY_K8]            = {'>', PAD_FREQ_LOW},
     [JOY_K9]            = {KEY_ENTER, 0},
     [JOY_K10]           = {KEY_ESCAPE, PAD_FREQ_LOW},
 };
