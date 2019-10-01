@@ -448,32 +448,32 @@ static void GenerateTextureHashTable(void)
 //
 void R_InitTextures (void)
 {
-    maptexture_t*	mtexture;
-    texture_t*		texture;
-    mappatch_t*		mpatch;
-    texpatch_t*		patch;
+    maptexture_t*	mtexture = NULL;
+    texture_t*		texture = NULL;
+    mappatch_t*		mpatch = NULL;
+    texpatch_t*		patch = NULL;
 
-    int			i;
-    int			j;
+    int			i = 0;
+    int			j = 0;
 
-    int*		maptex;
-    int*		maptex2;
+    int*		maptex = NULL;
+    int*		maptex2 = NULL;
     
-    char		name[9];
-    char*		names;
-    char*		name_p;
+    char		name[9] = {'\0'};
+    char*		names = NULL;
+    char*		name_p = NULL;
     
-    int*		patchlookup;
+    int*		patchlookup =  NULL;
     
-    int			totalwidth;
-    int			nummappatches;
-    int			offset;
-    int			maxoff;
-    int			maxoff2;
-    int			numtextures1;
-    int			numtextures2;
+    int			totalwidth = 0;
+    int			nummappatches = 0;
+    int			offset = 0;
+    int			maxoff = 0;
+    int			maxoff2 = 0;
+    int			numtextures1 = 0;
+    int			numtextures2 = 0;
 
-    int*		directory;
+    int*		directory = 0;
 
     
     // Load the patch names from pnames.lmp.

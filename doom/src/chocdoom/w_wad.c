@@ -26,6 +26,7 @@
 
 #include <misc_utils.h>
 #include <bsp_sys.h>
+#include <debug.h>
 
 #include "doomtype.h"
 #include "d_iwad.h"
@@ -301,8 +302,8 @@ int W_NumLumps (void)
 
 int W_CheckNumForName (char* name)
 {
-    lumpinfo_t *lump_p;
-    int i;
+    lumpinfo_t *lump_p = NULL;
+    int i = 0;
 
     // Do we have a hash table yet?
 
@@ -330,7 +331,8 @@ int W_CheckNumForName (char* name)
 
         for (i=numlumps-1; i >= 0; --i)
         {
-            if (!strncasecmp(lumpinfo[i].name, name, 8))
+            lump_p = &lumpinfo[i];
+            if (!strncasecmp(lump_p->name, name, 8))
             {
                 return i;
             }
@@ -338,7 +340,7 @@ int W_CheckNumForName (char* name)
     }
 
     // TFB. Not found.
-
+    dprintf("%s() : missing [%s]\n", __func__, name);
     return -1;
 }
 

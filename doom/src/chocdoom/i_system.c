@@ -310,6 +310,7 @@ void I_Error (char *error, ...)
     va_start(argptr, error);
     dvprintf(error, argptr);
     va_end(argptr);
+    dprintf("\n");
 
     // Write a copy of the message into buffer.
     va_start(argptr, error);

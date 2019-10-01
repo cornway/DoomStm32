@@ -708,10 +708,10 @@ int newwadhack = 0;
 
 char *D_FindIWAD(int mask, GameMission_t *mission)
 {
-    char *result;
-    char *piwadfile;
-    int iwadparm;
-    int i;
+    char *result = NULL;
+    char *piwadfile = NULL;
+    int iwadparm = -1;
+    int i = 0;
 
     // Check for the -iwad parameter
 
