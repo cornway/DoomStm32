@@ -107,7 +107,7 @@ void I_UpdateNoBlit (void)
 
 void I_FinishUpdate (void)
 {
-    screen_t scr;
+    screen_t scr = {0};
     scr.buf = &I_VideoBuffer[0];
     scr.width = SCREENWIDTH;
     scr.height = SCREENHEIGHT;

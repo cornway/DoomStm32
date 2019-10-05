@@ -188,10 +188,9 @@ boolean W_ParseCommandLine(void)
             }
             W_MergeFile(filename, false);
         }
-    } else {
         modifiedgame = true;
-        D_MergePwads();
     }
+    D_MergePwads();
 
 //    W_PrintDirectory();
 

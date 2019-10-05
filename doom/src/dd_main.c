@@ -175,8 +175,6 @@ void DD_PwadAddEach (void (*handle)(void *))
     if (game_subdir_ext) {
         DD_GETPATH(path, game_subdir_ext);
         W_ForEach(path, handle);
-    } else {
-        W_ForEach(DD_DOOMPATH(), handle);
     }
 }
 /*---------------------------------------------------------------------*
