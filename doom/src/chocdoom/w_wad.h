@@ -59,6 +59,8 @@ wad_file_t *W_AddFile (char *filename, wad_file_t *wad_file);
 int	W_CheckNumForName (char* name);
 int	W_GetNumForName (char* name);
 
+boolean W_CheckMultipleLumps(char *name);
+
 int	W_LumpLength (unsigned int lump);
 void    W_ReadLump (unsigned int lump, void *dest);
 

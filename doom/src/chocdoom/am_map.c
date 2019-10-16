@@ -87,52 +87,38 @@
 
 #define AM_NUMMARKPOINTS 10
 
+#define MAPWIDTH                SCREENWIDTH
+#define MAPHEIGHT               (SCREENHEIGHT - SBARHEIGHT)
+#define MAPAREA                 (MAPWIDTH * MAPHEIGHT)
+
 // scale on entry
-#define INITSCALEMTOF (.2*FRACUNIT)
-// how much the automap moves window per tic in frame-buffer coordinates
+#define INITSCALEMTOF           (0.2 * FRACUNIT)
+// how much the automap moves window per tic in map coordinates
 // moves 140 pixels in 1 second
-#define F_PANINC	4
+#define F_PANINC                ((4 << speedtoggle) * SCREENSCALE)
 // how much zoom-in per tic
 // goes to 2x in 1 second
-#define M_ZOOMIN        ((int) (1.02*FRACUNIT))
+#define M_ZOOMIN                ((int)((float)FRACUNIT * (1.00f + F_PANINC / 200.0f)))
 // how much zoom-out per tic
 // pulls out to 0.5x in 1 second
-#define M_ZOOMOUT       ((int) (FRACUNIT/1.02))
+#define M_ZOOMOUT               ((int)((float)FRACUNIT / (1.00f + F_PANINC / 200.0f)))
 
 // translates between frame-buffer and map distances
-#define FTOM(x) FixedMul(((x)<<16),scale_ftom)
-#define MTOF(x) (FixedMul((x),scale_mtof)>>16)
+#define FTOM(x)                 FixedMul((x) << 16, scale_ftom)
+#define MTOF(x)                 (fixed_t)((((int64_t)(x) * scale_mtof) >> FRACBITS) >> FRACBITS)
 // translates between frame-buffer and map coordinates
-#define CXMTOF(x)  (f_x + MTOF((x)-m_x))
-#define CYMTOF(y)  (f_y + (f_h - MTOF((y)-m_y)))
-
-// the following is crap
-#define LINE_NEVERSEE ML_DONTDRAW
+#define CXMTOF(x)               MTOF(x - m_x)
+#define CYMTOF(y)               (MAPHEIGHT - MTOF(y - m_y))
 
 typedef struct
 {
-    int x, y;
-} fpoint_t;
-
-typedef struct
-{
-    fpoint_t a, b;
-} fline_t;
-
-typedef struct
-{
-    fixed_t		x,y;
+    fixed_t x, y;
 } mpoint_t;
 
 typedef struct
 {
     mpoint_t a, b;
 } mline_t;
-
-typedef struct
-{
-    fixed_t slp, islp;
-} islope_t;
 
 
 
@@ -216,19 +202,20 @@ static mpoint_t m_paninc; // how far the window pans each tic (map coords)
 static fixed_t 	mtof_zoommul; // how far the window zooms in each tic (map coords)
 static fixed_t 	ftom_zoommul; // how far the window zooms in each tic (fb coords)
 
-static fixed_t 	m_x, m_y;   // LL x,y where the window is on the map (map coords)
-static fixed_t 	m_x2, m_y2; // UR x,y where the window is on the map (map coords)
+fixed_t         m_x = INT_MAX, m_y = INT_MAX;   // LL x,y where the window is on the map (map coords)
+static fixed_t  m_x2, m_y2;                     // UR x,y where the window is on the map (map coords)
 
 //
 // width/height of window on map (map coords)
 //
-static fixed_t 	m_w;
-static fixed_t	m_h;
+fixed_t         m_w;
+fixed_t         m_h;
+
 
 // based on level size
-static fixed_t 	min_x;
-static fixed_t	min_y; 
-static fixed_t 	max_x;
+static fixed_t  min_x;
+static fixed_t  min_y;
+static fixed_t  max_x;
 static fixed_t  max_y;
 
 static fixed_t 	max_w; // max_x-min_x,
@@ -237,28 +224,28 @@ static fixed_t  max_h; // max_y-min_y
 // based on player size
 
 
-static fixed_t 	min_scale_mtof; // used to tell when to stop zooming out
-static fixed_t 	max_scale_mtof; // used to tell when to stop zooming in
+static fixed_t  min_scale_mtof;                 // used to tell when to stop zooming out
+static fixed_t  max_scale_mtof;                 // used to tell when to stop zooming in
 
 // old stuff for recovery later
-static fixed_t old_m_w, old_m_h;
-static fixed_t old_m_x, old_m_y;
+static fixed_t  old_m_w, old_m_h;
+static fixed_t  old_m_x, old_m_y;
 
 // old location used by the Follower routine
 static mpoint_t f_oldloc;
 
 // used by MTOF to scale from map-to-frame-buffer coords
-static fixed_t scale_mtof = (fixed_t)INITSCALEMTOF;
+static fixed_t  scale_mtof = (fixed_t)INITSCALEMTOF;
 // used by FTOM to scale from frame-buffer-to-map coords (=1/scale_mtof)
-static fixed_t scale_ftom;
+static fixed_t  scale_ftom;
 
-static player_t *plr; // the player represented by an arrow
+static player_t *plr;                           // the player represented by an arrow
 
 static patch_t *marknums[10]; // numbers used for marking by the automap
 static mpoint_t markpoints[AM_NUMMARKPOINTS]; // where the points are
 static int markpointnum = 0; // next point to be assigned
 
-int followplayer = 1; // specifies whether to follow the player around
+boolean         followplayer = true;            // specifies whether to follow the player around
 
 cheatseq_t cheat_amap = CHEAT("iddt", 0);
 
@@ -267,22 +254,6 @@ static boolean stopped = true;
 // Calculates the slope and slope according to the x-axis of a line
 // segment in map coordinates (with the upright y-axis n' all) so
 // that it can be used with the brain-dead drawing stuff.
-
-void
-AM_getIslope
-( mline_t*	ml,
-  islope_t*	is )
-{
-    int dx, dy;
-
-    dy = ml->a.y - ml->b.y;
-    dx = ml->b.x - ml->a.x;
-    if (!dy) is->islp = (dx<0?-INT_MAX:INT_MAX);
-    else is->islp = FixedDiv(dx, dy);
-    if (!dx) is->slp = (dy<0?-INT_MAX:INT_MAX);
-    else is->slp = FixedDiv(dy, dx);
-
-}
 
 //
 //
@@ -355,20 +326,22 @@ void AM_findMinMaxBoundaries(void)
     fixed_t a;
     fixed_t b;
 
-    min_x = min_y =  INT_MAX;
-    max_x = max_y = -INT_MAX;
-  
-    for (i=0;i<numvertexes;i++)
+    min_x = min_y = INT_MAX;
+    max_x = max_y = INT_MIN;
+
+    for (i = 0; i < numvertexes; ++i)
     {
-	if (vertexes[i].x < min_x)
-	    min_x = vertexes[i].x;
-	else if (vertexes[i].x > max_x)
-	    max_x = vertexes[i].x;
-    
-	if (vertexes[i].y < min_y)
-	    min_y = vertexes[i].y;
-	else if (vertexes[i].y > max_y)
-	    max_y = vertexes[i].y;
+        fixed_t x = vertexes[i].x;
+        fixed_t y = vertexes[i].y;
+
+        if (x < min_x)
+            min_x = x;
+        else if (x > max_x)
+            max_x = x;
+        if (y < min_y)
+            min_y = y;
+        else if (y > max_y)
+            max_y = y;
     }
   
     max_w = max_x - min_x;
@@ -478,7 +451,7 @@ void AM_loadPics(void)
   
     for (i=0;i<10;i++)
     {
-	DEH_snprintf(namebuf, 9, "AMMNUM%d", i);
+	snprintf(namebuf, 9, "AMMNUM%d", i);
 	marknums[i] = (patch_t *)W_CacheLumpName(namebuf, PU_STATIC);
     }
 
@@ -491,7 +464,7 @@ void AM_unloadPics(void)
   
     for (i=0;i<10;i++)
     {
-	DEH_snprintf(namebuf, 9, "AMMNUM%d", i);
+	snprintf(namebuf, 9, "AMMNUM%d", i);
 	W_ReleaseLumpName(namebuf);
     }
 }
@@ -531,7 +504,7 @@ void AM_LevelInit(void)
 //
 //
 //
-void AM_Stop (void)
+void AM_Stop(void)
 {
     static event_t st_notify = { (evtype_t)0, ev_keyup, AM_MSGEXITED, 0 };
 
@@ -541,20 +514,21 @@ void AM_Stop (void)
     stopped = true;
 }
 
-//
-//
-//
-void AM_Start (void)
-{
-    static int lastlevel = -1, lastepisode = -1;
+int lastlevel = -1, lastepisode = -1;
 
-    if (!stopped) AM_Stop();
+//
+//
+//
+void AM_Start(void)
+{
+    if (!stopped)
+        AM_Stop();
     stopped = false;
     if (lastlevel != gamemap || lastepisode != gameepisode)
     {
-	AM_LevelInit();
-	lastlevel = gamemap;
-	lastepisode = gameepisode;
+        AM_LevelInit();
+        lastlevel = gamemap;
+        lastepisode = gameepisode;
     }
     AM_initVariables();
     AM_loadPics();
@@ -584,15 +558,14 @@ void AM_maxOutWindowScale(void)
 //
 // Handle events (user inputs) in automap mode
 //
-boolean
-AM_Responder
-( event_t*	ev )
+boolean AM_Responder(event_t *ev)
 {
 
     int rc;
     static int bigstate=0;
     static char buffer[20];
     int key;
+    boolean speedtoggle = false;
 
     rc = false;
 
@@ -723,9 +696,7 @@ AM_Responder
             ftom_zoommul = FRACUNIT;
         }
     }
-
     return rc;
-
 }
 
 
@@ -734,17 +705,16 @@ AM_Responder
 //
 void AM_changeWindowScale(void)
 {
-
     // Change the scaling multipliers
     scale_mtof = FixedMul(scale_mtof, mtof_zoommul);
     scale_ftom = FixedDiv(FRACUNIT, scale_mtof);
 
     if (scale_mtof < min_scale_mtof)
-	AM_minOutWindowScale();
+        AM_minOutWindowScale();
     else if (scale_mtof > max_scale_mtof)
-	AM_maxOutWindowScale();
+        AM_maxOutWindowScale();
     else
-	AM_activateNewScale();
+        AM_activateNewScale();
 }
 
 
@@ -753,29 +723,25 @@ void AM_changeWindowScale(void)
 //
 void AM_doFollowPlayer(void)
 {
+    fixed_t x = plr->mo->x;
+    fixed_t y = plr->mo->y;
 
-    if (f_oldloc.x != plr->mo->x || f_oldloc.y != plr->mo->y)
+    if (f_oldloc.x != x || f_oldloc.y != y)
     {
-	m_x = FTOM(MTOF(plr->mo->x)) - m_w/2;
-	m_y = FTOM(MTOF(plr->mo->y)) - m_h/2;
-	m_x2 = m_x + m_w;
-	m_y2 = m_y + m_h;
-	f_oldloc.x = plr->mo->x;
-	f_oldloc.y = plr->mo->y;
-
-	//  m_x = FTOM(MTOF(plr->mo->x - m_w/2));
-	//  m_y = FTOM(MTOF(plr->mo->y - m_h/2));
-	//  m_x = plr->mo->x - m_w/2;
-	//  m_y = plr->mo->y - m_h/2;
-
+        m_x = FTOM(MTOF(x)) - (m_w >> 1);
+        m_y = FTOM(MTOF(y)) - (m_h >> 1);
+        m_x2 = m_x + m_w;
+        m_y2 = m_y + m_h;
+        f_oldloc.x = x;
+        f_oldloc.y = y;
     }
-
 }
 
+
 //
 //
 //
-void AM_updateLightLev(void)
+void AM_decelerate(void)
 {
     static int nexttic = 0;
     //static int litelevels[] = { 0, 3, 5, 6, 6, 7, 7, 7 };
@@ -796,20 +762,19 @@ void AM_updateLightLev(void)
 //
 // Updates on Game Tick
 //
-void AM_Ticker (void)
+void AM_Ticker(void)
 {
-
     if (!automapactive)
 	return;
 
     amclock++;
 
     if (followplayer)
-	AM_doFollowPlayer();
+        AM_doFollowPlayer();
 
     // Change the zoom if necessary
     if (ftom_zoommul != FRACUNIT)
-	AM_changeWindowScale();
+        AM_changeWindowScale();
 
     // Change x,y location
     if (m_paninc.x || m_paninc.y)
@@ -830,24 +795,27 @@ void AM_clearFB(int color)
 }
 
 
+typedef struct {
+    int x, y;
+} fpoint_t;
+
+typedef struct {
+    fpoint_t a, b;
+} fline_t;
 //
 // Automap clipping of lines.
 //
 // Based on Cohen-Sutherland clipping algorithm but with a slightly
-// faster reject and precalculated slopes.  If the speed is needed,
-// use a hash algorithm to handle  the common cases.
-//
-boolean
-AM_clipMline
-( mline_t*	ml,
-  fline_t*	fl )
+// faster reject and precalculated slopes. If the speed is needed,
+// use a hash algorithm to handle the common cases.
+static boolean AM_clipMline(mline_t *ml, fline_t *fl)
 {
     enum
     {
-	LEFT	=1,
-	RIGHT	=2,
-	BOTTOM	=4,
-	TOP	=8
+        LEFT   = 1,
+        RIGHT  = 2,
+        TOP    = 4,
+        BOTTOM = 8
     };
     
     register int	outcode1 = 0;
@@ -1046,7 +1014,7 @@ AM_drawFline
 
 
 //
-// Clip lines, draw visible part sof lines.
+// Clip lines, draw visible parts of lines.
 //
 void
 AM_drawMline
@@ -1123,7 +1091,7 @@ void AM_drawWalls(void)
 	l.b.y = lines[i].v2->y;
 	if (cheating || (lines[i].flags & ML_MAPPED))
 	{
-	    if ((lines[i].flags & LINE_NEVERSEE) && !cheating)
+	    if ((lines[i].flags & ML_DONTDRAW) && !cheating)
 		continue;
 	    if (!lines[i].backsector)
 	    {
@@ -1155,7 +1123,7 @@ void AM_drawWalls(void)
 	}
 	else if (plr->powers[pw_allmap])
 	{
-	    if (!(lines[i].flags & LINE_NEVERSEE)) AM_drawMline(&l, GRAYS+3);
+	    if (!(lines[i].flags & ML_DONTDRAW)) AM_drawMline(&l, GRAYS+3);
 	}
     }
 }

@@ -31,22 +31,38 @@
 // Global parameters/defines.
 //
 // DOOM version
-#define DOOM_VERSION 109
+#define DOOM_VERSION            109
 
 // Version code for cph's longtics hack ("v1.91")
-#define DOOM_191_VERSION 111
+#define DOOM_191_VERSION        111
 
 
-// If rangecheck is undefined,
-// most parameter validation debugging code will not be compiled
-//#define RANGECHECK
+// Screen width and height.
+
+#define ORIGINALWIDTH   320
+#define ORIGINALHEIGHT  200
+
+#if defined(STM32_SDK)
+#define SCREENSCALE     1
+#define SCREENWIDTH     320
+#define SCREENHEIGHT    200
+#else
+#define SCREENSCALE     2
+#define SCREENWIDTH     640
+#define SCREENHEIGHT    400
+#endif /*defined(STM32_SDK)*/
+
+#define SBARHEIGHT      64
 
 // The maximum number of players, multiplayer/networking.
-#define MAXPLAYERS 4
+#define MAXPLAYERS      4
+
+// State updates, number of tics / second.
+#define TICRATE         35
 
 // The current state of the game: whether we are
 // playing, gazing at the intermission screen,
-// the game final animation, or a demo. 
+// the game final animation, or a demo.
 typedef enum
 {
     GS_LEVEL,
@@ -57,29 +73,14 @@ typedef enum
     GS_FORCE_WIPE = -1,
 } gamestate_t;
 
-typedef enum
-{
-    ga_nothing,
-    ga_loadlevel,
-    ga_newgame,
-    ga_loadgame,
-    ga_savegame,
-    ga_playdemo,
-    ga_completed,
-    ga_victory,
-    ga_worlddone,
-    ga_screenshot,
-    ga_cachelevel,
-} gameaction_t;
-
 //
 // Difficulty/skill settings/filters.
 //
 
 // Skill flags.
-#define	MTF_EASY		1
-#define	MTF_NORMAL		2
-#define	MTF_HARD		4
+#define MTF_EASY                1
+#define MTF_NORMAL              2
+#define MTF_HARD                4
 
 // Deaf monsters/do not react to sound.
 #define	MTF_AMBUSH		8
@@ -96,9 +97,9 @@ typedef enum
     it_blueskull,
     it_yellowskull,
     it_redskull,
-    
+
     NUMCARDS
-    
+
 } card_t;
 
 
@@ -119,7 +120,7 @@ typedef enum
     wp_supershotgun,
 
     NUMWEAPONS,
-    
+
     // No pending weapon change.
     wp_nochange
 
@@ -129,12 +130,12 @@ typedef enum
 // Ammunition types defined.
 typedef enum
 {
-    am_clip,	// Pistol / chaingun ammo.
-    am_shell,	// Shotgun / double barreled shotgun.
-    am_cell,	// Plasma rifle, BFG.
-    am_misl,	// Missile launcher.
+    am_clip,    // Pistol / chaingun ammo.
+    am_shell,   // Shotgun / double barreled shotgun.
+    am_cell,    // Plasma rifle, BFG.
+    am_misl,    // Missile launcher.
     NUMAMMO,
-    am_noammo	// Unlimited for chainsaw / fist.	
+    am_noammo   // Unlimited for chainsaw / fist.
 
 } ammotype_t;
 
@@ -149,7 +150,7 @@ typedef enum
     pw_allmap,
     pw_infrared,
     NUMPOWERS
-    
+
 } powertype_t;
 
 
@@ -161,13 +162,16 @@ typedef enum
 //
 typedef enum
 {
-    INVULNTICS	= (30*TICRATE),
-    INVISTICS	= (60*TICRATE),
-    INFRATICS	= (120*TICRATE),
-    IRONTICS	= (60*TICRATE)
-    
+    INVULNTICS  = ( 30 * TICRATE ),
+    INVISTICS   = ( 60 * TICRATE ),
+    INFRATICS   = ( 120 * TICRATE ),
+    IRONTICS    = ( 60 * TICRATE )
+
 } powerduration_t;
 
-void D_memcpy (void *dest, void *src, int count);
+#define STARTFLASHING   127
+
+// Index of the special effects (INVUL inverse) map.
+#define INVERSECOLORMAP 32
 
 #endif          // __DOOMDEF__

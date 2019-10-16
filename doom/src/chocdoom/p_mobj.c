@@ -665,6 +665,9 @@ void P_RespawnSpecials (void)
 // Most of the player structure stays unchanged
 //  between levels.
 //
+extern int      lastlevel;
+extern int      lastepisode;
+
 void P_SpawnPlayer (mapthing_t* mthing)
 {
     player_t*		p;
@@ -720,7 +723,10 @@ void P_SpawnPlayer (mapthing_t* mthing)
     if (deathmatch)
 	for (i=0 ; i<NUMCARDS ; i++)
 	    p->cards[i] = true;
-			
+
+    lastlevel = -1;
+    lastepisode = -1;
+
     if (mthing->type-1 == consoleplayer)
     {
 	// wake up the status bar

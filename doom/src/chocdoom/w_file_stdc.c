@@ -19,12 +19,15 @@
 #include <stdio.h>
 #include "string.h"
 
+#if defined(STM32_SDK)
 #include <misc_utils.h>
 #include <debug.h>
 #include <dev_io.h>
 #include <bsp_sys.h>
+#endif
 
-#include <d_main.h>
+#include "d_event.h"
+#include "d_main.h"
 #include "m_misc.h"
 #include "w_file.h"
 #include "z_zone.h"

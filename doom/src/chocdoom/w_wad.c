@@ -345,7 +345,22 @@ int W_CheckNumForName (char* name)
 }
 
 
+// Check if there's two of the same lump. If there's two, then a PWAD is
+// replacing something.
+boolean W_CheckMultipleLumps(char* name)
+{
+    int i, count = 0;
 
+    for (i = numlumps - 1; i >= 0; --i)
+    {
+        if (!strncasecmp(lumpinfo[i].name, name, 8))
+        {
+            if (++count == 2)
+                return true;
+        }
+    }
+    return false;
+}
 
 //
 // W_GetNumForName
@@ -626,9 +641,6 @@ static const struct
     char *lumpname;
 } unique_lumps[] = {
     { doom,    "POSSA1" },
-    { heretic, "IMPXA1" },
-    { hexen,   "ETTNA1" },
-    { strife,  "AGRDA1" },
 };
 
 void W_CheckCorrectIWAD(GameMission_t mission)

@@ -33,17 +33,7 @@
 #define strcasecmp stricmp
 #define strncasecmp strnicmp
 
-#endif
-
-
-//
-// The packed attribute forces structures to be packed into the minimum 
-// space necessary.  If this is not done, the compiler may align structure
-// fields differently to optimize memory access, inflating the overall
-// structure size.  It is important to use the packed attribute on certain
-// structures where alignment is important, particularly data read/written
-// to disk.
-//
+#endif /*_WIN32*/
 
 #if     defined(V_PREPACK) && defined(V_POSTPACK)
 #define PACKEDATTR V_POSTPACK
@@ -65,21 +55,35 @@ char *d_strdup (const char *str);
 char *d_strupr(char *str);
 
 #ifdef __cplusplus
-
 // Use builtin bool type with C++.
-
-typedef bool boolean;
-
 #else
+
+#if defined(STM32_SDK)
+
+#define bool boolean
 
 typedef int boolean;
 #define true 1
 #define false 0
 #define undef -1
 
-#endif
+#else /*STM32_SDK*/
+
+typedef enum
+{
+    false,
+    true
+} bool;
+
+#endif /*STM32_SDK*/
+
+#endif /*__cplusplus*/
 
 typedef uint8_t byte;
+
+#if !defined(STM32_SDK)
+#include <limits.h>
+#endif
 
 #ifdef _WIN32
 
@@ -87,13 +91,12 @@ typedef uint8_t byte;
 #define DIR_SEPARATOR_S "\\"
 #define PATH_SEPARATOR ';'
 
-#else
+#else /*_WIN32*/
 
 #define DIR_SEPARATOR '/'
 #define DIR_SEPARATOR_S "/"
 #define PATH_SEPARATOR ':'
 
-#endif
+#endif /*_WIN32*/
 
-#endif
-
+#endif /*__DOOMTYPE__*/

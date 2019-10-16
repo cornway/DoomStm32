@@ -10,6 +10,7 @@
 #include "p_spec.h"
 #include "p_local.h"
 #include "net_defs.h"
+#include "d_event.h"
 
 byte*		viewimage; 
 int		viewwidth;
@@ -430,16 +431,6 @@ int		ptflags;
 
 
 
-gamestate_t     oldgamestate; 
- 
-gameaction_t    gameaction;
-gameaction_t    gameaction_next;
-gamestate_t     gamestate; 
-skill_t         gameskill; 
-boolean		respawnmonsters;
-int             gameepisode; 
-int             gamemap; 
-
 // If non-zero, exit the level after this number of minutes.
 
 int             timelimit;
@@ -450,7 +441,6 @@ boolean         sendsave;             	// send a save event next tic
 boolean         usergame;               // ok to save / end game 
  
 boolean         timingdemo;             // if true, exit with report on completion 
-boolean         nodrawers;              // for comparative timing purposes 
 int             starttime;          	// for comparative timing purposes  	 
  
 boolean         viewactive; 

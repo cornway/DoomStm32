@@ -74,7 +74,7 @@ char *P_SaveGameFile(int slot)
         filename = (char *)heap_malloc(filename_size);
     }
 
-    DEH_snprintf(basename, 32, SAVEGAMENAME "%d.dsg", slot);
+    snprintf(basename, 32, SAVEGAMENAME "%d.dsg", slot);
     snprintf(filename, filename_size, "%s/%s", savegamedir, basename);
 
     return filename;

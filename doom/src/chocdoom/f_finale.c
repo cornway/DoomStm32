@@ -20,8 +20,13 @@
 #include <stdio.h>
 #include <ctype.h>
 
+#ifdef RETRO_PORT
+#include "SDL.h"
+#else
+#include "misc_utils.h"
+#endif
+
 // Functions.
-#include "deh_main.h"
 #include "i_system.h"
 #include "i_swap.h"
 #include "z_zone.h"
@@ -30,13 +35,11 @@
 #include "s_sound.h"
 
 // Data.
-#include "d_main.h"
 #include "dstrings.h"
 #include "sounds.h"
 
 #include "doomstat.h"
 #include "r_state.h"
-#include "misc_utils.h"
 
 typedef enum
 {
@@ -45,18 +48,13 @@ typedef enum
     F_STAGE_CAST,
 } finalestage_t;
 
-// ?
-//#include "doomstat.h"
-//#include "r_local.h"
-//#include "f_finale.h"
-
 // Stage of animation:
 finalestage_t finalestage;
 
 unsigned int finalecount;
 
-#define	TEXTSPEED	3
-#define	TEXTWAIT	250
+#define TEXTSPEED       3
+#define TEXTWAIT        250
 
 typedef struct
 {
@@ -68,45 +66,47 @@ typedef struct
 
 static textscreen_t textscreens[] =
 {
-    { doom,      1, 8,  "FLOOR4_8",  E1TEXT},
-    { doom,      2, 8,  "SFLR6_1",   E2TEXT},
-    { doom,      3, 8,  "MFLR8_4",   E3TEXT},
-    { doom,      4, 8,  "MFLR8_3",   E4TEXT},
+    { doom,       1, 8,  "FLOOR4_8",  E1TEXT },
+    { doom,       2, 8,  "SFLR6_1",   E2TEXT },
+    { doom,       3, 8,  "MFLR8_4",   E3TEXT },
+    { doom,       4, 8,  "MFLR8_3",   E4TEXT },
 
-    { doom2,     1, 6,  "SLIME16",   C1TEXT},
-    { doom2,     1, 11, "RROCK14",   C2TEXT},
-    { doom2,     1, 20, "RROCK07",   C3TEXT},
-    { doom2,     1, 30, "RROCK17",   C4TEXT},
-    { doom2,     1, 15, "RROCK13",   C5TEXT},
-    { doom2,     1, 31, "RROCK19",   C6TEXT},
+    { doom2,      1, 6,  "SLIME16",   C1TEXT },
+    { doom2,      1, 11, "RROCK14",   C2TEXT },
+    { doom2,      1, 20, "RROCK07",   C3TEXT },
+    { doom2,      1, 30, "RROCK17",   C4TEXT },
+    { doom2,      1, 15, "RROCK13",   C5TEXT },
+    { doom2,      1, 31, "RROCK19",   C6TEXT },
 
-    { pack_tnt,  1, 6,  "SLIME16",   T1TEXT},
-    { pack_tnt,  1, 11, "RROCK14",   T2TEXT},
-    { pack_tnt,  1, 20, "RROCK07",   T3TEXT},
-    { pack_tnt,  1, 30, "RROCK17",   T4TEXT},
-    { pack_tnt,  1, 15, "RROCK13",   T5TEXT},
-    { pack_tnt,  1, 31, "RROCK19",   T6TEXT},
+    { pack_nerve, 1, 8,  "SLIME16",   N1TEXT },
 
-    { pack_plut, 1, 6,  "SLIME16",   P1TEXT},
-    { pack_plut, 1, 11, "RROCK14",   P2TEXT},
-    { pack_plut, 1, 20, "RROCK07",   P3TEXT},
-    { pack_plut, 1, 30, "RROCK17",   P4TEXT},
-    { pack_plut, 1, 15, "RROCK13",   P5TEXT},
-    { pack_plut, 1, 31, "RROCK19",   P6TEXT},
+    { pack_tnt,   1, 6,  "SLIME16",   T1TEXT },
+    { pack_tnt,   1, 11, "RROCK14",   T2TEXT },
+    { pack_tnt,   1, 20, "RROCK07",   T3TEXT },
+    { pack_tnt,   1, 30, "RROCK17",   T4TEXT },
+    { pack_tnt,   1, 15, "RROCK13",   T5TEXT },
+    { pack_tnt,   1, 31, "RROCK19",   T6TEXT },
+
+    { pack_plut,  1, 6,  "SLIME16",   P1TEXT },
+    { pack_plut,  1, 11, "RROCK14",   P2TEXT },
+    { pack_plut,  1, 20, "RROCK07",   P3TEXT },
+    { pack_plut,  1, 30, "RROCK17",   P4TEXT },
+    { pack_plut,  1, 15, "RROCK13",   P5TEXT },
+    { pack_plut,  1, 31, "RROCK19",   P6TEXT },
 };
 
-char*	finaletext;
-char*	finaleflat;
+char    *finaletext;
+char    *finaleflat;
 
-void	F_StartCast (void);
-void	F_CastTicker (void);
-boolean F_CastResponder (event_t *ev);
-void	F_CastDrawer (void);
+void F_StartCast(void);
+void F_CastTicker(void);
+boolean F_CastResponder(event_t *ev);
+void F_CastDrawer(void);
 
 //
 // F_StartFinale
 //
-void F_StartFinale (void)
+void F_StartFinale(void)
 {
     size_t i;
 
@@ -115,31 +115,17 @@ void F_StartFinale (void)
     viewactive = false;
     automapactive = false;
 
-    if (logical_gamemission == doom)
-    {
-        S_ChangeMusic(mus_victor, true);
-    }
-    else
-    {
-        S_ChangeMusic(mus_read_m, true);
-    }
+    S_ChangeMusic(mus_victor, true);
 
     // Find the right screen and set the text and background
 
-    for (i=0; i<arrlen(textscreens); ++i)
+    for (i = 0; i<arrlen(textscreens); ++i)
     {
         textscreen_t *screen = &textscreens[i];
 
-        // Hack for Chex Quest
-
-        if (gameversion == exe_chex && screen->mission == doom)
-        {
-            screen->level = 5;
-        }
-
-        if (logical_gamemission == screen->mission
-         && (logical_gamemission != doom || gameepisode == screen->episode)
-         && gamemap == screen->level)
+        if (gamemission == screen->mission
+            && (gamemission != doom || gameepisode == screen->episode)
+            && gamemap == screen->level)
         {
             finaletext = screen->text;
             finaleflat = screen->background;
@@ -148,21 +134,20 @@ void F_StartFinale (void)
 
     // Do dehacked substitutions of strings
   
-    finaletext = DEH_String(finaletext);
-    finaleflat = DEH_String(finaleflat);
+    finaletext = finaletext;
+    finaleflat = finaleflat;
     
     finalestage = F_STAGE_TEXT;
     finalecount = 0;
-	
 }
 
 
 
-boolean F_Responder (event_t *event)
+boolean F_Responder(event_t *ev)
 {
     if (finalestage == F_STAGE_CAST)
-	return F_CastResponder (event);
-	
+        return F_CastResponder(ev);
+
     return false;
 }
 
@@ -170,7 +155,7 @@ boolean F_Responder (event_t *event)
 //
 // F_Ticker
 //
-void F_Ticker (void)
+void F_Ticker(void)
 {
     size_t		i;
     
@@ -191,52 +176,57 @@ void F_Ticker (void)
 	  gameaction = ga_worlddone;
       }
     }
-    
+
     // advance animation
     finalecount++;
-	
+
     if (finalestage == F_STAGE_CAST)
     {
-	F_CastTicker ();
-	return;
+        F_CastTicker();
+        return;
     }
-	
-    if ( gamemode == commercial)
-	return;
-		
+
+    if (gamemode == commercial)
+        return;
+
     if (finalestage == F_STAGE_TEXT
      && finalecount>strlen (finaletext)*TEXTSPEED + TEXTWAIT)
     {
-	finalecount = 0;
-	finalestage = F_STAGE_ARTSCREEN;
-	wipegamestate = GS_FORCE_WIPE;		// force a wipe
-	if (gameepisode == 3)
-	    S_StartMusic (mus_bunny);
+        finalecount = 0;
+        finalestage = F_STAGE_ARTSCREEN;
+        wipegamestate = (gamestate_t)-1;        // force a wipe
+        if (gameepisode == 3)
+            S_StartMusic(mus_bunny);
     }
 }
 
 
 
 //
+//
 // F_TextWrite
 //
 
 #include "hu_stuff.h"
-extern	patch_t *hu_font[HU_FONTSIZE];
+extern patch_t *hu_font[HU_FONTSIZE];
 
 
-void F_TextWrite (void)
+void F_TextWrite(void)
 {
-    byte*	src;
-    pix_t *	dest;
-    
-    int		x,y,w;
-    signed int	count;
-    char*	ch;
-    int		c;
-    int		cx;
-    int		cy;
-    
+    byte                *src;
+    byte                *dest;
+
+    int                 x, y, w;
+    signed int          count;
+    char                *ch;
+    int                 c;
+    int                 cx;
+    int                 cy;
+    int                 ay;
+    int                 i;
+    char                letter;
+    char                prev = ' ';
+
     // erase the entire screen to a tiled background
     src = (byte *)W_CacheLumpName ( finaleflat , PU_CACHE);
     dest = I_VideoBuffer;
@@ -261,11 +251,11 @@ void F_TextWrite (void)
     cx = 10;
     cy = 10;
     ch = finaletext;
-	
-    count = ((signed int) finalecount - 10) / TEXTSPEED;
+
+    count = ((signed int)finalecount - 10) / TEXTSPEED;
     if (count < 0)
-	count = 0;
-    for ( ; count ; count-- )
+        count = 0;
+    for ( ; count; count--)
     {
 	c = *ch++;
 	if (!c)
@@ -290,7 +280,6 @@ void F_TextWrite (void)
 	V_DrawPatch(cx, cy, hu_font[c]);
 	cx+=w;
     }
-	
 }
 
 //
@@ -300,45 +289,48 @@ void F_TextWrite (void)
 //
 typedef struct
 {
-    char		*name;
-    mobjtype_t	type;
+    char        *name;
+    mobjtype_t  type;
 } castinfo_t;
 
-castinfo_t	castorder[] = {
-    {CC_ZOMBIE, MT_POSSESSED},
-    {CC_SHOTGUN, MT_SHOTGUY},
-    {CC_HEAVY, MT_CHAINGUY},
-    {CC_IMP, MT_TROOP},
-    {CC_DEMON, MT_SERGEANT},
-    {CC_LOST, MT_SKULL},
-    {CC_CACO, MT_HEAD},
-    {CC_HELL, MT_KNIGHT},
-    {CC_BARON, MT_BRUISER},
-    {CC_ARACH, MT_BABY},
-    {CC_PAIN, MT_PAIN},
-    {CC_REVEN, MT_UNDEAD},
-    {CC_MANCU, MT_FATSO},
-    {CC_ARCH, MT_VILE},
-    {CC_SPIDER, MT_SPIDER},
-    {CC_CYBER, MT_CYBORG},
-    {CC_HERO, MT_PLAYER},
+castinfo_t castorder[] = {
+    { CC_ZOMBIE,  MT_POSSESSED  },
+    { CC_SHOTGUN, MT_SHOTGUY    },
+    { CC_HEAVY,   MT_CHAINGUY   },
+    { CC_IMP,     MT_TROOP      },
+    { CC_DEMON,   MT_SERGEANT   },
+    { CC_SPECTRE, MT_SHADOWS    },
+    { CC_LOST,    MT_SKULL      },
+    { CC_CACO,    MT_HEAD       },
+    { CC_HELL,    MT_KNIGHT     },
+    { CC_BARON,   MT_BRUISER    },
+    { CC_ARACH,   MT_BABY       },
+    { CC_PAIN,    MT_PAIN       },
+    { CC_REVEN,   MT_UNDEAD     },
+    { CC_MANCU,   MT_FATSO      },
+    { CC_ARCH,    MT_VILE       },
+    { CC_SPIDER,  MT_SPIDER     },
+    { CC_CYBER,   MT_CYBORG     },
+    { CC_HERO,    MT_PLAYER     },
 
-    {NULL,(mobjtype_t)0}
+    { NULL,       (mobjtype_t)0 }
 };
 
-int		castnum;
-int		casttics;
-state_t*	caststate;
-boolean		castdeath;
-int		castframes;
-int		castonmelee;
-boolean		castattacking;
+int             castnum;
+int             casttics;
+state_t         *caststate;
+int             castrot;
+boolean         castdeath;
+int             castframes;
+int             castonmelee;
+boolean         castattacking;
+boolean         firstevent;
 
 
 //
 // F_StartCast
 //
-void F_StartCast (void)
+void F_StartCast(void)
 {
     wipegamestate = GS_FORCE_WIPE;		// force a screen wipe
     castnum = 0;
@@ -356,25 +348,25 @@ void F_StartCast (void)
 //
 // F_CastTicker
 //
-void F_CastTicker (void)
+void F_CastTicker(void)
 {
-    int		st;
-    int		sfx;
-	
+    int         st;
+    int         sfx;
+
     if (--casttics > 0)
-	return;			// not time to change state yet
-		
+        return;                         // not time to change state yet
+
     if (caststate->tics == -1 || caststate->nextstate == S_NULL)
     {
-	// switch from deathstate to next monster
-	castnum++;
-	castdeath = false;
-	if (castorder[castnum].name == NULL)
-	    castnum = 0;
-	if (mobjinfo[castorder[castnum].type].seesound)
-	    S_StartSound (NULL, mobjinfo[castorder[castnum].type].seesound);
-	caststate = &states[mobjinfo[castorder[castnum].type].seestate];
-	castframes = 0;
+        // switch from deathstate to next monster
+        castnum++;
+        castdeath = false;
+        if (castorder[castnum].name == NULL)
+            castnum = 0;
+        if (mobjinfo[castorder[castnum].type].seesound)
+            S_StartSound(NULL, mobjinfo[castorder[castnum].type].seesound);
+        caststate = &states[mobjinfo[castorder[castnum].type].seestate];
+        castframes = 0;
     }
     else
     {
@@ -420,7 +412,7 @@ void F_CastTicker (void)
 	if (sfx)
 	    S_StartSound (NULL, sfx);
     }
-	
+
     if (castframes == 12)
     {
 	// go into attack frame
@@ -440,7 +432,7 @@ void F_CastTicker (void)
 		    &states[mobjinfo[castorder[castnum].type].missilestate];
 	}
     }
-	
+
     if (castattacking)
     {
 	if (castframes == 24
@@ -452,12 +444,11 @@ void F_CastTicker (void)
 	    caststate = &states[mobjinfo[castorder[castnum].type].seestate];
 	}
     }
-	
+
     casttics = caststate->tics;
     if (casttics == -1)
-	casttics = 15;
+        casttics = 15;
 }
-
 
 //
 // F_CastResponder
@@ -478,40 +469,40 @@ boolean F_CastResponder (event_t* ev)
     castframes = 0;
     castattacking = false;
     if (mobjinfo[castorder[castnum].type].deathsound)
-	S_StartSound (NULL, mobjinfo[castorder[castnum].type].deathsound);
-	
+        S_StartSound(NULL, mobjinfo[castorder[castnum].type].deathsound);
+
     return true;
 }
 
 
-void F_CastPrint (char* text)
+void F_CastPrint(char *text)
 {
-    char*	ch;
-    int		c;
-    int		cx;
-    int		w;
-    int		width;
-    
+    char        *ch;
+    int         c;
+    int         cx;
+    int         w;
+    int         width;
+
     // find width
     ch = text;
     width = 0;
-	
+
     while (ch)
     {
-	c = *ch++;
-	if (!c)
-	    break;
-	c = toupper(c) - HU_FONTSTART;
-	if (c < 0 || c> HU_FONTSIZE)
-	{
-	    width += 4;
-	    continue;
-	}
-		
-	w = READ_LE_I16 (hu_font[c]->width);
-	width += w;
+        c = *ch++;
+        if (!c)
+            break;
+        c = toupper(c) - HU_FONTSTART;
+        if (c < 0 || c> HU_FONTSIZE)
+        {
+            width += 4;
+            continue;
+        }
+
+        w = SHORT (hu_font[c]->width);
+        width += w;
     }
-    
+
     // draw it
     cx = 160-width/2;
     ch = text;
@@ -531,26 +522,25 @@ void F_CastPrint (char* text)
 	V_DrawPatch(cx, 180, hu_font[c]);
 	cx+=w;
     }
-	
 }
-
 
 //
 // F_CastDrawer
 //
 
-void F_CastDrawer (void)
+void F_CastDrawer(void)
 {
-    spritedef_t*	sprdef;
-    spriteframe_t*	sprframe;
-    int			lump;
-    boolean		flip;
-    patch_t*		patch;
-    
-    // erase the entire screen to a background
-    V_DrawPatch (0, 0, (patch_t *)W_CacheLumpName (DEH_String("BOSSBACK"), PU_CACHE));
+    spritedef_t         *sprdef;
+    spriteframe_t       *sprframe;
+    int                 lump;
+    int                 rot = 0;
+    boolean             flip;
+    patch_t             *patch;
 
-    F_CastPrint (DEH_String(castorder[castnum].name));
+    // erase the entire screen to a background
+    V_DrawPatch (0, 0, (patch_t *)W_CacheLumpName ("BOSSBACK", PU_CACHE));
+
+    F_CastPrint (castorder[castnum].name);
     
     // draw the current frame in the middle of the screen
     sprdef = &sprites[caststate->sprite];
@@ -575,17 +565,18 @@ F_DrawPatchCol
   patch_t*	patch,
   int		col )
 {
-    column_t*	column;
-    byte*	source;
-    pix_t*	dest;
-    pix_t*	desttop;
-    int		count;
-	
+    column_t    *column;
+    byte        *source;
+    byte        *dest;
+    byte        *desttop;
+    int         count;
+    fixed_t     frac;
+
     column = (column_t *)((byte *)patch + LONG(patch->columnofs[col]));
     desttop = I_VideoBuffer + x;
 
     // step through the posts in a column
-    while (column->topdelta != 0xff )
+    while (column->topdelta != 0xff)
     {
 	source = (byte *)column + 3;
 	dest = desttop + column->topdelta*SCREENWIDTH;
@@ -604,7 +595,7 @@ F_DrawPatchCol
 //
 // F_BunnyScroll
 //
-void F_BunnyScroll (void)
+void F_BunnyScroll(void)
 {
     signed int  scrolled;
     int		x;
@@ -614,8 +605,8 @@ void F_BunnyScroll (void)
     int		stage;
     static int	laststage;
 		
-    p1 = (patch_t *)W_CacheLumpName (DEH_String("PFUB2"), PU_LEVEL);
-    p2 = (patch_t *)W_CacheLumpName (DEH_String("PFUB1"), PU_LEVEL);
+    p1 = (patch_t *)W_CacheLumpName ("PFUB2", PU_LEVEL);
+    p2 = (patch_t *)W_CacheLumpName ("PFUB1", PU_LEVEL);
 
     V_MarkRect (0, 0, SCREENWIDTH, SCREENHEIGHT);
 	
@@ -623,37 +614,37 @@ void F_BunnyScroll (void)
     if (scrolled > 320)
 	scrolled = 320;
     if (scrolled < 0)
-	scrolled = 0;
-		
-    for ( x=0 ; x<SCREENWIDTH ; x++)
+        scrolled = 0;
+
+    for (x = 0; x < ORIGINALWIDTH; x++)
     {
 	if (x+scrolled < 320)
 	    F_DrawPatchCol (x, p1, x+scrolled);
 	else
 	    F_DrawPatchCol (x, p2, x+scrolled - 320);		
     }
-	
+
     if (finalecount < 1130)
-	return;
+        return;
     if (finalecount < 1180)
     {
         V_DrawPatch((SCREENWIDTH - 13 * 8) / 2,
                     (SCREENHEIGHT - 8 * 8) / 2, 
-                    (patch_t *)W_CacheLumpName(DEH_String("END0"), PU_CACHE));
+                    (patch_t *)W_CacheLumpName("END0", PU_CACHE));
 	laststage = 0;
 	return;
     }
-	
-    stage = (finalecount-1180) / 5;
+
+    stage = (finalecount - 1180) / 5;
     if (stage > 6)
-	stage = 6;
+        stage = 6;
     if (stage > laststage)
     {
-	S_StartSound (NULL, sfx_pistol);
-	laststage = stage;
+        S_StartSound(NULL, sfx_pistol);
+        laststage = stage;
     }
 	
-    DEH_snprintf(name, 10, "END%i", stage);
+    snprintf(name, 10, "END%i", stage);
     V_DrawPatch((SCREENWIDTH - 13 * 8) / 2, 
                 (SCREENHEIGHT - 8 * 8) / 2, 
                 (patch_t *)W_CacheLumpName (name,PU_CACHE));
@@ -662,7 +653,7 @@ void F_BunnyScroll (void)
 static void F_ArtScreenDrawer(void)
 {
     char *lumpname;
-    
+
     if (gameepisode == 3)
     {
         F_BunnyScroll();
@@ -691,16 +682,14 @@ static void F_ArtScreenDrawer(void)
                 return;
         }
 
-        lumpname = DEH_String(lumpname);
-
-        V_DrawPatch (0, 0, (patch_t *)W_CacheLumpName(lumpname, PU_CACHE));
+        V_DrawPatch(0, 0, (patch_t *)W_CacheLumpName(lumpname, PU_CACHE));
     }
 }
 
 //
 // F_Drawer
 //
-void F_Drawer (void)
+void F_Drawer(void)
 {
     switch (finalestage)
     {
@@ -715,5 +704,3 @@ void F_Drawer (void)
             break;
     }
 }
-
-

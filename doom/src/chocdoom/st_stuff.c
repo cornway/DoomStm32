@@ -532,7 +532,7 @@ ST_Responder (event_t* ev)
 	  musnum = mus_runnin + (buf[0]-'0')*10 + buf[1]-'0' - 1;
 	  
 	  if (((buf[0]-'0')*10 + buf[1]-'0') > 35)
-	    plyr->message = DEH_String(STSTR_NOMUS);
+	    plyr->message = "no music";
 	  else
 	    S_ChangeMusic(musnum, 1);
 	}
@@ -541,27 +541,12 @@ ST_Responder (event_t* ev)
 	  musnum = mus_e1m1 + (buf[0]-'1')*9 + (buf[1]-'1');
 	  
 	  if (((buf[0]-'1')*9 + buf[1]-'1') > 31)
-	    plyr->message = DEH_String(STSTR_NOMUS);
+	    plyr->message = "no music";
 	  else
 	    S_ChangeMusic(musnum, 1);
 	}
       }
-      else if ( (logical_gamemission == doom 
-                 && cht_CheckCheat(&cheat_noclip, ev->data2))
-             || (logical_gamemission != doom 
-                 && cht_CheckCheat(&cheat_commercial_noclip,ev->data2)))
-      {	
-        // Noclip cheat.
-        // For Doom 1, use the idspipsopd cheat; for all others, use
-        // idclip
 
-	plyr->cheats ^= CF_NOCLIP;
-	
-	if (plyr->cheats & CF_NOCLIP)
-	  plyr->message = DEH_String(STSTR_NCON);
-	else
-	  plyr->message = DEH_String(STSTR_NCOFF);
-      }
       // 'behold?' power-up cheats
       for (i=0;i<6;i++)
       {
@@ -1295,10 +1280,10 @@ static void ST_loadUnloadGraphics(load_callback_t callback)
     // Load the numbers, tall and short
     for (i=0;i<10;i++)
     {
-	DEH_snprintf(namebuf, 9, "STTNUM%d", i);
+	snprintf(namebuf, 9, "STTNUM%d", i);
         callback(namebuf, &tallnum[i]);
 
-	DEH_snprintf(namebuf, 9, "STYSNUM%d", i);
+	snprintf(namebuf, 9, "STYSNUM%d", i);
         callback(namebuf, &shortnum[i]);
     }
 
@@ -1310,7 +1295,7 @@ static void ST_loadUnloadGraphics(load_callback_t callback)
     // key cards
     for (i=0;i<NUMCARDS;i++)
     {
-    	DEH_snprintf(namebuf, 9, "STKEYS%d", i);
+    	snprintf(namebuf, 9, "STKEYS%d", i);
         callback(namebuf, &keys[i]);
     }
 
@@ -1321,7 +1306,7 @@ static void ST_loadUnloadGraphics(load_callback_t callback)
     // arms ownership widgets
     for (i=0; i<6; i++)
     {
-    	DEH_snprintf(namebuf, 9, "STGNUM%d", i+2);
+    	snprintf(namebuf, 9, "STGNUM%d", i+2);
 
     	// gray #
         callback(namebuf, &arms[i][0]);
@@ -1331,7 +1316,7 @@ static void ST_loadUnloadGraphics(load_callback_t callback)
     }
 
     // face backgrounds for different color players
-    DEH_snprintf(namebuf, 9, "STFB%d", consoleplayer);
+    snprintf(namebuf, 9, "STFB%d", consoleplayer);
     callback(namebuf, &faceback);
 
     // status bar background bits
@@ -1343,23 +1328,23 @@ static void ST_loadUnloadGraphics(load_callback_t callback)
     {
 	for (j=0; j<ST_NUMSTRAIGHTFACES; j++)
 	{
-	    DEH_snprintf(namebuf, 9, "STFST%d%d", i, j);
+	    snprintf(namebuf, 9, "STFST%d%d", i, j);
             callback(namebuf, &faces[facenum]);
             ++facenum;
 	}
-	DEH_snprintf(namebuf, 9, "STFTR%d0", i);	// turn right
+	snprintf(namebuf, 9, "STFTR%d0", i);	// turn right
         callback(namebuf, &faces[facenum]);
         ++facenum;
-	DEH_snprintf(namebuf, 9, "STFTL%d0", i);	// turn left
+	snprintf(namebuf, 9, "STFTL%d0", i);	// turn left
         callback(namebuf, &faces[facenum]);
         ++facenum;
-	DEH_snprintf(namebuf, 9, "STFOUCH%d", i);	// ouch!
+	snprintf(namebuf, 9, "STFOUCH%d", i);	// ouch!
         callback(namebuf, &faces[facenum]);
         ++facenum;
-	DEH_snprintf(namebuf, 9, "STFEVL%d", i);	// evil grin ;)
+	snprintf(namebuf, 9, "STFEVL%d", i);	// evil grin ;)
         callback(namebuf, &faces[facenum]);
         ++facenum;
-	DEH_snprintf(namebuf, 9, "STFKILL%d", i);	// pissed off
+	snprintf(namebuf, 9, "STFKILL%d", i);	// pissed off
         callback(namebuf, &faces[facenum]);
         ++facenum;
     }
@@ -1371,7 +1356,7 @@ static void ST_loadUnloadGraphics(load_callback_t callback)
 
     if (D_PKG_PSX()) {
         for (j=0; j<ST_NUMEXPFACES; j++) {
-            DEH_snprintf(namebuf, 9, "STFEXP%d", j);
+            snprintf(namebuf, 9, "STFEXP%d", j);
                 callback(namebuf, &faces[facenum]);
                 ++facenum;
         }

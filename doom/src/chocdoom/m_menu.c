@@ -26,6 +26,7 @@
 #include "doomkeys.h"
 #include "dstrings.h"
 
+#include "d_event.h"
 #include "d_main.h"
 #include "deh_main.h"
 
@@ -73,12 +74,12 @@ int level_selected = 1;
 static char level_select_message[64] = {0};
 
 extern int *joy_extrafreeze;
+
 //
 // defaulted values
 //
-#if ORIGCODE
-int			mouseSensitivity = 5;
-#endif
+int                     mouseSensitivity = 6;
+float                   gamepadSensitivity = 1.6f;
 
 // Show messages has default, 0 = off, 1 = on
 int			showMessages = 1;
@@ -759,7 +760,7 @@ void M_QuickSave(void)
 	quickSaveSlot = -2;	// means to pick a slot now
 	return;
     }
-    DEH_snprintf(tempstring, 80, QSPROMPT, savegamestrings[quickSaveSlot]);
+    snprintf(tempstring, 80, QSPROMPT, savegamestrings[quickSaveSlot]);
     M_StartMessage(tempstring,M_QuickSaveResponse,true);
 }
 
@@ -791,7 +792,7 @@ void M_QuickLoad(void)
 	M_StartMessage(DEH_String(QSAVESPOT),NULL,false);
 	return;
     }
-    DEH_snprintf(tempstring, 80, QLPROMPT, savegamestrings[quickSaveSlot]);
+    snprintf(tempstring, 80, QLPROMPT, savegamestrings[quickSaveSlot]);
     M_StartMessage(tempstring,M_QuickLoadResponse,true);
 }
 
@@ -1210,7 +1211,7 @@ static char *M_SelectEndMessage(void)
 {
     char **endmsg;
 
-    if (logical_gamemission == doom)
+    if (gamemission == doom)
     {
         // Doom 1
 
@@ -1229,7 +1230,7 @@ static char *M_SelectEndMessage(void)
 
 void M_QuitDOOM(int choice)
 {
-    DEH_snprintf(endstring, sizeof(endstring), "%s\n\n" DOSY,
+    snprintf(endstring, sizeof(endstring), "%s\n\n" DOSY,
                  DEH_String(M_SelectEndMessage()));
 
     M_StartMessage(endstring,M_QuitResponse,true);
@@ -1488,22 +1489,6 @@ boolean M_Responder (event_t* ev)
     static  int     mousey = 0; 
     static  int     mousex = 0;
 #endif
-
-    // In testcontrols mode, none of the function keys should do anything
-    // - the only key is escape to quit.
-
-    if (testcontrols)
-    {
-        if (ev->type == ev_quit
-         || (ev->type == ev_keydown
-          && (ev->data1 == key_menu_activate || ev->data1 == key_menu_quit)))
-        {
-            I_Quit();
-            return true;
-        }
-
-        return false;
-    }
 
     // "close" button pressed on window?
     if (ev->type == ev_quit)

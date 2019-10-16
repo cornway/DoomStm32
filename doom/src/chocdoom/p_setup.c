@@ -770,9 +770,9 @@ P_SetupLevel
     if (D_PKG_3DO() || gamemode == commercial)
     {
         if (map<10)
-            DEH_snprintf(lumpname, 9, "map0%i", map);
+            snprintf(lumpname, 9, "map0%i", map);
         else
-            DEH_snprintf(lumpname, 9, "map%i", map);
+            snprintf(lumpname, 9, "map%i", map);
     }
     else
     {

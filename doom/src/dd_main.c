@@ -21,6 +21,7 @@
 #include <bsp_sys.h>
 
 #include "doom.h"
+#include "d_event.h"
 #include "d_main.h"
 #include "d_mode.h"
 #include "w_wad.h"
@@ -205,10 +206,11 @@ static const char *__DD_GetDecorSubdir (void)
 
 static void __DD_UpdateNoBlitPSX (void)
 {
-    if (alt_gameaction == ga_cachelevel) {
-        patch_t *ld = W_CacheLumpName("LOADING", PU_CACHE);
-        V_DrawPatchC(ld, 0);
-    }
+    /*TODO:*/
+    //if (alt_gameaction == ga_cachelevel) {
+    //    patch_t *ld = W_CacheLumpName("LOADING", PU_CACHE);
+    //    V_DrawPatchC(ld, 0);
+    //}
     if (gamestate == GS_DEMOSCREEN) {
         __DD_TickleAnimation(&fire_anim);
         __DD_DrawAnimationTile(&fire_anim);

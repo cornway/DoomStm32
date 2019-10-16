@@ -294,7 +294,7 @@ void HU_Init(void)
     j = HU_FONTSTART;
     for (i=0;i<HU_FONTSIZE;i++)
     {
-	DEH_snprintf(buffer, 9, "STCFN%.3d", j++);
+	snprintf(buffer, 9, "STCFN%.3d", j++);
 	hu_font[i] = (patch_t *) W_CacheLumpName(buffer, PU_STATIC);
     }
 
@@ -331,25 +331,8 @@ void HU_Start(void)
 		       HU_TITLEX, HU_TITLEY,
 		       hu_font,
 		       HU_FONTSTART);
-    
-    switch ( logical_gamemission )
-    {
-      case doom:
-	s = HU_TITLE;
-	break;
-      case doom2:
-	 s = HU_TITLE2;
-	 break;
-      case pack_plut:
-	s = HU_TITLEP;
-	break;
-      case pack_tnt:
-	s = HU_TITLET;
-	break;
-      default:
-         s = "Unknown level";
-         break;
-    }
+
+    s = "Unknown level";
 
     // Chex.exe always uses the episode 1 level title
     // eg. E2M1 gives the title for E1M1

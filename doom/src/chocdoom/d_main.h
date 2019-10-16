@@ -65,7 +65,7 @@ int DD_PlaySoundtrackNum (void *_cd, int num, int volume);
 //
 
 extern  gameaction_t    gameaction;
-extern gameaction_t    gameaction_next;
+//extern gameaction_t    gameaction_next;
 
 #endif
 

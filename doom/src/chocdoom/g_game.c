@@ -64,7 +64,7 @@
 #include "dstrings.h"
 #include "sounds.h"
 
-// SKY handling - still the wrong place.
+// SKY handling.
 #include "r_data.h"
 #include "r_sky.h"
 
@@ -72,34 +72,39 @@
 
 #include "g_game.h"
 
+#ifdef STM32_SDK
 #include "misc_utils.h"
 #include <dev_io.h>
-#define SAVEGAMESIZE	0x2c000
+#else
+#include "SDL.h"
+#endif
 
-void	G_ReadDemoTiccmd (ticcmd_t* cmd); 
-void	G_WriteDemoTiccmd (ticcmd_t* cmd); 
-void	G_PlayerReborn (int player); 
- 
-void	G_DoReborn (int playernum); 
- 
-void	G_DoLoadLevel (void); 
-void	G_DoNewGame (void); 
-void	G_DoPlayDemo (void); 
-void	G_DoCompleted (void); 
-void	G_DoVictory (void); 
-void	G_DoWorldDone (void); 
-void	G_DoSaveGame (void); 
- 
+#define SAVEGAMESIZE            0x2c0000
+
+void G_ReadDemoTiccmd(ticcmd_t *cmd);
+void G_WriteDemoTiccmd(ticcmd_t *cmd);
+void G_PlayerReborn(int player);
+
+void G_DoReborn(int playernum);
+
+void G_DoLoadLevel(void);
+void G_DoNewGame(void);
+void G_DoPlayDemo(void);
+void G_DoCompleted(void);
+void G_DoVictory(void);
+void G_DoWorldDone(void);
+void G_DoSaveGame(void);
+
 // Gamestate the last time G_Ticker was called.
 
-extern gamestate_t     oldgamestate; 
- 
-extern gameaction_t    gameaction; 
-extern gamestate_t     gamestate; 
-extern skill_t         gameskill; 
-extern boolean		respawnmonsters;
-extern int             gameepisode; 
-extern int             gamemap; 
+gamestate_t     oldgamestate;
+
+gameaction_t    gameaction;
+gamestate_t     gamestate = GS_DEMOSCREEN;
+skill_t         gameskill;
+boolean         respawnmonsters;
+int             gameepisode;
+int             gamemap;
 
 // If non-zero, exit the level after this number of minutes.
 
@@ -111,7 +116,6 @@ extern boolean         sendsave;             	// send a save event next tic
 extern boolean         usergame;               // ok to save / end game 
  
 extern boolean         timingdemo;             // if true, exit with report on completion 
-extern boolean         nodrawers;              // for comparative timing purposes 
 extern int             starttime;          	// for comparative timing purposes  	 
  
 extern boolean         viewactive; 
@@ -226,13 +230,6 @@ int G_CmdChecksum (ticcmd_t* cmd)
 
 boolean WeaponSelectable(weapontype_t weapon)
 {
-    // Can't select the super shotgun in Doom 1.
-
-    if (weapon == wp_supershotgun && logical_gamemission == doom)
-    {
-        return false;
-    }
-
     // These weapons aren't available in shareware.
 
     if ((weapon == wp_plasma || weapon == wp_bfg)
@@ -375,9 +372,8 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
             // fprintf(stderr, "strafe right\n");
             side += sidemove[speed]; 
         }
-        if (gamekeydown[key_left]) 
+        if (gamekeydown[key_left])
         {
-            //	fprintf(stderr, "strafe left\n");
             side -= sidemove[speed];
         }
  
@@ -463,7 +459,7 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
         {
             look += 16;
         }
-        cmd->lookfly = look;
+        //cmd->lookfly = look;
     }
     
     // special buttons
@@ -493,8 +489,6 @@ void G_BuildTiccmd (ticcmd_t* cmd, int maketic)
 
         cmd->angleturn = (desired_angleturn + 128) & 0xff00;
 
-        // Carry forward the error from the reduced resolution to the
-        // next tic, so that successive small movements can accumulate.
 
         carry = desired_angleturn - cmd->angleturn;
     }
@@ -548,11 +542,11 @@ void G_DoLoadLevel (void)
 } 
 
 //
-// G_Responder  
+// G_Responder
 // Get info needed to make ticcmd_ts for the players.
-// 
-boolean G_Responder (event_t* ev) 
-{ 
+//
+boolean G_Responder(event_t *ev)
+{
     // allow spy mode changes even during the demo
     if (gamestate == GS_LEVEL && ev->type == ev_keydown 
      && ev->data1 == key_spy && (singledemo || !deathmatch) )
@@ -673,10 +667,6 @@ void G_Ticker (void)
     { 
 	switch (gameaction) 
 	{ 
-	  case ga_cachelevel:
-        gameaction = ga_nothing;
-        DD_SetGameAct(ga_cachelevel);
-        break;
 	  case ga_loadlevel: 
 	    G_DoLoadLevel ();
 	    break; 
@@ -713,12 +703,6 @@ void G_Ticker (void)
 	} 
     }
 
-    if (gameaction_next != ga_nothing &&
-        gameaction == ga_nothing) {
-
-        gameaction = gameaction_next;
-        gameaction_next = ga_nothing;
-    }
     // get commands, check consistancy,
     // and build new consistancy check
     buf = (gametic/ticdup)%BACKUPTICS; 
@@ -1073,8 +1057,7 @@ void G_DoReborn (int playernum)
 	 
     if (!netgame && gameaction != ga_loadlevel) {
 	    // reload the level from scratch
-	    gameaction = ga_cachelevel;
-        gameaction_next = ga_loadlevel;
+	    gameaction = ga_loadlevel;
     }
     else 
     {
@@ -1359,8 +1342,7 @@ char	savename[256];
 void G_LoadGame (char* name) 
 { 
     M_StringCopy(savename, name, sizeof(savename));
-    gameaction = ga_cachelevel;
-    gameaction_next = ga_loadgame;
+    gameaction = ga_loadgame;
 } 
  
 #define VERSIONSIZE		16 
@@ -1501,9 +1483,8 @@ G_DeferedInitNew
     d_skill = skill; 
     d_episode = episode; 
     d_map = map; 
-    gameaction = ga_cachelevel;
-    gameaction_next = ga_newgame;
-} 
+    gameaction = ga_newgame;
+}
 
 
 void G_DoNewGame (void) 
@@ -1888,6 +1869,12 @@ void G_DeferedPlayDemo (char* name)
     gameaction = ga_playdemo; 
 } 
 
+void G_DeferredPlayDemo(char *name)
+{
+    defdemoname = name;
+    gameaction = ga_playdemo;
+}
+
 // Generate a string describing a demo version
 
 static char *DemoVersionDescription(int version)
@@ -2000,8 +1987,6 @@ void G_TimeDemo (char* name)
     //
     // Disable rendering the screen entirely.
     //
-
-    nodrawers = M_CheckParm ("-nodraw"); 
 
     timingdemo = true; 
     singletics = true; 

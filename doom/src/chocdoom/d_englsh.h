@@ -21,17 +21,17 @@
 #define __D_ENGLSH__
 
 //
-//	Printed strings for translation
+//  Printed strings for translation
 //
 
 //
 // D_Main.C
 //
-#define D_DEVSTR	"Development mode ON.\n"
-#define D_CDROM	"CD-ROM Version: default.cfg from c:\\doomdata\n"
+#define D_DEVSTR                "Development mode ON\n"
+#define D_CDROM                 "CD-ROM version: default.cfg from c:\\doomdata\n"
 
 //
-//	M_Menu.C
+// M_Menu.C
 //
 #define PRESSKEY 	"press a key."
 #define PRESSYN 	"press y or n."
@@ -72,7 +72,7 @@
 #define EMPTYSTRING	"empty slot"
 
 //
-//	P_inter.C
+// P_inter.C
 //
 #define GOTARMOR	"Picked up the armor."
 #define GOTMEGA	"Picked up the MegaArmor!"
@@ -127,12 +127,13 @@
 #define PD_YELLOWK	"You need a yellow key to open this door"
 
 //
-//	G_game.C
+// G_game.C
 //
-#define GGSAVED	"game saved."
+#define GGSAVED                 "\"%s\" saved"
+#define GSCREENSHOT             "Screenshot %i taken"
 
 //
-//	HU_stuff.C
+//  HU_stuff.C
 //
 #define HUSTR_MSGU	"[Message unsent]"
 
@@ -306,63 +307,65 @@
 // The following should NOT be changed unless it seems
 // just AWFULLY necessary
 
-#define HUSTR_PLRGREEN	"Green: "
-#define HUSTR_PLRINDIGO	"Indigo: "
-#define HUSTR_PLRBROWN	"Brown: "
-#define HUSTR_PLRRED		"Red: "
+#define HUSTR_PLRGREEN          "Green: "
+#define HUSTR_PLRINDIGO         "Indigo: "
+#define HUSTR_PLRBROWN          "Brown: "
+#define HUSTR_PLRRED            "Red: "
 
-#define HUSTR_KEYGREEN	'g'
-#define HUSTR_KEYINDIGO	'i'
-#define HUSTR_KEYBROWN	'b'
-#define HUSTR_KEYRED	'r'
-
-//
-//	AM_map.C
-//
-
-#define AMSTR_FOLLOWON	"Follow Mode ON"
-#define AMSTR_FOLLOWOFF	"Follow Mode OFF"
-
-#define AMSTR_GRIDON	"Grid ON"
-#define AMSTR_GRIDOFF	"Grid OFF"
-
-#define AMSTR_MARKEDSPOT	"Marked Spot"
-#define AMSTR_MARKSCLEARED	"All Marks Cleared"
+#define HUSTR_KEYGREEN          'g'
+#define HUSTR_KEYINDIGO         'i'
+#define HUSTR_KEYBROWN          'b'
+#define HUSTR_KEYRED            'r'
 
 //
-//	ST_stuff.C
+// AM_map.C
 //
 
-#define STSTR_MUS		"Music Change"
-#define STSTR_NOMUS		"IMPOSSIBLE SELECTION"
-#define STSTR_DQDON		"Degreelessness Mode On"
-#define STSTR_DQDOFF	"Degreelessness Mode Off"
+#define AMSTR_FOLLOWON          "Follow mode ON"
+#define AMSTR_FOLLOWOFF         "Follow mode OFF"
 
-#define STSTR_KFAADDED	"Very Happy Ammo Added"
-#define STSTR_FAADDED	"Ammo (no keys) Added"
+#define AMSTR_GRIDON            "Grid ON"
+#define AMSTR_GRIDOFF           "Grid OFF"
 
-#define STSTR_NCON		"No Clipping Mode ON"
-#define STSTR_NCOFF		"No Clipping Mode OFF"
-
-#define STSTR_BEHOLD	"inVuln, Str, Inviso, Rad, Allmap, or Lite-amp"
-#define STSTR_BEHOLDX	"Power-up Toggled"
-
-#define STSTR_CHOPPERS	"... doesn't suck - GM"
-#define STSTR_CLEV		"Changing Level..."
+#define AMSTR_MARKEDSPOT        "Marked spot %i"
+#define AMSTR_MARKCLEARED       "Mark cleared"
+#define AMSTR_MARKSCLEARED      "Marks cleared"
 
 //
-//	F_Finale.C
+//  ST_stuff.C
+//
+
+#define STSTR_MUS               "Music changed"
+#define STSTR_DQDON             "Degreelessness mode ON"
+#define STSTR_DQDOFF            "Degreelessness mode OFF"
+
+#define STSTR_KFAADDED          "Very happy ammo added"
+#define STSTR_FAADDED           "Ammo [no keys] added"
+
+#define STSTR_NCON              "No clipping mode ON"
+#define STSTR_NCOFF             "No clipping mode OFF"
+
+#define STSTR_BEHOLD            "inVuln, bSrk, Inviso, Rad, Allmap or Lite-amp?"
+#define STSTR_BEHOLDX           "Power-up toggled"
+
+#define STSTR_CHOPPERS          "\"...doesn't suck.\" - GM"
+#define STSTR_CLEV              "Changing level..."
+
+#define STSTR_MYPOS             "angle = %i%c  x,y,z = [%i,%i,%i]"
+
+//
+//  F_Finale.C
 //
 #define E1TEXT \
 "Once you beat the big badasses and\n"\
-"clean out the moon base you're supposed\n"\
+"clean out the moon base, you're supposed\n"\
 "to win, aren't you? Aren't you? Where's\n"\
 "your fat reward and ticket home? What\n"\
-"the hell is this? It's not supposed to\n"\
+"the Hell is this? It's not supposed to\n"\
 "end this way!\n"\
 "\n" \
 "It stinks like rotten meat, but looks\n"\
-"like the lost Deimos base.  Looks like\n"\
+"like the lost Deimos base. It looks like\n"\
 "you're stuck on The Shores of Hell.\n"\
 "The only way out is through.\n"\
 "\n"\
@@ -375,7 +378,7 @@
 "You've done it! The hideous cyber-\n"\
 "demon lord that ruled the lost Deimos\n"\
 "moon base has been slain and you\n"\
-"are triumphant! But ... where are\n"\
+"are triumphant! But... where are\n"\
 "you? You clamber to the edge of the\n"\
 "moon and look down to see the awful\n"\
 "truth.\n" \
@@ -384,11 +387,11 @@
 "You've never heard of anyone escaping\n"\
 "from Hell, but you'll make the bastards\n"\
 "sorry they ever heard of you! Quickly,\n"\
-"you rappel down to  the surface of\n"\
+"you rappel down to the surface of\n"\
 "Hell.\n"\
 "\n" \
-"Now, it's on to the final chapter of\n"\
-"DOOM! -- Inferno."
+"Now, it's onto the final chapter of\n"\
+"DOOM - Inferno!"
 
 
 #define E3TEXT \
@@ -400,7 +403,7 @@
 "A hidden doorway opens and you enter.\n"\
 "You've proven too tough for Hell to\n"\
 "contain, and now Hell at last plays\n"\
-"fair -- for you emerge from the door\n"\
+"fair - for you emerge from the door\n"\
 "to see the green fields of Earth!\n"\
 "Home at last.\n" \
 "\n"\
@@ -408,127 +411,149 @@
 "Earth while you were battling evil\n"\
 "unleashed. It's good that no Hell-\n"\
 "spawn could have come through that\n"\
-"door with you ..."
+"door with you..."
 
 
 #define E4TEXT \
-"the spider mastermind must have sent forth\n"\
-"its legions of hellspawn before your\n"\
+"The spider mastermind must have sent forth\n"\
+"its legions of Hellspawn before your\n"\
 "final confrontation with that terrible\n"\
-"beast from hell.  but you stepped forward\n"\
+"beast from Hell. But you stepped forward\n"\
 "and brought forth eternal damnation and\n"\
 "suffering upon the horde as a true hero\n"\
 "would in the face of something so evil.\n"\
 "\n"\
-"besides, someone was gonna pay for what\n"\
-"happened to daisy, your pet rabbit.\n"\
+"Besides, someone was gonna pay for what\n"\
+"happened to Daisy, your pet rabbit.\n"\
 "\n"\
-"but now, you see spread before you more\n"\
+"But now, you see spread before you more\n"\
 "potential pain and gibbitude as a nation\n"\
 "of demons run amok among our cities.\n"\
 "\n"\
-"next stop, hell on earth!"
+"Next stop, Hell on Earth!"
 
 
 // after level 6, put this:
 
 #define C1TEXT \
-"YOU HAVE ENTERED DEEPLY INTO THE INFESTED\n" \
-"STARPORT. BUT SOMETHING IS WRONG. THE\n" \
-"MONSTERS HAVE BROUGHT THEIR OWN REALITY\n" \
-"WITH THEM, AND THE STARPORT'S TECHNOLOGY\n" \
-"IS BEING SUBVERTED BY THEIR PRESENCE.\n" \
+"You have entered deeply into the infested\n" \
+"starport. But something is wrong. The\n" \
+"monsters have brought their own reality\n" \
+"with them, and the starport's technology\n" \
+"is being subverted by their presence.\n" \
 "\n"\
-"AHEAD, YOU SEE AN OUTPOST OF HELL, A\n" \
-"FORTIFIED ZONE. IF YOU CAN GET PAST IT,\n" \
-"YOU CAN PENETRATE INTO THE HAUNTED HEART\n" \
-"OF THE STARBASE AND FIND THE CONTROLLING\n" \
-"SWITCH WHICH HOLDS EARTH'S POPULATION\n" \
-"HOSTAGE."
+"Ahead, you see an outpost of Hell, a\n" \
+"fortified zone. If you can get past it,\n" \
+"you can penetrate into the haunted heart\n" \
+"of the starbase and find the controlling\n" \
+"switch which holds Earth's population\n" \
+"hostage."
 
 // After level 11, put this:
 
 #define C2TEXT \
-"YOU HAVE WON! YOUR VICTORY HAS ENABLED\n" \
-"HUMANKIND TO EVACUATE EARTH AND ESCAPE\n"\
-"THE NIGHTMARE.  NOW YOU ARE THE ONLY\n"\
-"HUMAN LEFT ON THE FACE OF THE PLANET.\n"\
-"CANNIBAL MUTATIONS, CARNIVOROUS ALIENS,\n"\
-"AND EVIL SPIRITS ARE YOUR ONLY NEIGHBORS.\n"\
-"YOU SIT BACK AND WAIT FOR DEATH, CONTENT\n"\
-"THAT YOU HAVE SAVED YOUR SPECIES.\n"\
+"You have won! Your victory has enabled\n" \
+"humankind to evacuate Earth and escape\n"\
+"the nightmare. Now you are the only\n"\
+"human left on the face of the planet.\n"\
+"Cannibal mutations, carnivorous aliens,\n"\
+"and evil spirits are your only neighbors.\n"\
+"You sit back and wait for death, content\n"\
+"that you have saved your species.\n"\
 "\n"\
-"BUT THEN, EARTH CONTROL BEAMS DOWN A\n"\
-"MESSAGE FROM SPACE: \"SENSORS HAVE LOCATED\n"\
-"THE SOURCE OF THE ALIEN INVASION. IF YOU\n"\
-"GO THERE, YOU MAY BE ABLE TO BLOCK THEIR\n"\
-"ENTRY.  THE ALIEN BASE IS IN THE HEART OF\n"\
-"YOUR OWN HOME CITY, NOT FAR FROM THE\n"\
-"STARPORT.\" SLOWLY AND PAINFULLY YOU GET\n"\
-"UP AND RETURN TO THE FRAY."
+"But then, Earth Control beams down a\n"\
+"message from space: \"Sensors have located\n"\
+"the source of the alien invasion. If you\n"\
+"go there, you may be able to block their\n"\
+"entry. The alien base is in the heart of\n"\
+"your own home city, not far from the\n"\
+"starport.\" Slowly and painfully you get\n"\
+"up and return to the fray."
 
 
 // After level 20, put this:
 
 #define C3TEXT \
-"YOU ARE AT THE CORRUPT HEART OF THE CITY,\n"\
-"SURROUNDED BY THE CORPSES OF YOUR ENEMIES.\n"\
-"YOU SEE NO WAY TO DESTROY THE CREATURES'\n"\
-"ENTRYWAY ON THIS SIDE, SO YOU CLENCH YOUR\n"\
-"TEETH AND PLUNGE THROUGH IT.\n"\
+"You are at the corrupt heart of the city,\n"\
+"surrounded by the corpses of your enemies.\n"\
+"You see no way to destroy the creatures'\n"\
+"entryway on this side, so you clench your\n"\
+"teeth and plunge through it.\n"\
 "\n"\
-"THERE MUST BE A WAY TO CLOSE IT ON THE\n"\
-"OTHER SIDE. WHAT DO YOU CARE IF YOU'VE\n"\
-"GOT TO GO THROUGH HELL TO GET TO IT?"
+"There must be a way to close it on the\n"\
+"other side. What do you care if you've\n"\
+"got to go through Hell to get to it?"
 
 
 // After level 29, put this:
 
 #define C4TEXT \
-"THE HORRENDOUS VISAGE OF THE BIGGEST\n"\
-"DEMON YOU'VE EVER SEEN CRUMBLES BEFORE\n"\
-"YOU, AFTER YOU PUMP YOUR ROCKETS INTO\n"\
-"HIS EXPOSED BRAIN. THE MONSTER SHRIVELS\n"\
-"UP AND DIES, ITS THRASHING LIMBS\n"\
-"DEVASTATING UNTOLD MILES OF HELL'S\n"\
-"SURFACE.\n"\
+"The horrendous visage of the biggest\n"\
+"demon you've ever seen crumbles before\n"\
+"you, after you pump your rockets into\n"\
+"its exposed brain. The monster shrivels\n"\
+"up and dies, its thrashing limbs\n"\
+"devastating untold miles of Hell's\n"\
+"surface.\n"\
 "\n"\
-"YOU'VE DONE IT. THE INVASION IS OVER.\n"\
-"EARTH IS SAVED. HELL IS A WRECK. YOU\n"\
-"WONDER WHERE BAD FOLKS WILL GO WHEN THEY\n"\
-"DIE, NOW. WIPING THE SWEAT FROM YOUR\n"\
-"FOREHEAD YOU BEGIN THE LONG TREK BACK\n"\
-"HOME. REBUILDING EARTH OUGHT TO BE A\n"\
-"LOT MORE FUN THAN RUINING IT WAS.\n"
+"You've done it. The invasion is over.\n"\
+"Earth is saved. Hell is a wreck. You\n"\
+"wonder where bad folks will go when they\n"\
+"die, now. Wiping the sweat from your\n"\
+"forehead you begin the long trek back\n"\
+"home. Rebuilding Earth ought to be a\n"\
+"lot more fun than ruining it was.\n"
 
 
 
 // Before level 31, put this:
 
 #define C5TEXT \
-"CONGRATULATIONS, YOU'VE FOUND THE SECRET\n"\
-"LEVEL! LOOKS LIKE IT'S BEEN BUILT BY\n"\
-"HUMANS, RATHER THAN DEMONS. YOU WONDER\n"\
-"WHO THE INMATES OF THIS CORNER OF HELL\n"\
-"WILL BE."
+"Congratulations, you've found the secret\n"\
+"level! Looks like it's been built by\n"\
+"humans, rather than demons. You wonder\n"\
+"who the inmates of this corner of Hell\n"\
+"will be."
 
 
 // Before level 32, put this:
 
 #define C6TEXT \
-"CONGRATULATIONS, YOU'VE FOUND THE\n"\
-"SUPER SECRET LEVEL!  YOU'D BETTER\n"\
-"BLAZE THROUGH THIS ONE!\n"
+"Congratulations, you've found the\n"\
+"super secret level! You'd better\n"\
+"blaze through this one!\n"
 
 
-// after map 06	
+// After level 8, put this:
 
-#define P1TEXT  \
+#define N1TEXT \
+"Trouble was brewing again in your favorite\n"\
+"vacation spot... Hell. Some cyberdemon\n"\
+"punk thought he could turn hell into a\n"\
+"personal amusement park, and make Earth\n"\
+"the ticket booth.\n"\
+"\n"\
+"Well, that half-robot freak show didn't\n"\
+"know who was coming to the fair. There's\n"\
+"nothing like a shooting gallery full of\n"\
+"hellspawn to get the blood pumping...\n"\
+"\n"\
+"Now the walls of the demon's labyrinth\n"\
+"echo with the sound of his metallic limbs\n"\
+"hitting the floor. His death moan gurgles\n"\
+"out through the mess you left of his face.\n"\
+"\n"\
+"This ride is closed."
+
+
+// after map 06
+
+#define P1TEXT \
 "You gloat over the steaming carcass of the\n"\
-"Guardian.  With its death, you've wrested\n"\
+"Guardian. With its death, you've wrested\n"\
 "the Accelerator from the stinking claws\n"\
-"of Hell.  You relax and glance around the\n"\
-"room.  Damn!  There was supposed to be at\n"\
+"of Hell. You relax and glance around the\n"\
+"room. Damn! There was supposed to be at\n"\
 "least one working prototype, but you can't\n"\
 "see it. The demons must have taken it.\n"\
 "\n"\
@@ -553,10 +578,10 @@
 
 #define P3TEXT \
 "You've bashed and battered your way into\n"\
-"the heart of the devil-hive.  Time for a\n"\
+"the heart of the devil-hive. Time for a\n"\
 "Search-and-Destroy mission, aimed at the\n"\
 "Gatekeeper, whose foul offspring is\n"\
-"cascading to Earth.  Yeah, he's bad. But\n"\
+"cascading to Earth. Yeah, he's bad. But\n"\
 "you know who's worse!\n"\
 "\n"\
 "Grinning evilly, you check your gear, and\n"\
@@ -567,41 +592,41 @@
 
 #define P4TEXT \
 "The Gatekeeper's evil face is splattered\n"\
-"all over the place.  As its tattered corpse\n"\
+"all over the place. As its tattered corpse\n"\
 "collapses, an inverted Gate forms and\n"\
 "sucks down the shards of the last\n"\
 "prototype Accelerator, not to mention the\n"\
-"few remaining demons.  You're done. Hell\n"\
-"has gone back to pounding bad dead folks \n"\
-"instead of good live ones.  Remember to\n"\
+"few remaining demons. You're done. Hell\n"\
+"has gone back to pounding bad dead folks\n"\
+"instead of good live ones. Remember to\n"\
 "tell your grandkids to put a rocket\n"\
 "launcher in your coffin. If you go to Hell\n"\
 "when you die, you'll need it for some\n"\
-"final cleaning-up ..."
+"final cleaning-up..."
 
 // before map 31
 
 #define P5TEXT \
 "You've found the second-hardest level we\n"\
 "got. Hope you have a saved game a level or\n"\
-"two previous.  If not, be prepared to die\n"\
+"two previous. If not, be prepared to die\n"\
 "aplenty. For master marines only."
 
 // before map 32
 
 #define P6TEXT \
 "Betcha wondered just what WAS the hardest\n"\
-"level we had ready for ya?  Now you know.\n"\
+"level we had ready for ya? Now you know.\n"\
 "No one gets out alive."
 
 
 #define T1TEXT \
 "You've fought your way out of the infested\n"\
-"experimental labs.   It seems that UAC has\n"\
-"once again gulped it down.  With their\n"\
-"high turnover, it must be hard for poor\n"\
+"experimental labs. It seems that the UAC\n"\
+"has once again gulped it down. With their\n"\
+"high turnover, it must be hard for the poor\n"\
 "old UAC to buy corporate health insurance\n"\
-"nowadays..\n"\
+"nowadays...\n"\
 "\n"\
 "Ahead lies the military complex, now\n"\
 "swarming with diseased horrors hot to get\n"\
@@ -612,8 +637,8 @@
 
 #define T2TEXT \
 "You hear the grinding of heavy machinery\n"\
-"ahead.  You sure hope they're not stamping\n"\
-"out new hellspawn, but you're ready to\n"\
+"ahead. You sure hope they're not stamping\n"\
+"out new Hellspawn, but you're ready to\n"\
 "ream out a whole herd if you have to.\n"\
 "They might be planning a blood feast, but\n"\
 "you feel about as mean as two thousand\n"\
@@ -624,9 +649,9 @@
 
 #define T3TEXT \
 "The vista opening ahead looks real damn\n"\
-"familiar. Smells familiar, too -- like\n"\
+"familiar. Smells familiar, too - like\n"\
 "fried excrement. You didn't like this\n"\
-"place before, and you sure as hell ain't\n"\
+"place before, and you sure as Hell ain't\n"\
 "planning to like it now. The more you\n"\
 "brood on it, the madder you get.\n"\
 "Hefting your gun, an evil grin trickles\n"\
@@ -636,30 +661,29 @@
 "Suddenly, all is silent, from one horizon\n"\
 "to the other. The agonizing echo of Hell\n"\
 "fades away, the nightmare sky turns to\n"\
-"blue, the heaps of monster corpses play \n"\
+"blue, the heaps of monster corpses start \n"\
 "to evaporate along with the evil stench \n"\
-"that filled the air. Jeeze, maybe you've\n"\
+"that filled the air. Jeez, maybe you've\n"\
 "done it. Have you really won?\n"\
 "\n"\
 "Something rumbles in the distance.\n"\
 "A blue light begins to glow inside the\n"\
 "ruined skull of the demon-spitter."
 
-
 #define T5TEXT \
 "What now? Looks totally different. Kind\n"\
 "of like King Tut's condo. Well,\n"\
 "whatever's here can't be any worse\n"\
-"than usual. Can it?  Or maybe it's best\n"\
-"to let sleeping gods lie.."
+"than usual. Can it? Or maybe it's best\n"\
+"to let sleeping Gods lie..."
 
 
 #define T6TEXT \
 "Time for a vacation. You've burst the\n"\
-"bowels of hell and by golly you're ready\n"\
+"bowels of Hell and by golly you're ready\n"\
 "for a break. You mutter to yourself,\n"\
-"Maybe someone else can kick Hell's ass\n"\
-"next time around. Ahead lies a quiet town,\n"\
+"\"Maybe someone else can kick Hell's ass\n"\
+"next time around.\" Ahead lies a quiet town,\n"\
 "with peaceful flowing water, quaint\n"\
 "buildings, and presumably no Hellspawn.\n"\
 "\n"\
@@ -671,23 +695,24 @@
 //
 // Character cast strings F_FINALE.C
 //
-#define CC_ZOMBIE	"ZOMBIEMAN"
-#define CC_SHOTGUN	"SHOTGUN GUY"
-#define CC_HEAVY	"HEAVY WEAPON DUDE"
-#define CC_IMP	"IMP"
-#define CC_DEMON	"DEMON"
-#define CC_LOST	"LOST SOUL"
-#define CC_CACO	"CACODEMON"
-#define CC_HELL	"HELL KNIGHT"
-#define CC_BARON	"BARON OF HELL"
-#define CC_ARACH	"ARACHNOTRON"
-#define CC_PAIN	"PAIN ELEMENTAL"
-#define CC_REVEN	"REVENANT"
-#define CC_MANCU	"MANCUBUS"
-#define CC_ARCH	"ARCH-VILE"
-#define CC_SPIDER	"THE SPIDER MASTERMIND"
-#define CC_CYBER	"THE CYBERDEMON"
-#define CC_HERO	"OUR HERO"
+#define CC_ZOMBIE       "ZOMBIEMAN"
+#define CC_SHOTGUN      "SHOTGUN GUY"
+#define CC_HEAVY        "HEAVY WEAPON DUDE"
+#define CC_IMP          "IMP"
+#define CC_DEMON        "DEMON"
+#define CC_SPECTRE      "SPECTRE"
+#define CC_LOST         "LOST SOUL"
+#define CC_CACO         "CACODEMON"
+#define CC_HELL         "HELL KNIGHT"
+#define CC_BARON        "BARON OF HELL"
+#define CC_ARACH        "ARACHNOTRON"
+#define CC_PAIN         "PAIN ELEMENTAL"
+#define CC_REVEN        "REVENANT"
+#define CC_MANCU        "MANCUBUS"
+#define CC_ARCH         "ARCH-VILE"
+#define CC_SPIDER       "THE SPIDER MASTERMIND"
+#define CC_CYBER        "THE CYBERDEMON"
+#define CC_HERO         "OUR HERO"
 
 
 #endif

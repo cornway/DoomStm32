@@ -143,7 +143,6 @@ void P_CalcHeight (player_t* player)
 void P_MovePlayer (player_t* player)
 {
     ticcmd_t*		cmd;
-    int look;
 	
     cmd = &player->cmd;
 	
@@ -164,33 +163,6 @@ void P_MovePlayer (player_t* player)
     {
 	P_SetMobjState (player->mo, S_PLAY_RUN1);
     }
-
-    look = cmd->lookfly & 15;
-    if (look > 7)
-    {
-        look -= 16;
-    }
-    if (look)
-    {
-        if (look == TOCENTER)
-        {
-            player->centering = true;
-            player->lookdir = 0;
-        }
-        else
-        {
-            look = look  * 5;
-            player->lookdir += look * FRACUNIT;
-            if (player->lookdir > 60 * FRACUNIT)
-            {
-                player->lookdir = 60 * FRACUNIT;
-            } else if (player->lookdir < -60 * FRACUNIT)
-            {
-                player->lookdir = -60 * FRACUNIT;
-            }
-        }
-    }
-    cmd->lookfly = 0;
 }	
 
 

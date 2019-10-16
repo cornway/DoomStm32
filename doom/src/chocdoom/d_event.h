@@ -38,6 +38,21 @@ typedef enum
     ev_quit
 } evtype_t;
 
+typedef enum
+{
+    ga_nothing,
+    ga_loadlevel,
+    ga_newgame,
+    ga_loadgame,
+    ga_savegame,
+    ga_playdemo,
+    ga_completed,
+    ga_victory,
+    ga_worlddone,
+    ga_screenshot,
+    ga_reloadgame
+} gameaction_t;
+
 // Event structure.
 typedef struct
 {
@@ -74,25 +89,25 @@ typedef struct
 typedef enum
 {
     // Press "Fire".
-    BT_ATTACK		= 1,
+    BT_ATTACK           = 1,
     // Use button, to open doors, activate switches.
-    BT_USE		= 2,
+    BT_USE              = 2,
 
     // Flag: game events, not really buttons.
-    BT_SPECIAL		= 128,
-    BT_SPECIALMASK	= 3,
-    
+    BT_SPECIAL          = 128,
+    BT_SPECIALMASK      = 3,
+
     // Flag, weapon change pending.
     // If true, the next 3 bits hold weapon num.
-    BT_CHANGE		= 4,
+    BT_CHANGE           = 4,
     // The 3bit weapon mask and shift, convenience.
-    BT_WEAPONMASK	= (0xff00),
-    BT_WEAPONSHIFT	= 8,
+    BT_WEAPONMASK       = (8 + 16 + 32),
+    BT_WEAPONSHIFT      = 3,
 
     // Pause the game.
-    BTS_PAUSE		= 1,
+    BTS_PAUSE           = 1,
     // Save the game at each console.
-    BTS_SAVEGAME	= 2,
+    BTS_SAVEGAME        = 2,
 
     // Savegame slot numbers
     //  occupy the second byte of buttons.    
@@ -128,10 +143,12 @@ typedef enum
 // Called by IO functions when input is detected.
 void D_PostEvent (event_t *ev);
 
-// Read an event from the event queue
+//
+// GLOBAL VARIABLES
+//
 
 event_t *D_PopEvent(void);
 
+extern gameaction_t     gameaction;
 
 #endif
-
