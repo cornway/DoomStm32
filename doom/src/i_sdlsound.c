@@ -79,7 +79,7 @@ static boolean sound_initialized = false;
 
 static allocated_sound_t *channels_playing[NUM_CHANNELS];
 
-static int mixer_freq = AUDIO_SAMPLE_RATE;
+static int mixer_freq = 22050;
 static boolean use_sfx_prefix;
 
 // Doubly-linked list of allocated sounds.

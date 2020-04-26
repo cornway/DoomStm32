@@ -63,7 +63,6 @@
 #include <misc_utils.h>
 #include <dev_io.h>
 #include <bsp_sys.h>
-#include <bsp_cmd.h>
 #include <audio_main.h>
 
 #include "hu_stuff.h"

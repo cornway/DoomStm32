@@ -16,8 +16,8 @@
         <TargetCommonOption>
           <Device>STM32F769NIHx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F7xx_DFP.2.11.0</PackID>
-          <PackURL>http://www.keil.com/pack</PackURL>
+          <PackID>Keil.STM32F7xx_DFP.2.12.0</PackID>
+          <PackURL>https://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000-0x2007FFFF) IROM(0x8000000-0x81FFFFF) CLOCK(12000000) FPU3(DFPU) CPUTYPE("Cortex-M7") ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
@@ -381,11 +381,6 @@
           <GroupName>Example/MDK-ARM</GroupName>
           <Files>
             <File>
-              <FileName>startup_stm32f769xx.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>startup_stm32f769xx.s</FilePath>
-            </File>
-            <File>
               <FileName>startup.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\startup.s</FilePath>
@@ -411,19 +406,9 @@
               <FilePath>..\doom\src\i_sdlsound.c</FilePath>
             </File>
             <File>
-              <FileName>machM7.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\common\misc\arch\Arm\m7\src\machM7.s</FilePath>
-            </File>
-            <File>
               <FileName>stm32f7xx_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\stm32f7xx_it.c</FilePath>
-            </File>
-            <File>
-              <FileName>system_stm32f7xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\misc\arch\Arm\m7\src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1466,34 +1451,42 @@
             <File>
               <FileName>dev_main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\dev_main.c</FilePath>
+              <FilePath>..\ulib\pub\dev_main.c</FilePath>
             </File>
             <File>
               <FileName>bsp_api.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\bsp_api.c</FilePath>
-            </File>
-            <File>
-              <FileName>heap.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\heap.c</FilePath>
+              <FilePath>..\ulib\pub\bsp_api.c</FilePath>
             </File>
             <File>
               <FileName>dstring.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\lib\dstring.c</FilePath>
+              <FilePath>..\ulib\lib\dstring.c</FilePath>
+            </File>
+            <File>
+              <FileName>heap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ulib\mem\heap.c</FilePath>
+            </File>
+            <File>
+              <FileName>machM7.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\ulib\arch\Arm\m7\src\machM7.s</FilePath>
+            </File>
+            <File>
+              <FileName>asm_utils.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\ulib\arch\Arm\m7\src\asm_utils.s</FilePath>
+            </File>
+            <File>
+              <FileName>system_stm32f7xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\STM32F7xx_Driver\Src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
           <GroupName>hal-lib</GroupName>
-          <Files>
-            <File>
-              <FileName>32f7hal.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>.\32f7-hal-obj\32f7hal.lib</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>::CMSIS</GroupName>
@@ -1510,8 +1503,8 @@
         <TargetCommonOption>
           <Device>STM32F769NIHx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F7xx_DFP.2.11.0</PackID>
-          <PackURL>http://www.keil.com/pack</PackURL>
+          <PackID>Keil.STM32F7xx_DFP.2.12.0</PackID>
+          <PackURL>https://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000-0x2007FFFF) IROM(0x8000000-0x81FFFFF) CLOCK(12000000) FPU3(DFPU) CPUTYPE("Cortex-M7") ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
@@ -1875,11 +1868,6 @@
           <GroupName>Example/MDK-ARM</GroupName>
           <Files>
             <File>
-              <FileName>startup_stm32f769xx.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>startup_stm32f769xx.s</FilePath>
-            </File>
-            <File>
               <FileName>startup.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\startup.s</FilePath>
@@ -1903,11 +1891,6 @@
               <FileName>i_sdlsound.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\doom\src\i_sdlsound.c</FilePath>
-            </File>
-            <File>
-              <FileName>machM7.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\common\misc\arch\Arm\m7\src\machM7.s</FilePath>
             </File>
             <File>
               <FileName>stm32f7xx_it.c</FileName>
@@ -1963,11 +1946,6 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
-            </File>
-            <File>
-              <FileName>system_stm32f7xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\misc\arch\Arm\m7\src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -3282,34 +3260,42 @@
             <File>
               <FileName>dev_main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\dev_main.c</FilePath>
+              <FilePath>..\ulib\pub\dev_main.c</FilePath>
             </File>
             <File>
               <FileName>bsp_api.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\bsp_api.c</FilePath>
-            </File>
-            <File>
-              <FileName>heap.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\heap.c</FilePath>
+              <FilePath>..\ulib\pub\bsp_api.c</FilePath>
             </File>
             <File>
               <FileName>dstring.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\lib\dstring.c</FilePath>
+              <FilePath>..\ulib\lib\dstring.c</FilePath>
+            </File>
+            <File>
+              <FileName>heap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ulib\mem\heap.c</FilePath>
+            </File>
+            <File>
+              <FileName>machM7.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\ulib\arch\Arm\m7\src\machM7.s</FilePath>
+            </File>
+            <File>
+              <FileName>asm_utils.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\ulib\arch\Arm\m7\src\asm_utils.s</FilePath>
+            </File>
+            <File>
+              <FileName>system_stm32f7xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\STM32F7xx_Driver\Src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
           <GroupName>hal-lib</GroupName>
-          <Files>
-            <File>
-              <FileName>32f7hal.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>.\32f7-hal-obj\32f7hal.lib</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>::CMSIS</GroupName>
@@ -3326,8 +3312,8 @@
         <TargetCommonOption>
           <Device>STM32F769NIHx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F7xx_DFP.2.11.0</PackID>
-          <PackURL>http://www.keil.com/pack</PackURL>
+          <PackID>Keil.STM32F7xx_DFP.2.12.0</PackID>
+          <PackURL>https://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000-0x2007FFFF) IROM(0x8000000-0x81FFFFF) CLOCK(12000000) FPU3(DFPU) CPUTYPE("Cortex-M7") ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
@@ -3691,11 +3677,6 @@
           <GroupName>Example/MDK-ARM</GroupName>
           <Files>
             <File>
-              <FileName>startup_stm32f769xx.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>startup_stm32f769xx.s</FilePath>
-            </File>
-            <File>
               <FileName>startup.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\startup.s</FilePath>
@@ -3721,19 +3702,9 @@
               <FilePath>..\doom\src\i_sdlsound.c</FilePath>
             </File>
             <File>
-              <FileName>machM7.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\common\misc\arch\Arm\m7\src\machM7.s</FilePath>
-            </File>
-            <File>
               <FileName>stm32f7xx_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\stm32f7xx_it.c</FilePath>
-            </File>
-            <File>
-              <FileName>system_stm32f7xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\misc\arch\Arm\m7\src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -4708,34 +4679,42 @@
             <File>
               <FileName>dev_main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\dev_main.c</FilePath>
+              <FilePath>..\ulib\pub\dev_main.c</FilePath>
             </File>
             <File>
               <FileName>bsp_api.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\bsp_api.c</FilePath>
-            </File>
-            <File>
-              <FileName>heap.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\heap.c</FilePath>
+              <FilePath>..\ulib\pub\bsp_api.c</FilePath>
             </File>
             <File>
               <FileName>dstring.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\lib\dstring.c</FilePath>
+              <FilePath>..\ulib\lib\dstring.c</FilePath>
+            </File>
+            <File>
+              <FileName>heap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ulib\mem\heap.c</FilePath>
+            </File>
+            <File>
+              <FileName>machM7.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\ulib\arch\Arm\m7\src\machM7.s</FilePath>
+            </File>
+            <File>
+              <FileName>asm_utils.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\ulib\arch\Arm\m7\src\asm_utils.s</FilePath>
+            </File>
+            <File>
+              <FileName>system_stm32f7xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\STM32F7xx_Driver\Src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
           <GroupName>hal-lib</GroupName>
-          <Files>
-            <File>
-              <FileName>32f7hal.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>.\32f7-hal-obj\32f7hal.lib</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>::CMSIS</GroupName>
@@ -4752,8 +4731,8 @@
         <TargetCommonOption>
           <Device>STM32F769NIHx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F7xx_DFP.2.11.0</PackID>
-          <PackURL>http://www.keil.com/pack</PackURL>
+          <PackID>Keil.STM32F7xx_DFP.2.12.0</PackID>
+          <PackURL>https://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000-0x2007FFFF) IROM(0x8000000-0x81FFFFF) CLOCK(12000000) FPU3(DFPU) CPUTYPE("Cortex-M7") ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
@@ -4818,7 +4797,7 @@
           <AfterMake>
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name>E:..\common\pc\win\postbuild.bat E:\Keil_v5\ARM app-sram sram</UserProg1Name>
+            <UserProg1Name>fromelf app-sram\%L --bin --output=app-sram\bin\sram.bin</UserProg1Name>
             <UserProg2Name>fromelf app-sram\%L --disassemble --interleave=source  --text -c --output=outfile.lst</UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
@@ -5070,9 +5049,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls> </MiscControls>
-              <Define>STM32F769xx,USE_STM32F769I_DISCO,STM32_SDK,APPLICATION</Define>
+              <Define>STM32F769xx,USE_STM32F769I_DISCO,STM32_SDK,APPLICATION,__ARCH_ARM_M7__</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Inc;..\common\STM32F7xx_Driver\Inc;..\common\FatFs\src;..\common\STM32F7xx_Driver\BSP\Components\Common;..\common\STM32F7xx_Driver\BSP\STM32F769I-Discovery;..\common\STM32F7xx_Driver\CMSIS\Device\ST\STM32F7xx\Include;..\doom\src;..\doom\src\chocdoom;..\common\inc</IncludePath>
+              <IncludePath>..\Inc;..\doom\src;..\doom\src\chocdoom;..\ulib\arch;..\ulib\pub;..\ulib\audio;..\configs\stm32f769-disco;..\common\int</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -5117,11 +5096,6 @@
           <GroupName>Example/MDK-ARM</GroupName>
           <Files>
             <File>
-              <FileName>startup_stm32f769xx.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>startup_stm32f769xx.s</FilePath>
-            </File>
-            <File>
               <FileName>startup.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\startup.s</FilePath>
@@ -5145,11 +5119,6 @@
               <FileName>i_sdlsound.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\doom\src\i_sdlsound.c</FilePath>
-            </File>
-            <File>
-              <FileName>machM7.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\common\misc\arch\Arm\m7\src\machM7.s</FilePath>
             </File>
             <File>
               <FileName>stm32f7xx_it.c</FileName>
@@ -5205,11 +5174,6 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
-            </File>
-            <File>
-              <FileName>system_stm32f7xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\misc\arch\Arm\m7\src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -6524,34 +6488,42 @@
             <File>
               <FileName>dev_main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\dev_main.c</FilePath>
+              <FilePath>..\ulib\pub\dev_main.c</FilePath>
             </File>
             <File>
               <FileName>bsp_api.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\bsp_api.c</FilePath>
-            </File>
-            <File>
-              <FileName>heap.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\heap.c</FilePath>
+              <FilePath>..\ulib\pub\bsp_api.c</FilePath>
             </File>
             <File>
               <FileName>dstring.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\lib\dstring.c</FilePath>
+              <FilePath>..\ulib\lib\dstring.c</FilePath>
+            </File>
+            <File>
+              <FileName>heap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ulib\mem\heap.c</FilePath>
+            </File>
+            <File>
+              <FileName>machM7.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\ulib\arch\Arm\m7\src\machM7.s</FilePath>
+            </File>
+            <File>
+              <FileName>asm_utils.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\ulib\arch\Arm\m7\src\asm_utils.s</FilePath>
+            </File>
+            <File>
+              <FileName>system_stm32f7xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\STM32F7xx_Driver\Src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
           <GroupName>hal-lib</GroupName>
-          <Files>
-            <File>
-              <FileName>32f7hal.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>.\32f7-hal-obj\32f7hal.lib</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>::CMSIS</GroupName>
@@ -6568,8 +6540,8 @@
         <TargetCommonOption>
           <Device>STM32F769NIHx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F7xx_DFP.2.11.0</PackID>
-          <PackURL>http://www.keil.com/pack</PackURL>
+          <PackID>Keil.STM32F7xx_DFP.2.12.0</PackID>
+          <PackURL>https://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000-0x2007FFFF) IROM(0x8000000-0x81FFFFF) CLOCK(12000000) FPU3(DFPU) CPUTYPE("Cortex-M7") ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
@@ -6933,11 +6905,6 @@
           <GroupName>Example/MDK-ARM</GroupName>
           <Files>
             <File>
-              <FileName>startup_stm32f769xx.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>startup_stm32f769xx.s</FilePath>
-            </File>
-            <File>
               <FileName>startup.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\startup.s</FilePath>
@@ -7063,49 +7030,6 @@
               </FileOption>
             </File>
             <File>
-              <FileName>machM7.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\common\misc\arch\Arm\m7\src\machM7.s</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>1</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArmAds>
-                  <Aads>
-                    <interw>2</interw>
-                    <Ropi>2</Ropi>
-                    <Rwpi>2</Rwpi>
-                    <thumb>2</thumb>
-                    <SplitLS>2</SplitLS>
-                    <SwStkChk>2</SwStkChk>
-                    <NoWarn>2</NoWarn>
-                    <uSurpInc>2</uSurpInc>
-                    <useXO>2</useXO>
-                    <uClangAs>2</uClangAs>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Aads>
-                </FileArmAds>
-              </FileOption>
-            </File>
-            <File>
               <FileName>stm32f7xx_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\stm32f7xx_it.c</FilePath>
@@ -7159,11 +7083,6 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
-            </File>
-            <File>
-              <FileName>system_stm32f7xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\misc\arch\Arm\m7\src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -8546,84 +8465,42 @@
             <File>
               <FileName>dev_main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\dev_main.c</FilePath>
+              <FilePath>..\ulib\pub\dev_main.c</FilePath>
             </File>
             <File>
               <FileName>bsp_api.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\bsp_api.c</FilePath>
-            </File>
-            <File>
-              <FileName>heap.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\heap.c</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArmAds>
-                  <Cads>
-                    <interw>2</interw>
-                    <Optim>0</Optim>
-                    <oTime>2</oTime>
-                    <SplitLS>2</SplitLS>
-                    <OneElfS>2</OneElfS>
-                    <Strict>2</Strict>
-                    <EnumInt>2</EnumInt>
-                    <PlainCh>2</PlainCh>
-                    <Ropi>2</Ropi>
-                    <Rwpi>2</Rwpi>
-                    <wLevel>0</wLevel>
-                    <uThumb>2</uThumb>
-                    <uSurpInc>2</uSurpInc>
-                    <uC99>2</uC99>
-                    <useXO>2</useXO>
-                    <v6Lang>0</v6Lang>
-                    <v6LangP>0</v6LangP>
-                    <vShortEn>2</vShortEn>
-                    <vShortWch>2</vShortWch>
-                    <v6Lto>2</v6Lto>
-                    <v6WtE>2</v6WtE>
-                    <v6Rtti>2</v6Rtti>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Cads>
-                </FileArmAds>
-              </FileOption>
+              <FilePath>..\ulib\pub\bsp_api.c</FilePath>
             </File>
             <File>
               <FileName>dstring.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\lib\dstring.c</FilePath>
+              <FilePath>..\ulib\lib\dstring.c</FilePath>
+            </File>
+            <File>
+              <FileName>heap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ulib\mem\heap.c</FilePath>
+            </File>
+            <File>
+              <FileName>machM7.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\ulib\arch\Arm\m7\src\machM7.s</FilePath>
+            </File>
+            <File>
+              <FileName>asm_utils.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\ulib\arch\Arm\m7\src\asm_utils.s</FilePath>
+            </File>
+            <File>
+              <FileName>system_stm32f7xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\STM32F7xx_Driver\Src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
           <GroupName>hal-lib</GroupName>
-          <Files>
-            <File>
-              <FileName>32f7hal.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>.\32f7-hal-obj\32f7hal.lib</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>::CMSIS</GroupName>
@@ -8640,8 +8517,8 @@
         <TargetCommonOption>
           <Device>STM32F769NIHx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F7xx_DFP.2.11.0</PackID>
-          <PackURL>http://www.keil.com/pack</PackURL>
+          <PackID>Keil.STM32F7xx_DFP.2.12.0</PackID>
+          <PackURL>https://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000-0x2007FFFF) IROM(0x8000000-0x81FFFFF) CLOCK(12000000) FPU3(DFPU) CPUTYPE("Cortex-M7") ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
@@ -9005,11 +8882,6 @@
           <GroupName>Example/MDK-ARM</GroupName>
           <Files>
             <File>
-              <FileName>startup_stm32f769xx.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>startup_stm32f769xx.s</FilePath>
-            </File>
-            <File>
               <FileName>startup.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\startup.s</FilePath>
@@ -9135,49 +9007,6 @@
               </FileOption>
             </File>
             <File>
-              <FileName>machM7.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\common\misc\arch\Arm\m7\src\machM7.s</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>1</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArmAds>
-                  <Aads>
-                    <interw>2</interw>
-                    <Ropi>2</Ropi>
-                    <Rwpi>2</Rwpi>
-                    <thumb>2</thumb>
-                    <SplitLS>2</SplitLS>
-                    <SwStkChk>2</SwStkChk>
-                    <NoWarn>2</NoWarn>
-                    <uSurpInc>2</uSurpInc>
-                    <useXO>2</useXO>
-                    <uClangAs>2</uClangAs>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Aads>
-                </FileArmAds>
-              </FileOption>
-            </File>
-            <File>
               <FileName>stm32f7xx_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\stm32f7xx_it.c</FilePath>
@@ -9231,11 +9060,6 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
-            </File>
-            <File>
-              <FileName>system_stm32f7xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\misc\arch\Arm\m7\src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -10618,84 +10442,42 @@
             <File>
               <FileName>dev_main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\dev_main.c</FilePath>
+              <FilePath>..\ulib\pub\dev_main.c</FilePath>
             </File>
             <File>
               <FileName>bsp_api.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\bsp_api.c</FilePath>
-            </File>
-            <File>
-              <FileName>heap.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\heap.c</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArmAds>
-                  <Cads>
-                    <interw>2</interw>
-                    <Optim>0</Optim>
-                    <oTime>2</oTime>
-                    <SplitLS>2</SplitLS>
-                    <OneElfS>2</OneElfS>
-                    <Strict>2</Strict>
-                    <EnumInt>2</EnumInt>
-                    <PlainCh>2</PlainCh>
-                    <Ropi>2</Ropi>
-                    <Rwpi>2</Rwpi>
-                    <wLevel>0</wLevel>
-                    <uThumb>2</uThumb>
-                    <uSurpInc>2</uSurpInc>
-                    <uC99>2</uC99>
-                    <useXO>2</useXO>
-                    <v6Lang>0</v6Lang>
-                    <v6LangP>0</v6LangP>
-                    <vShortEn>2</vShortEn>
-                    <vShortWch>2</vShortWch>
-                    <v6Lto>2</v6Lto>
-                    <v6WtE>2</v6WtE>
-                    <v6Rtti>2</v6Rtti>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Cads>
-                </FileArmAds>
-              </FileOption>
+              <FilePath>..\ulib\pub\bsp_api.c</FilePath>
             </File>
             <File>
               <FileName>dstring.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\lib\dstring.c</FilePath>
+              <FilePath>..\ulib\lib\dstring.c</FilePath>
+            </File>
+            <File>
+              <FileName>heap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ulib\mem\heap.c</FilePath>
+            </File>
+            <File>
+              <FileName>machM7.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\ulib\arch\Arm\m7\src\machM7.s</FilePath>
+            </File>
+            <File>
+              <FileName>asm_utils.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\ulib\arch\Arm\m7\src\asm_utils.s</FilePath>
+            </File>
+            <File>
+              <FileName>system_stm32f7xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\STM32F7xx_Driver\Src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
           <GroupName>hal-lib</GroupName>
-          <Files>
-            <File>
-              <FileName>32f7hal.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>.\32f7-hal-obj\32f7hal.lib</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>::CMSIS</GroupName>
@@ -10712,8 +10494,8 @@
         <TargetCommonOption>
           <Device>STM32F769NIHx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F7xx_DFP.2.11.0</PackID>
-          <PackURL>http://www.keil.com/pack</PackURL>
+          <PackID>Keil.STM32F7xx_DFP.2.12.0</PackID>
+          <PackURL>https://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000-0x2007FFFF) IROM(0x8000000-0x81FFFFF) CLOCK(12000000) FPU3(DFPU) CPUTYPE("Cortex-M7") ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
@@ -11032,7 +10814,7 @@
               <MiscControls> --no_unaligned_access</MiscControls>
               <Define>STM32F769xx,USE_STM32F769I_DISCO,STM32_SDK,APPLICATION</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Inc;..\common\STM32F7xx_Driver\Inc;..\common\FatFs\src;..\common\STM32F7xx_Driver\BSP\Components\Common;..\common\STM32F7xx_Driver\BSP\STM32F769I-Discovery;..\common\STM32F7xx_Driver\CMSIS\Device\ST\STM32F7xx\Include;..\doom\src;..\doom\src\chocdoom;..\common\inc</IncludePath>
+              <IncludePath>..\Inc;..\doom\src;..\doom\src\chocdoom;..\ulib\pub;..\ulib\arch;..\configs\stm32f769-disco</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -11077,49 +10859,6 @@
           <GroupName>Example/MDK-ARM</GroupName>
           <Files>
             <File>
-              <FileName>startup_stm32f769xx.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>startup_stm32f769xx.s</FilePath>
-              <FileOption>
-                <CommonProperty>
-                  <UseCPPCompiler>2</UseCPPCompiler>
-                  <RVCTCodeConst>0</RVCTCodeConst>
-                  <RVCTZI>0</RVCTZI>
-                  <RVCTOtherData>0</RVCTOtherData>
-                  <ModuleSelection>0</ModuleSelection>
-                  <IncludeInBuild>0</IncludeInBuild>
-                  <AlwaysBuild>2</AlwaysBuild>
-                  <GenerateAssemblyFile>2</GenerateAssemblyFile>
-                  <AssembleAssemblyFile>2</AssembleAssemblyFile>
-                  <PublicsOnly>2</PublicsOnly>
-                  <StopOnExitCode>11</StopOnExitCode>
-                  <CustomArgument></CustomArgument>
-                  <IncludeLibraryModules></IncludeLibraryModules>
-                  <ComprImg>1</ComprImg>
-                </CommonProperty>
-                <FileArmAds>
-                  <Aads>
-                    <interw>2</interw>
-                    <Ropi>2</Ropi>
-                    <Rwpi>2</Rwpi>
-                    <thumb>2</thumb>
-                    <SplitLS>2</SplitLS>
-                    <SwStkChk>2</SwStkChk>
-                    <NoWarn>2</NoWarn>
-                    <uSurpInc>2</uSurpInc>
-                    <useXO>2</useXO>
-                    <uClangAs>2</uClangAs>
-                    <VariousControls>
-                      <MiscControls></MiscControls>
-                      <Define></Define>
-                      <Undefine></Undefine>
-                      <IncludePath></IncludePath>
-                    </VariousControls>
-                  </Aads>
-                </FileArmAds>
-              </FileOption>
-            </File>
-            <File>
               <FileName>startup.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\startup.s</FilePath>
@@ -11143,11 +10882,6 @@
               <FileName>i_sdlsound.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\doom\src\i_sdlsound.c</FilePath>
-            </File>
-            <File>
-              <FileName>machM7.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\common\misc\arch\Arm\m7\src\machM7.s</FilePath>
             </File>
             <File>
               <FileName>stm32f7xx_it.c</FileName>
@@ -11203,11 +10937,6 @@
                   </Cads>
                 </FileArmAds>
               </FileOption>
-            </File>
-            <File>
-              <FileName>system_stm32f7xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\misc\arch\Arm\m7\src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -12522,22 +12251,37 @@
             <File>
               <FileName>dev_main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\dev_main.c</FilePath>
+              <FilePath>..\ulib\pub\dev_main.c</FilePath>
             </File>
             <File>
               <FileName>bsp_api.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\bsp_api.c</FilePath>
-            </File>
-            <File>
-              <FileName>heap.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\heap.c</FilePath>
+              <FilePath>..\ulib\pub\bsp_api.c</FilePath>
             </File>
             <File>
               <FileName>dstring.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\lib\dstring.c</FilePath>
+              <FilePath>..\ulib\lib\dstring.c</FilePath>
+            </File>
+            <File>
+              <FileName>heap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ulib\mem\heap.c</FilePath>
+            </File>
+            <File>
+              <FileName>machM7.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\ulib\arch\Arm\m7\src\machM7.s</FilePath>
+            </File>
+            <File>
+              <FileName>asm_utils.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\ulib\arch\Arm\m7\src\asm_utils.s</FilePath>
+            </File>
+            <File>
+              <FileName>system_stm32f7xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\STM32F7xx_Driver\Src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -12611,13 +12355,6 @@
               </Aads>
             </GroupArmAds>
           </GroupOption>
-          <Files>
-            <File>
-              <FileName>32f7hal.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>.\32f7-hal-obj\32f7hal.lib</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>::CMSIS</GroupName>
@@ -12634,8 +12371,8 @@
         <TargetCommonOption>
           <Device>STM32F769NIHx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F7xx_DFP.2.11.0</PackID>
-          <PackURL>http://www.keil.com/pack</PackURL>
+          <PackID>Keil.STM32F7xx_DFP.2.12.0</PackID>
+          <PackURL>https://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000-0x2007FFFF) IROM(0x8000000-0x81FFFFF) CLOCK(12000000) FPU3(DFPU) CPUTYPE("Cortex-M7") ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
@@ -12999,11 +12736,6 @@
           <GroupName>Example/MDK-ARM</GroupName>
           <Files>
             <File>
-              <FileName>startup_stm32f769xx.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>startup_stm32f769xx.s</FilePath>
-            </File>
-            <File>
               <FileName>startup.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\startup.s</FilePath>
@@ -13029,19 +12761,9 @@
               <FilePath>..\doom\src\i_sdlsound.c</FilePath>
             </File>
             <File>
-              <FileName>machM7.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\common\misc\arch\Arm\m7\src\machM7.s</FilePath>
-            </File>
-            <File>
               <FileName>stm32f7xx_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\stm32f7xx_it.c</FilePath>
-            </File>
-            <File>
-              <FileName>system_stm32f7xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\misc\arch\Arm\m7\src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -14084,34 +13806,42 @@
             <File>
               <FileName>dev_main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\dev_main.c</FilePath>
+              <FilePath>..\ulib\pub\dev_main.c</FilePath>
             </File>
             <File>
               <FileName>bsp_api.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\bsp_api.c</FilePath>
-            </File>
-            <File>
-              <FileName>heap.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\heap.c</FilePath>
+              <FilePath>..\ulib\pub\bsp_api.c</FilePath>
             </File>
             <File>
               <FileName>dstring.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\lib\dstring.c</FilePath>
+              <FilePath>..\ulib\lib\dstring.c</FilePath>
+            </File>
+            <File>
+              <FileName>heap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ulib\mem\heap.c</FilePath>
+            </File>
+            <File>
+              <FileName>machM7.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\ulib\arch\Arm\m7\src\machM7.s</FilePath>
+            </File>
+            <File>
+              <FileName>asm_utils.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\ulib\arch\Arm\m7\src\asm_utils.s</FilePath>
+            </File>
+            <File>
+              <FileName>system_stm32f7xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\STM32F7xx_Driver\Src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
           <GroupName>hal-lib</GroupName>
-          <Files>
-            <File>
-              <FileName>32f7hal.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>.\32f7-hal-obj\32f7hal.lib</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>::CMSIS</GroupName>
@@ -14128,8 +13858,8 @@
         <TargetCommonOption>
           <Device>STM32F769NIHx</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32F7xx_DFP.2.11.0</PackID>
-          <PackURL>http://www.keil.com/pack</PackURL>
+          <PackID>Keil.STM32F7xx_DFP.2.12.0</PackID>
+          <PackURL>https://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000-0x2007FFFF) IROM(0x8000000-0x81FFFFF) CLOCK(12000000) FPU3(DFPU) CPUTYPE("Cortex-M7") ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
@@ -14561,11 +14291,6 @@
           </GroupOption>
           <Files>
             <File>
-              <FileName>startup_stm32f769xx.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>startup_stm32f769xx.s</FilePath>
-            </File>
-            <File>
               <FileName>startup.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\startup.s</FilePath>
@@ -14659,19 +14384,9 @@
               <FilePath>..\doom\src\i_sdlsound.c</FilePath>
             </File>
             <File>
-              <FileName>machM7.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\common\misc\arch\Arm\m7\src\machM7.s</FilePath>
-            </File>
-            <File>
               <FileName>stm32f7xx_it.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\stm32f7xx_it.c</FilePath>
-            </File>
-            <File>
-              <FileName>system_stm32f7xx.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\misc\arch\Arm\m7\src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -16054,34 +15769,42 @@
             <File>
               <FileName>dev_main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\dev_main.c</FilePath>
+              <FilePath>..\ulib\pub\dev_main.c</FilePath>
             </File>
             <File>
               <FileName>bsp_api.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\bsp_api.c</FilePath>
-            </File>
-            <File>
-              <FileName>heap.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\common\heap.c</FilePath>
+              <FilePath>..\ulib\pub\bsp_api.c</FilePath>
             </File>
             <File>
               <FileName>dstring.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\common\lib\dstring.c</FilePath>
+              <FilePath>..\ulib\lib\dstring.c</FilePath>
+            </File>
+            <File>
+              <FileName>heap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\ulib\mem\heap.c</FilePath>
+            </File>
+            <File>
+              <FileName>machM7.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\ulib\arch\Arm\m7\src\machM7.s</FilePath>
+            </File>
+            <File>
+              <FileName>asm_utils.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\ulib\arch\Arm\m7\src\asm_utils.s</FilePath>
+            </File>
+            <File>
+              <FileName>system_stm32f7xx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\common\STM32F7xx_Driver\Src\system_stm32f7xx.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
           <GroupName>hal-lib</GroupName>
-          <Files>
-            <File>
-              <FileName>32f7hal.lib</FileName>
-              <FileType>4</FileType>
-              <FilePath>.\32f7-hal-obj\32f7hal.lib</FilePath>
-            </File>
-          </Files>
         </Group>
         <Group>
           <GroupName>::CMSIS</GroupName>

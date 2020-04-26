@@ -66,6 +66,9 @@ __heap_base
 Heap_Mem        SPACE   Heap_Size
 __heap_limit
 
+UserHeap_Mem    EQU Heap_Mem
+UserHeap_Size	EQU Heap_Size
+
                 PRESERVE8
                 THUMB
 
@@ -105,6 +108,8 @@ Reset_Handler    PROC
                  EXPORT  Stack_Size
                  EXPORT  Heap_Mem
                  EXPORT  Heap_Size
+                 EXPORT  UserHeap_Mem
+                 EXPORT  UserHeap_Size
                  EXPORT  Shared_Mem
                  EXPORT  Shared_Size
                  
