@@ -5051,7 +5051,7 @@
               <MiscControls> </MiscControls>
               <Define>STM32F769xx,USE_STM32F769I_DISCO,STM32_SDK,APPLICATION,__ARCH_ARM_M7__</Define>
               <Undefine></Undefine>
-              <IncludePath>..\Inc;..\doom\src;..\doom\src\chocdoom;..\ulib\arch;..\ulib\pub;..\ulib\audio;..\configs\stm32f769-disco;..\common\int</IncludePath>
+              <IncludePath>..\Inc;..\doom\src;..\doom\src\chocdoom;..\ulib\arch;..\ulib\pub;..\configs\stm32f769-disco</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
