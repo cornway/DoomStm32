@@ -32,6 +32,7 @@
 #include "r_local.h"
 #include "r_sky.h"
 #include "st_stuff.h"
+#include <gfx2d_mem.h>
 
 
 // OPTIMIZE: closed two sided lines as single sided
@@ -266,6 +267,8 @@ static void R_CopySegRange (void)
         }
     }
 }
+
+extern blut8_t *g_color_lookup_table;
 
 void R_RenderSegLoop (void)
 {

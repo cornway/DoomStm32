@@ -415,7 +415,6 @@ void R_DrawColumnLow (void)
 //
 // Spectre/Invisibility.
 //
-#if 1/*(GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)*/
 #define FUZZTABLE		50 
 #define FUZZOFF	(SCREENWIDTH)
 
@@ -433,7 +432,6 @@ int	fuzzoffset[FUZZTABLE] =
 
 int	fuzzpos = 0; 
 
-#endif
 //
 // Framebuffer postprocessing.
 // Creates a fuzzy image by copying pixels
@@ -448,9 +446,7 @@ void R_DrawFuzzColumn (void)
     pix_t       *dest;
     float       frac;
     float       fracstep;
-#if 1/*(GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)*/
     int         clut_idx;
-#endif
 
     // Adjust borders. Low... 
     if (!dc_yl) 
@@ -487,33 +483,35 @@ void R_DrawFuzzColumn (void)
     // Looks like an attempt at dithering,
     //  using the colormap #6 (of 0-31, a bit
     //  brighter than average).
-    do 
-    {
-	// Lookup framebuffer, and retrieve
-	//  a pixel that is either one column
-	//  left or right of the current one.
-	// Add index from colormap to index.
-        /*FIXME : !!!*/
-#if 0/*(GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)*/
 
-    pix = dc_colormap[dc_source[(int)frac & 0x7f]];
-    *dest = I_BlendPix(pixel(pix), *dest, 48);
+    if (dc_colormap) {
+        do 
+        {
+    	// Lookup framebuffer, and retrieve
+    	//  a pixel that is either one column
+    	//  left or right of the current one.
+    	// Add index from colormap to index.
+            /*FIXME : !!!*/
+        *dest = g_color_lookup_table->lut[dc_colormap[dc_source[(int)frac & 0x7f]]][pixel(*dest)];
+        dest += SCREENWIDTH;
 
-#else
+        frac += fracstep;
+        } while (count--);
+    } else {
+        do 
+        {
+        clut_idx = I_GetClutIndex(dest[fuzzoffset[fuzzpos]]);
+        *dest = pixel(colormaps[6*256+clut_idx]);
+        
+        // Clamp table lookup index.
+        if (++fuzzpos == FUZZTABLE)
+            fuzzpos = 0;
 
-    clut_idx = I_GetClutIndex(dest[fuzzoffset[fuzzpos]]);
-    *dest = pixel(colormaps[6*256+clut_idx]);
+        dest += SCREENWIDTH;
+        frac += fracstep;
+        } while (count--);
+    }
 
-    // Clamp table lookup index.
-    if (++fuzzpos == FUZZTABLE)
-        fuzzpos = 0;
-#endif /*(GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)*/
-
-
-    dest += SCREENWIDTH;
-
-    frac += fracstep;
-    } while (count--); 
 } 
 
 // low detail mode version
@@ -525,9 +523,8 @@ void R_DrawFuzzColumnLow (void)
     pix_t       *dest2;
     float       frac;
     float       fracstep;
-#if 1/*(GFX_COLOR_MODE == GFX_COLOR_MODE_CLUT)*/
+    int         blut_idx;
     int         clut_idx;
-#endif
     int x;
 
     // Adjust borders. Low... 
@@ -570,36 +567,44 @@ void R_DrawFuzzColumnLow (void)
     // Looks like an attempt at dithering,
     //  using the colormap #6 (of 0-31, a bit
     //  brighter than average).
-    do 
-    {
-	// Lookup framebuffer, and retrieve
-	//  a pixel that is either one column
-	//  left or right of the current one.
-	// Add index from colormap to index.
-#if 0/*(GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)*/
+    if (dc_colormap) {
+        do 
+        {
+    	// Lookup framebuffer, and retrieve
+    	//  a pixel that is either one column
+    	//  left or right of the current one.
+    	// Add index from colormap to index.
+        blut_idx = dc_colormap[dc_source[(int)frac & 0x7f]];
+        *dest = g_color_lookup_table->lut[pixel(*dest)][blut_idx];
+        *dest2 = g_color_lookup_table->lut[pixel(*dest2)][blut_idx];
 
-    pix = dc_colormap[dc_source[(int)frac & 0x7f]];
-    *dest = I_BlendPix(pixel(pix), *dest, 48);
-    *dest2 = I_BlendPix(pixel(pix), *dest2, 48);
+        dest += SCREENWIDTH;
+        dest2 += SCREENWIDTH;
 
-#else
+        frac += fracstep;
+        } while (count--);
+    } else {
+        do 
+        {
+        // Lookup framebuffer, and retrieve
+        //  a pixel that is either one column
+        //  left or right of the current one.
+        // Add index from colormap to index.
+        clut_idx = I_GetClutIndex(dest[fuzzoffset[fuzzpos]]);
+        *dest = pixel(colormaps[6*256+clut_idx]);
+        clut_idx = I_GetClutIndex(dest2[fuzzoffset[fuzzpos]]);
+        *dest2 = pixel(colormaps[6*256+clut_idx]);
+    
+        // Clamp table lookup index.
+        if (++fuzzpos == FUZZTABLE)
+            fuzzpos = 0;
+        dest += SCREENWIDTH;
+        dest2 += SCREENWIDTH;
+    
+        frac += fracstep;
+        } while (count--); 
+    }
 
-    clut_idx = I_GetClutIndex(dest[fuzzoffset[fuzzpos]]);
-    *dest = pixel(colormaps[6*256+clut_idx]);
-    clut_idx = I_GetClutIndex(dest2[fuzzoffset[fuzzpos]]);
-    *dest2 = pixel(colormaps[6*256+clut_idx]);
-
-    // Clamp table lookup index.
-    if (++fuzzpos == FUZZTABLE)
-        fuzzpos = 0;
-
-#endif /*(GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)*/
-
-    dest += SCREENWIDTH;
-    dest2 += SCREENWIDTH;
-
-    frac += fracstep;
-    } while (count--); 
 } 
  
   

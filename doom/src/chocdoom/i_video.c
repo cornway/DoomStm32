@@ -95,6 +95,7 @@ typedef struct
 static pal_t *rgb_palette;
 
 pal_t *p_palette;
+blut8_t *g_color_lookup_table;
 
 void I_StartFrame (void)
 {
@@ -218,6 +219,9 @@ void I_SetPlayPal (void)
     }
     prev_clut = p_palette;
     p_palette = rgb_palette;
+    if (vid_priv_ctl(LCD_PRIV_GET_TRANSP_LUT, &g_color_lookup_table)) {
+        g_color_lookup_table = NULL;
+    }
 }
 
 void I_RestorePal (void)

@@ -77,6 +77,7 @@ void VID_PreConfig (void)
     conf.laynum = 2;
     conf.hwaccel = hwaccel;
     conf.clockpresc = 1;
+    conf.filter = 1;
     vid_config(&conf);
 }
 

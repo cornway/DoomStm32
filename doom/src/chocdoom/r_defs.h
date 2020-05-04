@@ -371,9 +371,7 @@ typedef struct vissprite_s
     // for color translation and shadow draw,
     //  maxbright frames as well
     lighttable_t*	colormap;
-#if 0/*(GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)*/
     byte sprflags;
-#endif
     int			mobjflags;
     
 } vissprite_t;
