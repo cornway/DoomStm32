@@ -7,3 +7,4 @@
 !/MDK-ARM/startup_stm32f769xx.s
 /common
 /.repo
+/ulib
