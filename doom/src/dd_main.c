@@ -264,7 +264,6 @@ static void __DD_LoadAltPkgPSX (void)
     info->painstate     = S_SPEC_PAIN;
     info->meleestate    = S_SPEC_ATK1;
     info->deathstate    = S_SPEC_DIE1;
-    info->flags         &= ~MF_SHADOW;
     info->raisestate    = S_SPEC_RAISE1;
 
     __DD_LoadAnimation(&fire_anim, "FIRE001", "FIRE317", 20);

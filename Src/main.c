@@ -78,6 +78,7 @@ void VID_PreConfig (void)
     conf.hwaccel = hwaccel;
     conf.clockpresc = 1;
     conf.filter = 1;
+    conf.cachealgo = VID_CACHE_NORMAL;
     vid_config(&conf);
 }
 
