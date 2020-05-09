@@ -60,7 +60,7 @@ static bsp_user_api_t bsp_user_api =
 
 void VID_PreConfig (void)
 {
-    screen_conf_t conf;
+    screen_conf_t conf = {0};
     int hwaccel = 0, p;
 
     p = bsp_argv_check("-gfxmod");
@@ -78,7 +78,7 @@ void VID_PreConfig (void)
     conf.hwaccel = hwaccel;
     conf.clockpresc = 1;
     conf.filter = 1;
-    conf.cachealgo = VID_CACHE_NORMAL;
+    conf.cachealgo = VID_CACHE_WTWA;
     vid_config(&conf);
 }
 
