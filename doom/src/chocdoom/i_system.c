@@ -119,7 +119,7 @@ static byte *AutoAllocMemory(int *size, int default_ram, int min_ram)
 
         // Try to allocate the zone memory.
 
-        *size = default_ram;
+        *size = default_ram * 1024 * 1024;
 
         //zonemem = (byte *)malloc(*size);
         zonemem = (byte *)heap_malloc(*size);
@@ -156,8 +156,7 @@ byte *I_ZoneBase (int *size)
     }
     else
     {
-        default_ram = heap_avail() - (1024 * 64);
-        default_ram = default_ram - (default_ram & ((1024 * 64) - 1));
+        default_ram = heap_avail() / (1024 * 1024);
         min_ram = MIN_RAM;
     }
 
