@@ -34,6 +34,8 @@
   */
 
 /* Includes ------------------------------------------------------------------*/
+#include <stdint.h>
+
 #include "main.h"
 #include "lcd_main.h"
 #include "i_video.h"
@@ -77,7 +79,7 @@ void VID_PreConfig (void)
     conf.laynum = 2;
     conf.hwaccel = hwaccel;
     conf.clockpresc = 1;
-    conf.filter = 1;
+    conf.use_clut = 1;
     conf.cachealgo = VID_CACHE_WTWA;
     vid_config(&conf);
 }

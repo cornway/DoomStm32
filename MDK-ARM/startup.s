@@ -43,6 +43,9 @@
 ;   <o> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
 ; </h>
 
+                EXPORT __shared_base
+                EXPORT __shared_limit
+
 Stack_Size      EQU     0x4000
 
                 AREA    STACK, NOINIT, READWRITE, ALIGN=3

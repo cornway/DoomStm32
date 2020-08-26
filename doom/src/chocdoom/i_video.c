@@ -31,6 +31,7 @@
 #include <misc_utils.h>
 #include <dev_io.h>
 #include <bsp_cmd.h>
+#include <gfx.h>
 
 
 #include "v_video.h"
@@ -157,7 +158,7 @@ pix_t I_BlendPix (pix_t fg, pix_t bg, byte a)
     byte g = __blend(fg_g, bg_g, a) << 2;
     byte b = __blend(fg_b, bg_b, a) << 3;
 
-    ret = GFX_RGB(GFX_OPAQUE, r, g, b);
+    ret = GFX_ARGB8888(GFX_OPAQUE, r, g, b);
     return ret;
 }
 
@@ -255,10 +256,10 @@ void I_SetPalette (byte* palette, int idx)
     for (i = 0; i < clut_num_entries; i++)
     {
         color = (rgb_t*)palette;
-        pal[i] = GFX_RGBA8888(gammatable[usegamma][color->r],
+        pal[i] = GFX_ARGB8888(0xff,
+                                gammatable[usegamma][color->r],
                                 gammatable[usegamma][color->g],
-                                gammatable[usegamma][color->b],
-                                0xff);
+                                gammatable[usegamma][color->b]);
         palette += 3;
     }
 sw_done:
@@ -285,7 +286,7 @@ static void I_RefreshPalette (int pal_idx)
         g = GFX_ARGB8888_G(pal[i]);
         b = GFX_ARGB8888_B(pal[i]);
 
-        pal[i] = GFX_RGBA8888(gammatable[usegamma][r],
+        pal[i] = GFX_ARGB8888(gammatable[usegamma][r],
                                 gammatable[usegamma][g],
                                 gammatable[usegamma][b],
                                 0xff);

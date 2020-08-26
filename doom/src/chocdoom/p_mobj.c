@@ -1072,7 +1072,6 @@ P_SpawnPlayerMissile
 
     th->flags2 = MOBJ_MISSILE_BM;
     th->flags2 |= MOBJ_LIGHT_SRC_BM;
-    th->data = 1;
 
     if (th->info->seesound)
 	S_StartSound (th, th->info->seesound);

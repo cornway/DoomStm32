@@ -24,6 +24,7 @@
 #include "sha1.h"
 #include "w_checksum.h"
 #include "w_wad.h"
+#include "z_zone.h"
 
 static wad_file_t **open_wadfiles = NULL;
 static int num_open_wadfiles = 0;
@@ -43,9 +44,16 @@ static int GetFileNumber(wad_file_t *handle)
 
     // Not found in list.  This is a new file we haven't seen yet.
     // Allocate another slot for this file.
+    if (open_wadfiles) {
+        void *p = Z_Malloc(sizeof(wad_file_t *) * (num_open_wadfiles + 1), PU_STATIC, NULL);
 
-    open_wadfiles = realloc(open_wadfiles,
-                            sizeof(wad_file_t *) * (num_open_wadfiles + 1));
+        d_memcpy(p, open_wadfiles, sizeof(wad_file_t *) * (num_open_wadfiles));
+        Z_Free(open_wadfiles);
+        open_wadfiles = p;
+    } else {
+        open_wadfiles = Z_Malloc(sizeof(wad_file_t *) * (num_open_wadfiles + 1), PU_STATIC, NULL);
+    }
+
     open_wadfiles[num_open_wadfiles] = handle;
 
     result = num_open_wadfiles;

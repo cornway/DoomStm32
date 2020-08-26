@@ -278,7 +278,6 @@ typedef struct mobj_s
     struct mobj_s*	tracer;	
 
     uint32_t flags2;
-    uint32_t data;
 } mobj_t;
 
 

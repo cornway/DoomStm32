@@ -629,6 +629,7 @@ void R_ProjectSprite (mobj_t* thing)
     vis->patch = lump;
     
     // get light level
+    vis->colormap = NULL;
     if (thing->flags & MF_SHADOW)
     {
     vis->sprflags = VIS_SHADOW;
