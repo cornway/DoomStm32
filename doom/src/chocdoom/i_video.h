@@ -146,11 +146,6 @@ void I_RefreshClutsButPlaypal (void);
 void I_SetPlayPal (void);
 void I_RestorePal (void);
 
-void I_CacheAclut (void);
-pix_t I_BlendPix (pix_t fg, pix_t bg, byte a);
-pix_t I_BlendPixMap (pix_t fg, pix_t bg);
-
-
 #if 0/*(GFX_COLOR_MODE != GFX_COLOR_MODE_CLUT)*/
 
 int I_GetClutIndex (pix_t pix);

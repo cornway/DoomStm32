@@ -182,7 +182,7 @@
         <Bp>
           <Number>2</Number>
           <Type>0</Type>
-          <LineNumber>36</LineNumber>
+          <LineNumber>236</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>
@@ -191,7 +191,23 @@
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>0</BreakIfRCount>
-          <Filename>..\doom\src\chocdoom\w_checksum.c</Filename>
+          <Filename>..\doom\src\chocdoom\i_video.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression></Expression>
+        </Bp>
+        <Bp>
+          <Number>3</Number>
+          <Type>0</Type>
+          <LineNumber>277</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>0</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>0</BreakIfRCount>
+          <Filename>..\doom\src\chocdoom\i_video.c</Filename>
           <ExecCommand></ExecCommand>
           <Expression></Expression>
         </Bp>
@@ -414,25 +430,48 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>36</LineNumber>
+          <LineNumber>277</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>135317044</Address>
+          <Address>135322658</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
           <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\doom\src\chocdoom\w_checksum.c</Filename>
+          <Filename>..\doom\src\chocdoom\i_video.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\Project\../doom/src/chocdoom/w_checksum.c\36</Expression>
+          <Expression>\\Project\../doom/src/chocdoom/i_video.c\277</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>236</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>135320326</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\doom\src\chocdoom\i_video.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\Project\../doom/src/chocdoom/i_video.c\236</Expression>
         </Bp>
       </Breakpoint>
+      <WatchWindow1>
+        <Ww>
+          <count>0</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>clut_num_entries</ItemText>
+        </Ww>
+      </WatchWindow1>
       <MemoryWindow1>
         <Mm>
           <WinNumber>1</WinNumber>
           <SubType>2</SubType>
-          <ItemText>0xD008FF88</ItemText>
+          <ItemText>0xD0ACEB0C</ItemText>
           <AccSizeX>0</AccSizeX>
         </Mm>
       </MemoryWindow1>
@@ -517,7 +556,7 @@
 
   <Group>
     <GroupName>Example/User</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -573,7 +612,7 @@
 
   <Group>
     <GroupName>doom</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>
@@ -1565,7 +1604,7 @@
 
   <Group>
     <GroupName>app</GroupName>
-    <tvExp>1</tvExp>
+    <tvExp>0</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

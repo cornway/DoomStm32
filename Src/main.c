@@ -84,6 +84,11 @@ void VID_PreConfig (void)
     vid_config(&conf);
 }
 
+void heap_conf (void)
+{
+    heap_init();
+}
+
 extern void app_main (void);
 
 extern int myargc;

@@ -207,6 +207,56 @@ void I_CacheAclut (void)
 
 #endif /*(GFX_COLOR_MODE == GFX_COLOR_MODE_RGB565)*/
 
+typedef uint32_t rgba_t;
+
+rgba_t I_BlendPix (rgba_t fg, rgba_t bg, byte a)
+{
+#define __I_Blend(f, b, a) (uint8_t)(((rgba_t)(f * a) + (rgba_t)(b * (255 - a))) / 255)
+    rgba_t ret;
+
+    uint8_t fg_r = GFX_ARGB8888_R(fg);
+    uint8_t fg_g = GFX_ARGB8888_G(fg);
+    uint8_t fg_b = GFX_ARGB8888_B(fg);
+
+    uint8_t bg_r = GFX_ARGB8888_R(bg);
+    uint8_t bg_g = GFX_ARGB8888_G(bg);
+    uint8_t bg_b = GFX_ARGB8888_B(bg);
+
+    pix_t r = __I_Blend(fg_r, bg_r, a);
+    pix_t g = __I_Blend(fg_g, bg_g, a);
+    pix_t b = __I_Blend(fg_b, bg_b, a);
+
+    ret = GFX_ARGB8888(0xff, r, g, b);
+    return ret;
+}
+
+static inline uint8_t
+I_Blend8 (rgba_t fg, rgba_t bg, uint8_t a)
+{
+    rgba_t pix = I_BlendPix(fg, bg, a);
+
+    return I_GetPaletteIndex(GFX_ARGB8888_R(pix), GFX_ARGB8888_G(pix), GFX_ARGB8888_B(pix));
+}
+
+static void I_GenBlut8 (blut8_t *blut, void *palette, int numentries)
+{
+    int i, j;
+    rgba_t clut[256];
+
+    assert(arrlen(clut) >= numentries);
+    d_memcpy(clut, palette, numentries * sizeof(rgba_t));
+
+    for (i = 0; i < numentries; i++) {
+        for (j = 0; j < numentries; j++) {
+            if (i == j) {
+                blut->lut[i][j] = i;
+            } else {
+                blut->lut[i][j] = I_Blend8(clut[i], clut[j], 128);
+            }
+        }
+    }
+}
+
 pix_t I_BlendPixMap (pix_t fg, pix_t bg)
 {
     byte *map = aclut_map + (aclut[bg] * clut_num_entries);
@@ -220,8 +270,12 @@ void I_SetPlayPal (void)
     }
     prev_clut = p_palette;
     p_palette = rgb_palette;
-    if (vid_priv_ctl(LCD_PRIV_GET_TRANSP_LUT, &g_color_lookup_table)) {
-        g_color_lookup_table = NULL;
+
+    if (g_color_lookup_table == NULL) {
+        g_color_lookup_table = Z_Malloc(sizeof(*g_color_lookup_table), PU_STATIC, NULL);
+        if (g_color_lookup_table) {
+            I_GenBlut8(g_color_lookup_table, p_palette, clut_num_entries);
+        }
     }
 }
 
